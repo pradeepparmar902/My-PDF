@@ -481,7 +481,10 @@
           <h1>PDF Workbench</h1>
           <p>Drop in one or more PDFs, lay the pages out like a light table, drag to reorder, stamp the ones you don't need, and merge it all into a single file. Everything happens in your browser — nothing is uploaded anywhere.</p>
         </div>
-        <button id="helpBtn" style="flex-shrink:0;background:var(--teal);border-color:var(--teal-deep);color:#fff;font-size:13.5px;font-weight:600;border-radius:7px;padding:9px 16px;cursor:pointer;border-width:1px;border-style:solid;white-space:nowrap;">📖 How to use this</button>
+        <div style="flex-shrink:0;display:flex;gap:8px;flex-wrap:wrap;">
+          <button id="privacyBtn" style="background:transparent;border-color:var(--teal);color:var(--teal-deep);font-size:13.5px;font-weight:600;border-radius:7px;padding:9px 16px;cursor:pointer;border-width:1px;border-style:solid;white-space:nowrap;">🔒 Privacy</button>
+          <button id="helpBtn" style="background:var(--teal);border-color:var(--teal-deep);color:#fff;font-size:13.5px;font-weight:600;border-radius:7px;padding:9px 16px;cursor:pointer;border-width:1px;border-style:solid;white-space:nowrap;">📖 How to use this</button>
+        </div>
       </div>
 
       <div id="dropzone" class="dropzone">
@@ -498,6 +501,9 @@
     <button class="ghost" id="clearSelBtn">Clear selection</button>
     <button class="ghost" id="undoBtn" disabled>↺ Undo last change</button>
     <span class="count" id="countLabel">No pages yet</span>
+    <label class="ew-check" title="If you've used Find & Replace or the logo/image patch tool, exported pages with those changes get a visible 'EDITED' stamp — so an altered document can never be mistaken for the original." style="font-size:12px;">
+      <input type="checkbox" id="watermarkToggle" checked> 🔒 Watermark edited pages
+    </label>
     <button class="danger" id="deleteSelBtn" disabled>Delete selected (0)</button>
     <button id="splitBtn" disabled style="background:#A9780B;border-color:#7A5608;color:#fff;font-size:13px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;border-width:1px;border-style:solid;">✂ Split selected</button>
     <button class="primary" id="downloadBtn" disabled>⬇ Download merged PDF</button>
@@ -540,6 +546,20 @@
     <div class="matches" id="matchesArea" style="display:none;">
       <div class="matches-summary" id="matchesSummary"></div>
       <div id="matchesList"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>OCR language (for scanned or handwritten pages)</h2>
+    <p class="sub">Tell the OCR engine which language(s) might appear on a scanned page before extracting to Word or Excel — it's used by both tools below. Reading printed/typed text is reasonably reliable. Handwriting is much harder: neat, clearly separated lettering reads best, while cursive or naturally varied handwriting — especially in Hindi or Gujarati script, where there's far less public training data — will often come back partial or rough. Treat OCR'd handwriting as a rough first draft to proofread, not a final transcript.</p>
+    <div class="ew-row">
+      <label class="ew-check"><input type="checkbox" id="ocrLangEn" checked> English</label>
+      <label class="ew-check"><input type="checkbox" id="ocrLangHi"> Hindi (हिन्दी)</label>
+      <label class="ew-check"><input type="checkbox" id="ocrLangGu"> Gujarati (ગુજરાતી)</label>
+      <label class="ew-field" style="min-width:200px;">
+        <span>Other language (Tesseract code, optional)</span>
+        <input type="text" id="ocrLangOther" placeholder="e.g. mar, ben, tam" style="padding:8px 10px;border:1px solid var(--kraft-line);border-radius:7px;font-family:'Inter',sans-serif;font-size:13.5px;background:#fff;color:var(--ink);">
+      </label>
     </div>
   </div>
 
@@ -587,6 +607,9 @@
 
   <footer>
     Tip: text replacements and image patches are both only baked in the moment you click "Download merged PDF" — nothing is written until then. Reordering and deleting pages happen instantly, but you get one step of undo if you change your mind.
+    <div style="margin-top:10px;font-style:normal;">
+      <span id="adminBtn" style="cursor:pointer;color:var(--ink-soft);text-decoration:underline;font-size:11.5px;">⚙ Admin settings</span>
+    </div>
   </footer>
 </div>
 
@@ -595,7 +618,7 @@
 <div id="printGuideArea"></div>
 
 <script>
-const { PDFDocument, StandardFonts, rgb } = PDFLib;
+const { PDFDocument, StandardFonts, rgb, degrees } = PDFLib;
 
 // This sandbox blocks both real cross-origin Workers and blob: script loads,
 // so we point pdf.js straight at the worker URL and let it fall back to
@@ -615,6 +638,50 @@ let idCounter = 1;
 const genId = () => 'id' + (idCounter++) + '_' + Math.random().toString(36).slice(2,7);
 const modalRoot = document.getElementById('modalRoot');
 
+// ---------- admin settings (stored locally in this browser only) ----------
+// This is a soft, deterrent-level gate suitable for "keep regular staff from
+// casually changing the policy" — it is NOT real security. Anyone with
+// access to this file or browser dev tools could bypass it, since there is
+// no server involved anywhere in this app.
+const ADMIN_CONFIG_KEY = 'pdfWorkbenchAdminConfig';
+
+function simpleHash(str){
+  let h = 0;
+  for(let i = 0; i < str.length; i++){ h = (h * 31 + str.charCodeAt(i)) >>> 0; }
+  return h.toString(36);
+}
+
+function loadAdminConfig(){
+  try{
+    const raw = localStorage.getItem(ADMIN_CONFIG_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){ /* ignore corrupt/unavailable storage */ }
+  return { watermarkMode: 'optional', watermarkDefaultChecked: true, passwordHash: null };
+}
+function saveAdminConfig(cfg){
+  try{ localStorage.setItem(ADMIN_CONFIG_KEY, JSON.stringify(cfg)); }catch(e){ /* ignore */ }
+}
+
+let adminConfig = loadAdminConfig();
+
+// Applies the admin's watermark policy to the toolbar checkbox: either locks
+// it on, locks it off, or leaves it user-adjustable with a chosen default.
+function applyAdminWatermarkConfig(){
+  if(adminConfig.watermarkMode === 'forced_on'){
+    watermarkToggle.checked = true;
+    watermarkToggle.disabled = true;
+    watermarkToggle.title = 'Locked on by your administrator — every edited page will always be watermarked.';
+  } else if(adminConfig.watermarkMode === 'forced_off'){
+    watermarkToggle.checked = false;
+    watermarkToggle.disabled = true;
+    watermarkToggle.title = 'Locked off by your administrator.';
+  } else {
+    watermarkToggle.checked = !!adminConfig.watermarkDefaultChecked;
+    watermarkToggle.disabled = false;
+    watermarkToggle.title = "If you've used Find & Replace or the logo/image patch tool, exported pages with those changes get a visible 'EDITED' stamp — so an altered document can never be mistaken for the original.";
+  }
+}
+
 // ---------- dom refs ----------
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
@@ -627,6 +694,8 @@ const splitBtn = document.getElementById('splitBtn');
 const downloadBtn = document.getElementById('downloadBtn');
 const undoBtn = document.getElementById('undoBtn');
 const newProjectBtn = document.getElementById('newProjectBtn');
+const watermarkToggle = document.getElementById('watermarkToggle');
+applyAdminWatermarkConfig();
 const selectAllBtn = document.getElementById('selectAllBtn');
 const clearSelBtn = document.getElementById('clearSelBtn');
 const findInput = document.getElementById('findInput');
@@ -795,6 +864,271 @@ window.addEventListener('afterprint', () => {
   if(printArea) printArea.innerHTML = '';
 });
 
+// Reads the shared OCR language checkboxes (English/Hindi/Gujarati/custom)
+// used by both the Word and Excel extraction tools. Falls back to English
+// alone if nothing is selected, so OCR never silently does nothing.
+function getSelectedOcrLangs(){
+  const langs = [];
+  if(document.getElementById('ocrLangEn').checked) langs.push('eng');
+  if(document.getElementById('ocrLangHi').checked) langs.push('hin');
+  if(document.getElementById('ocrLangGu').checked) langs.push('guj');
+  const other = document.getElementById('ocrLangOther').value.trim();
+  if(other) other.split(/[,\s+]+/).forEach(code => { if(code) langs.push(code.toLowerCase()); });
+  return langs.length ? langs : ['eng'];
+}
+
+// ---------- Privacy Policy ----------
+document.getElementById('privacyBtn').addEventListener('click', openPrivacyPolicy);
+
+function openPrivacyPolicy(){
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal-card guide-card">
+      <div class="modal-head">
+        <h3>🔒 Privacy Policy</h3>
+        <button class="modal-close">✕</button>
+      </div>
+      <div id="privacyPrintArea">
+        <div class="guide-section">
+          <h4><span class="guide-icon">🛡️</span>The short version</h4>
+          <p><strong>Your PDF files never leave your device.</strong> There is no server. There is no upload. Every single feature in this tool — merging, reordering, deleting pages, editing text, OCR, and converting to Word or Excel — runs entirely inside your own browser, on your own computer. We never see your documents, we can't see your documents, and there's nowhere for them to be stored, intercepted, or leaked, because they're never transmitted anywhere in the first place.</p>
+          <div class="guide-note">If you've used other online PDF tools before, this is different from how most of them work — tools like typical "upload your PDF" web converters send your file to a remote server to be processed, which means a copy of your document (potentially containing financial data, personal information, or confidential business content) sits on someone else's infrastructure, even if briefly. This tool was built specifically to avoid that.</div>
+        </div>
+
+        <div class="guide-section">
+          <h4><span class="guide-icon">📂</span>What happens to your files</h4>
+          <ul>
+            <li>When you drop or select a PDF, it's read directly by your browser into your computer's own memory — it is not sent over the internet to us or to anyone else.</li>
+            <li>All processing — page thumbnails, merging, reordering, deleting, text find &amp; replace, image patching, OCR, and Word/Excel conversion — happens using your browser's own processing power, not a remote server.</li>
+            <li>When you click a download button, the finished file is generated locally and handed straight to your browser's normal "Save File" mechanism. It goes from your computer's memory to your computer's downloads folder — it does not pass through us at any point.</li>
+            <li>Closing the browser tab or refreshing the page clears everything from memory. Nothing is saved, logged, or retained anywhere once you're done, unless you explicitly clicked a download button to save a file yourself.</li>
+          </ul>
+        </div>
+
+        <div class="guide-section">
+          <h4><span class="guide-icon">🌐</span>The one honest technical exception</h4>
+          <p>To work at all, your browser needs to load a small number of open-source software libraries that power features like PDF reading, Word/Excel file creation, and OCR (text recognition). These are fetched once from standard, well-known public code libraries (the same kind any modern website uses) when the page first opens, the same way a website loads its fonts or icons. This is just program code — never your documents, never anything you've typed, and never anything you've uploaded.</p>
+          <p>The OCR (handwriting/scanned text reading) feature specifically needs to download a small language data file the first time you use a particular language (English, Hindi, Gujarati, etc.) so it knows how to recognize that script. Again, this is a one-time download of a generic language model — not a transmission of your document or its contents.</p>
+        </div>
+
+        <div class="guide-section">
+          <h4><span class="guide-icon">🚫</span>What we don't do</h4>
+          <ul>
+            <li>We don't have a server that receives your files.</li>
+            <li>We don't store, log, back up, or have any access to your documents, their contents, or anything extracted from them.</li>
+            <li>We don't use cookies, analytics trackers, or any kind of usage tracking inside this tool.</li>
+            <li>We don't share, sell, or have the technical ability to share any data with anyone, because there is no data on our side to share.</li>
+          </ul>
+        </div>
+
+        <div class="guide-section">
+          <h4><span class="guide-icon">✅</span>Who this matters most for</h4>
+          <p>If you're working with sensitive material — financial statements, trial balances, contracts, personal records, or anything confidential — this local-only approach means you can merge, edit, and convert those documents without ever creating a copy of them outside your own machine. That's a meaningful difference from typical "upload and convert" PDF websites, and it's a deliberate design choice, not an accident.</p>
+        </div>
+
+        <div class="guide-section">
+          <h4><span class="guide-icon">🔒</span>A safeguard against misuse: the "EDITED" watermark</h4>
+          <p>Privacy works both ways. This tool lets you edit text and replace logos directly in a PDF — useful for legitimate fixes, but it could also be used to alter a document and present it as authentic. To guard against that, any page where text was changed (Find &amp; Replace) or an image was patched (logo/picture editing) automatically receives a visible "EDITED" watermark and a dated note in the exported file. This is turned on by default and can be seen by anyone who opens the resulting document — it's there so an edited file can never quietly pass as an unmodified original.</p>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="ghost" id="privacyPrintBtn">🖨️ Print / Save as PDF</button>
+        <button class="primary" id="privacyCloseBtn">Got it</button>
+      </div>
+    </div>
+  `;
+  modalRoot.appendChild(backdrop);
+  backdrop.querySelector('.modal-close').addEventListener('click', () => backdrop.remove());
+  backdrop.querySelector('#privacyCloseBtn').addEventListener('click', () => backdrop.remove());
+  backdrop.querySelector('#privacyPrintBtn').addEventListener('click', () => {
+    const printArea = document.getElementById('printGuideArea');
+    const content = backdrop.querySelector('#privacyPrintArea').cloneNode(true);
+    printArea.innerHTML = '';
+    const title = document.createElement('h2');
+    title.textContent = '🔒 Privacy Policy — PDF Workbench';
+    printArea.appendChild(title);
+    printArea.appendChild(content);
+    window.print();
+  });
+}
+
+// ---------- Admin Settings panel ----------
+document.getElementById('adminBtn').addEventListener('click', openAdminPanel);
+
+function openAdminPanel(){
+  if(!adminConfig.passwordHash){
+    openAdminSetupModal();
+  } else {
+    openAdminLoginModal();
+  }
+}
+
+function openAdminSetupModal(){
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal-card" style="max-width:440px;">
+      <div class="modal-head">
+        <h3>⚙ Set up admin access</h3>
+        <button class="modal-close">✕</button>
+      </div>
+      <p class="modal-hint">No admin PIN has been set on this browser yet. Create one now to control the document-watermarking policy for anyone using this tool here. This is a lightweight gate to keep settings from being changed casually — not a real security login, since this whole tool runs locally with no server.</p>
+      <label style="display:block;font-size:12px;color:var(--ink-soft);margin:10px 0 4px;">Create a PIN / password</label>
+      <input type="password" id="adminSetupPw1" style="width:100%;padding:9px 11px;border:1px solid var(--kraft-line);border-radius:7px;font-size:13.5px;">
+      <label style="display:block;font-size:12px;color:var(--ink-soft);margin:10px 0 4px;">Confirm it</label>
+      <input type="password" id="adminSetupPw2" style="width:100%;padding:9px 11px;border:1px solid var(--kraft-line);border-radius:7px;font-size:13.5px;">
+      <div class="modal-foot">
+        <button class="ghost" id="adminSetupCancel">Cancel</button>
+        <button class="primary" id="adminSetupContinue">Continue to settings</button>
+      </div>
+    </div>
+  `;
+  modalRoot.appendChild(backdrop);
+  backdrop.querySelector('.modal-close').addEventListener('click', () => backdrop.remove());
+  backdrop.querySelector('#adminSetupCancel').addEventListener('click', () => backdrop.remove());
+  backdrop.querySelector('#adminSetupContinue').addEventListener('click', () => {
+    const pw1 = backdrop.querySelector('#adminSetupPw1').value;
+    const pw2 = backdrop.querySelector('#adminSetupPw2').value;
+    if(pw1.length < 4){ showToast('Use at least 4 characters for the admin PIN.'); return; }
+    if(pw1 !== pw2){ showToast('Those two entries don\'t match — try again.'); return; }
+    adminConfig.passwordHash = simpleHash(pw1);
+    saveAdminConfig(adminConfig);
+    backdrop.remove();
+    openAdminSettingsModal();
+  });
+}
+
+function openAdminLoginModal(){
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal-card" style="max-width:380px;">
+      <div class="modal-head">
+        <h3>⚙ Admin settings</h3>
+        <button class="modal-close">✕</button>
+      </div>
+      <p class="modal-hint">Enter the admin PIN to view or change the watermarking policy.</p>
+      <input type="password" id="adminLoginPw" placeholder="Admin PIN" style="width:100%;padding:9px 11px;border:1px solid var(--kraft-line);border-radius:7px;font-size:13.5px;">
+      <div class="modal-foot" style="justify-content:space-between;">
+        <span style="font-size:11.5px;color:var(--ink-soft);text-decoration:underline;cursor:pointer;align-self:center;" id="adminForgotLink">Forgot PIN?</span>
+        <span style="display:flex;gap:8px;">
+          <button class="ghost" id="adminLoginCancel">Cancel</button>
+          <button class="primary" id="adminLoginSubmit">Unlock</button>
+        </span>
+      </div>
+    </div>
+  `;
+  modalRoot.appendChild(backdrop);
+  const pwInput = backdrop.querySelector('#adminLoginPw');
+  pwInput.focus();
+  function tryUnlock(){
+    if(simpleHash(pwInput.value) === adminConfig.passwordHash){
+      backdrop.remove();
+      openAdminSettingsModal();
+    } else {
+      showToast('Incorrect PIN.');
+    }
+  }
+  backdrop.querySelector('.modal-close').addEventListener('click', () => backdrop.remove());
+  backdrop.querySelector('#adminLoginCancel').addEventListener('click', () => backdrop.remove());
+  backdrop.querySelector('#adminLoginSubmit').addEventListener('click', tryUnlock);
+  pwInput.addEventListener('keydown', e => { if(e.key === 'Enter') tryUnlock(); });
+  backdrop.querySelector('#adminForgotLink').addEventListener('click', () => {
+    backdrop.remove();
+    openConfirmModal(
+      'Reset admin access?',
+      'Since there is no server, the only way to recover a forgotten PIN is to reset admin settings on this browser. This removes the current PIN and restores the watermark policy to its default (optional, on by default). You can set a new PIN afterward.',
+      'Reset admin access',
+      () => {
+        adminConfig = { watermarkMode: 'optional', watermarkDefaultChecked: true, passwordHash: null };
+        saveAdminConfig(adminConfig);
+        applyAdminWatermarkConfig();
+        showToast('Admin access reset. Click "Admin settings" again to set a new PIN.');
+      }
+    );
+  });
+}
+
+function openAdminSettingsModal(){
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  const mode = adminConfig.watermarkMode || 'optional';
+  backdrop.innerHTML = `
+    <div class="modal-card" style="max-width:480px;">
+      <div class="modal-head">
+        <h3>⚙ Admin settings — watermark policy</h3>
+        <button class="modal-close">✕</button>
+      </div>
+      <p class="modal-hint">Decide how the "EDITED" watermark (stamped on any page where text was replaced or a logo/image was patched) behaves for anyone using this tool on this browser/device.</p>
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px;">
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:13.5px;cursor:pointer;">
+          <input type="radio" name="wmMode" value="optional" ${mode==='optional'?'checked':''} style="margin-top:3px;">
+          <span><strong>Let the user choose</strong><br><span style="color:var(--ink-soft);font-size:12.5px;">The toolbar checkbox stays adjustable. You set what it's pre-ticked to below.</span></span>
+        </label>
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:13.5px;cursor:pointer;">
+          <input type="radio" name="wmMode" value="forced_on" ${mode==='forced_on'?'checked':''} style="margin-top:3px;">
+          <span><strong>Always watermark edited pages</strong><br><span style="color:var(--ink-soft);font-size:12.5px;">Locked on — the checkbox is greyed out and can't be turned off by users.</span></span>
+        </label>
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:13.5px;cursor:pointer;">
+          <input type="radio" name="wmMode" value="forced_off" ${mode==='forced_off'?'checked':''} style="margin-top:3px;">
+          <span><strong>Never watermark</strong><br><span style="color:var(--ink-soft);font-size:12.5px;">Locked off. Not recommended unless you have a specific reason — this removes the safeguard against passing off edited documents as originals.</span></span>
+        </label>
+      </div>
+
+      <div id="wmDefaultRow" style="margin-top:12px;padding:10px 12px;background:var(--paper-deep);border-radius:7px;${mode==='optional'?'':'display:none;'}">
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" id="wmDefaultChecked" ${adminConfig.watermarkDefaultChecked ? 'checked' : ''}>
+          Pre-tick the watermark checkbox by default (users can still change it)
+        </label>
+      </div>
+
+      <details style="margin-top:16px;">
+        <summary style="cursor:pointer;font-size:12.5px;color:var(--teal-deep);">Change admin PIN</summary>
+        <div style="margin-top:8px;">
+          <input type="password" id="wmNewPw1" placeholder="New PIN (leave blank to keep current)" style="width:100%;margin-bottom:8px;padding:8px 10px;border:1px solid var(--kraft-line);border-radius:6px;font-size:13px;">
+          <input type="password" id="wmNewPw2" placeholder="Confirm new PIN" style="width:100%;padding:8px 10px;border:1px solid var(--kraft-line);border-radius:6px;font-size:13px;">
+        </div>
+      </details>
+
+      <div class="modal-foot">
+        <button class="ghost" id="adminSettingsCancel">Cancel</button>
+        <button class="primary" id="adminSettingsSave">Save settings</button>
+      </div>
+    </div>
+  `;
+  modalRoot.appendChild(backdrop);
+
+  backdrop.querySelectorAll('input[name="wmMode"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      backdrop.querySelector('#wmDefaultRow').style.display = radio.value === 'optional' && radio.checked ? 'block' : (backdrop.querySelector('input[name="wmMode"]:checked').value === 'optional' ? 'block' : 'none');
+    });
+  });
+
+  backdrop.querySelector('.modal-close').addEventListener('click', () => backdrop.remove());
+  backdrop.querySelector('#adminSettingsCancel').addEventListener('click', () => backdrop.remove());
+  backdrop.querySelector('#adminSettingsSave').addEventListener('click', () => {
+    const selectedMode = backdrop.querySelector('input[name="wmMode"]:checked').value;
+    const defaultChecked = backdrop.querySelector('#wmDefaultChecked').checked;
+    const pw1 = backdrop.querySelector('#wmNewPw1').value;
+    const pw2 = backdrop.querySelector('#wmNewPw2').value;
+
+    if(pw1 || pw2){
+      if(pw1.length < 4){ showToast('New PIN must be at least 4 characters.'); return; }
+      if(pw1 !== pw2){ showToast('New PIN entries don\'t match.'); return; }
+      adminConfig.passwordHash = simpleHash(pw1);
+    }
+
+    adminConfig.watermarkMode = selectedMode;
+    adminConfig.watermarkDefaultChecked = defaultChecked;
+    saveAdminConfig(adminConfig);
+    applyAdminWatermarkConfig();
+    backdrop.remove();
+    showToast('Admin settings saved.');
+  });
+}
+
 // ---------- Help / User Guide ----------
 document.getElementById('helpBtn').addEventListener('click', openUserGuide);
 
@@ -818,10 +1152,12 @@ function openUserGuide(){
           <a href="#g-split">7. Splitting out pages</a>
           <a href="#g-findreplace">8. Find &amp; replace text</a>
           <a href="#g-patch">9. Fixing text inside logos/images</a>
-          <a href="#g-word">10. Converting to a Word file</a>
-          <a href="#g-excel">11. Converting to an Excel file</a>
-          <a href="#g-undo">12. Undo &amp; starting over</a>
-          <a href="#g-tips">13. General tips</a>
+          <a href="#g-watermark">9b. 🔒 The "EDITED" watermark</a>
+          <a href="#g-ocr">10. ⭐ Reading scanned &amp; multi-language text (OCR)</a>
+          <a href="#g-word">11. Converting to a Word file</a>
+          <a href="#g-excel">12. Converting to an Excel file</a>
+          <a href="#g-undo">13. Undo &amp; starting over</a>
+          <a href="#g-tips">14. General tips</a>
         </div>
 
         <div class="guide-section" id="g-upload">
@@ -909,7 +1245,7 @@ function openUserGuide(){
             <li>Untick any matches you don't actually want changed.</li>
             <li>The changes are only applied when you click "Download merged PDF" — nothing is altered until then.</li>
           </ol>
-          <div class="guide-note">This works best on clean PDFs with plain text and a white background. It won't find words inside a scanned page or a picture/logo.</div>
+          <div class="guide-note">This works best on clean PDFs with plain text and a white background. It won't find words inside a scanned page or a picture/logo. <strong>About the watermark:</strong> any page where text was actually changed gets a faint diagonal "EDITED" stamp and a small dated note in the exported file, so it's always clear the page isn't the unmodified original. You can turn this off using the "🔒 Watermark edited pages" checkbox in the toolbar if you have a legitimate reason to (for example, fixing your own typo before a document's first official release) — but please use that responsibly.</div>
         </div>
 
         <div class="guide-section" id="g-patch">
@@ -924,15 +1260,41 @@ function openUserGuide(){
             <li>You can drag a patch to move it, drag its corner handles to resize it, or click it again to edit or delete it — at any time before downloading.</li>
             <li>Click "Done" to close the editor. As with everything else, the patch is only baked into the file once you click "Download merged PDF".</li>
           </ol>
+          <div class="guide-note">Same as text replacement, any page with a patch on it gets the "EDITED" watermark in the exported file by default — this tool is meant for legitimate corrections (fixing a typo, updating a contact detail), not for disguising an altered document as an unedited original.</div>
+        </div>
+
+        <div class="guide-section" id="g-watermark" style="background:#FCEDEA;border:1px solid #E8B9AC;border-radius:10px;padding:16px 16px 4px;">
+          <h4><span class="guide-icon">🔒</span>9b. The "EDITED" watermark — why it's there</h4>
+          <p>The "🔒 Watermark edited pages" checkbox sits in the main toolbar near the download buttons, and it's <strong>turned on by default</strong>. When it's on, any page where you've changed real text (Find &amp; Replace) or covered something with a patch (logos/images) gets a faint diagonal "EDITED" stamp plus a small dated note at the bottom of the page, in the file you download.</p>
+          <p>This exists so an edited document can never quietly pass as an untouched original — for example, someone changing a company name or a figure on a scanned document and presenting it as authentic. If you have a genuine reason to turn it off (correcting your own document before it's ever shared as final), you can untick the box, but please use that responsibly.</p>
+          <div class="guide-note">If you're an administrator setting this tool up for a team, see the small <strong>"⚙ Admin settings"</strong> link at the very bottom of the page — it lets you lock the watermark permanently on or off for everyone using this tool on this device, instead of leaving it as an adjustable option.</div>
+        </div>
+
+        <div class="guide-section" id="g-ocr" style="background:#FBF3E2;border:1px solid #E5CE9B;border-radius:10px;padding:16px 16px 4px;">
+          <h4><span class="guide-icon">⭐</span>10. Reading scanned &amp; handwritten text, in multiple languages (OCR)</h4>
+          <p>This is one of the things that sets PDF Workbench apart from most free PDF tools: it can read text out of <strong>scanned pages and pictures</strong> — not just normal typed PDF text — and it can do this in <strong>English, Hindi, and Gujarati</strong>, with other languages also supported if you need them. This "reading text from an image" process is called <strong>OCR</strong> (Optical Character Recognition).</p>
+          <ol>
+            <li>Scroll to the <strong>"OCR language"</strong> section (just above the Word and Excel tools). Tick every language that might appear in your scanned pages — you can tick more than one at once if a document mixes languages.</li>
+            <li>If you need a language other than English, Hindi, or Gujarati, type its short code into the "Other language" box (for example <code>mar</code> for Marathi, <code>ben</code> for Bengali).</li>
+            <li>Leave the <strong>"Use OCR for scanned/image pages"</strong> box ticked in either the Word or Excel section below — OCR then runs automatically, only on pages that actually need it (pages with normal typed text are read directly and don't need OCR at all, so they stay fast).</li>
+            <li>Run your Word or Excel extraction as normal — any scanned or image-based pages will come back as real, readable, editable text instead of staying as an untouchable picture.</li>
+          </ol>
+          <p><strong>What to expect, honestly:</strong></p>
+          <ul>
+            <li><strong>Printed or typed text in a scanned page</strong> (like a photocopied or scanned document) — generally reads well, especially if the scan is clear and not skewed or blurry.</li>
+            <li><strong>Neat, clearly separated handwriting</strong> — can often be read reasonably, though never perfectly. Treat it as a strong first draft.</li>
+            <li><strong>Cursive or fast, joined-up handwriting</strong> — this is genuinely hard for any free OCR tool, and results will often be patchy. This is especially true for handwritten Hindi and Gujarati script, where there's simply less public training data available than for English. Always proofread OCR'd handwriting before relying on it.</li>
+          </ul>
+          <div class="guide-note">Why this matters: most free PDF tools online only handle typed text, or don't support Indian languages at all. Being able to pull text out of scanned and handwritten pages — in English, Hindi, and Gujarati — directly in your browser, with nothing uploaded anywhere, is a genuinely uncommon combination.</div>
         </div>
 
         <div class="guide-section" id="g-word">
-          <h4><span class="guide-icon">📝</span>10. Turning a PDF into an editable Word document</h4>
+          <h4><span class="guide-icon">📝</span>11. Turning a PDF into an editable Word document</h4>
           <p>Use this when you want to open and edit the content in Microsoft Word, rather than just reading it as a PDF.</p>
           <ol>
             <li>Scroll to the <strong>"Extract text to a Word document"</strong> section.</li>
             <li>Choose whether to convert all pages, or only the ones you've ticked.</li>
-            <li>Leave <strong>"Use OCR for scanned/image pages"</strong> ticked if some of your pages are scanned photos rather than typed text — this lets the tool "read" the words off the picture and turn them into real, editable text.</li>
+            <li>Leave <strong>"Use OCR for scanned/image pages"</strong> ticked if some of your pages are scanned photos rather than typed text — this lets the tool "read" the words off the picture and turn them into real, editable text (see the OCR section above to choose which languages to read).</li>
             <li>Click <strong>"📝 Extract & download Word file"</strong>. A progress list shows what's happening page by page (scanned pages take longer than typed ones).</li>
             <li>A .docx file downloads automatically once it's done, ready to open in Word.</li>
           </ol>
@@ -940,7 +1302,7 @@ function openUserGuide(){
         </div>
 
         <div class="guide-section" id="g-excel">
-          <h4><span class="guide-icon">📊</span>11. Turning a PDF into an Excel spreadsheet</h4>
+          <h4><span class="guide-icon">📊</span>12. Turning a PDF into an Excel spreadsheet</h4>
           <p>Use this for PDFs that contain tables of figures — like a financial statement, schedule, or list — that you'd like to work with in Excel.</p>
           <ol>
             <li>Scroll to the <strong>"Extract text to an Excel spreadsheet"</strong> section.</li>
@@ -952,18 +1314,19 @@ function openUserGuide(){
         </div>
 
         <div class="guide-section" id="g-undo">
-          <h4><span class="guide-icon">↺</span>12. Undo, and starting a brand new project</h4>
+          <h4><span class="guide-icon">↺</span>13. Undo, and starting a brand new project</h4>
           <p><strong>Undo:</strong> the "↺ Undo last change" button in the toolbar reverses your most recent action — deleting a page, reordering, etc. It only remembers one step back, so use it right away if something looks wrong.</p>
           <p><strong>Starting over completely:</strong> if you're finished with one document and want to begin a fresh project, click the red <strong>"🗑 New project"</strong> button in the toolbar. You'll be asked to confirm, since this clears everything — every file, every page, every edit — back to an empty workbench.</p>
           <div class="guide-note">Make sure you've already downloaded anything you want to keep before clicking "New project" — it cannot be undone.</div>
         </div>
 
         <div class="guide-section" id="g-tips">
-          <h4><span class="guide-icon">💡</span>13. A few general tips</h4>
+          <h4><span class="guide-icon">💡</span>14. A few general tips</h4>
           <ul>
             <li>Nothing is saved or changed in your final PDF until you actually click a download button — feel free to experiment freely beforehand.</li>
             <li>Working with a very large PDF (many pages, or large scanned images) may take a little longer to load and process — this is normal.</li>
             <li>If you're trying the scanned-page (OCR) features and they don't seem to start, try downloading this tool and opening it directly in your browser rather than viewing it inside another app's preview window — some preview windows restrict background processing that OCR needs.</li>
+            <li>Your documents are never uploaded anywhere — see the <strong>"🔒 Privacy"</strong> button at the top of the page for the full details.</li>
             <li>You can come back to this guide any time by clicking "📖 How to use this" at the top of the page.</li>
           </ul>
         </div>
@@ -1646,6 +2009,11 @@ function openSplitModal(){
               copied.drawText(patch.text, { x:rx+Math.max(2,(rw-tw)/2), y:ry+Math.max(2,(rh-fs2)/2)+fs2*0.12, size:fs2, font, color:hexToRgb01(patch.textColor) });
             }
           }
+
+          const wasEdited = pageMatches.length > 0 || (p.patches || []).length > 0;
+          if(wasEdited && watermarkToggle.checked){
+            stampEditedWatermark(copied, helvBold);
+          }
         }
       }
 
@@ -1771,6 +2139,31 @@ function renderMatches(){
 // ---------- export ----------
 downloadBtn.addEventListener('click', mergeAndDownload);
 
+// Stamps a visible "EDITED" watermark plus a small dated footer note onto a
+// page that has had its content altered (text replaced or a logo/image
+// patched). This exists so an altered export can never be quietly mistaken
+// for the unmodified original document.
+function stampEditedWatermark(pdfPage, font){
+  const w = pdfPage.getWidth(), h = pdfPage.getHeight();
+  pdfPage.drawText('EDITED', {
+    x: w / 2 - 150,
+    y: h / 2 - 30,
+    size: 72,
+    font,
+    color: rgb(0.78, 0.14, 0.1),
+    rotate: degrees(35),
+    opacity: 0.16
+  });
+  pdfPage.drawText('Edited using PDF Workbench — ' + new Date().toLocaleDateString(), {
+    x: 14,
+    y: 12,
+    size: 7,
+    font,
+    color: rgb(0.4, 0.4, 0.4),
+    opacity: 0.85
+  });
+}
+
 async function mergeAndDownload(){
   if(pages.length === 0) return;
   downloadBtn.disabled = true;
@@ -1833,6 +2226,11 @@ async function mergeAndDownload(){
             x: tx, y: ty, size: fontSize, font, color: hexToRgb01(patch.textColor)
           });
         }
+      }
+
+      const wasEdited = pageMatches.length > 0 || (p.patches || []).length > 0;
+      if(wasEdited && watermarkToggle.checked){
+        stampEditedWatermark(copied, helvBold);
       }
     }
 
@@ -2051,8 +2449,9 @@ async function extractToWord(){
         ewLog('Page ' + globalIdx + ': no real text found — running OCR (this can take a while)…');
         try{
           if(!ocrWorker){
-            ewLog('Loading OCR engine (first time only)…');
-            ocrWorker = await Tesseract.createWorker('eng');
+            const langs = getSelectedOcrLangs();
+            ewLog('Loading OCR engine (' + langs.join(' + ') + ', first time only)…');
+            ocrWorker = await Tesseract.createWorker(langs.join('+'));
           }
           const canvas = await renderEditorCanvas(p.fileId, p.pageIndex, 1500);
           const { data } = await ocrWorker.recognize(canvas);
@@ -2339,8 +2738,9 @@ async function extractToExcel(){
         xlLog('Page ' + globalIdx + ': no real text found — running OCR (this can take a while)…');
         try{
           if(!ocrWorker){
-            xlLog('Loading OCR engine (first time only)…');
-            ocrWorker = await Tesseract.createWorker('eng');
+            const langs = getSelectedOcrLangs();
+            xlLog('Loading OCR engine (' + langs.join(' + ') + ', first time only)…');
+            ocrWorker = await Tesseract.createWorker(langs.join('+'));
           }
           const canvas = await renderEditorCanvas(p.fileId, p.pageIndex, 1500);
           const { data } = await ocrWorker.recognize(canvas);
