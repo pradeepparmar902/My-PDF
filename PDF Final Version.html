@@ -1,0 +1,2420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Workbench</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,900;1,9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --paper:#F6F1E6;
+    --paper-deep:#ECE1C7;
+    --card:#FCFAF4;
+    --ink:#211F1A;
+    --ink-soft:#6B6452;
+    --kraft:#C7B695;
+    --kraft-line:#B7A37D;
+    --teal:#2B6F73;
+    --teal-deep:#1D5256;
+    --red:#BD3B22;
+    --red-deep:#8F2C18;
+    --gold:#A9780B;
+    --shadow:0 2px 6px rgba(33,31,26,.10), 0 10px 22px rgba(33,31,26,.10);
+    --radius:10px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    background-image:
+      radial-gradient(circle at 1px 1px, rgba(33,31,26,0.035) 1px, transparent 0);
+    background-size:22px 22px;
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 22px 60px;}
+
+  /* ---------- Header / folder tab ---------- */
+  header{padding:34px 0 0;}
+  .tab{
+    display:inline-block;
+    background:var(--paper-deep);
+    border:1px solid var(--kraft-line);
+    border-bottom:none;
+    border-radius:8px 8px 0 0;
+    padding:7px 18px 22px;
+    margin-bottom:-1px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  .header-card{
+    background:var(--card);
+    border:1px solid var(--kraft-line);
+    border-radius:0 10px 10px 10px;
+    padding:22px 26px 24px;
+    box-shadow:var(--shadow);
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:900;
+    font-size:34px;
+    margin:0 0 4px;
+    letter-spacing:-.01em;
+  }
+  header p{margin:0;color:var(--ink-soft);font-size:14.5px;max-width:560px;line-height:1.5;}
+
+  /* ---------- Drop zone ---------- */
+  .dropzone{
+    margin-top:18px;
+    border:2px dashed var(--kraft-line);
+    border-radius:var(--radius);
+    background:rgba(255,255,255,.4);
+    padding:34px 20px;
+    text-align:center;
+    cursor:pointer;
+    transition:.15s ease;
+  }
+  .dropzone:hover, .dropzone.drag{
+    border-color:var(--teal);
+    background:rgba(43,111,115,.06);
+  }
+  .dropzone strong{font-family:'Fraunces',serif;font-size:18px;display:block;margin-bottom:4px;}
+  .dropzone span{color:var(--ink-soft);font-size:13px;}
+  .dropzone.compact{
+    margin-top:14px;padding:10px 16px;text-align:left;display:flex;align-items:center;gap:10px;
+  }
+  .dropzone.compact strong{font-size:14px;margin:0;display:inline;}
+  #fileInput{display:none;}
+
+  /* ---------- Toolbar ---------- */
+  .toolbar{
+    position:sticky;top:0;z-index:30;
+    margin-top:22px;
+    background:var(--paper-deep);
+    border:1px solid var(--kraft-line);
+    border-radius:var(--radius);
+    padding:10px 14px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
+    box-shadow:var(--shadow);
+  }
+  .toolbar .count{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-right:auto;
+    white-space:nowrap;
+  }
+  button{
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    border-radius:7px;
+    padding:8px 13px;
+    cursor:pointer;
+    border:1px solid var(--kraft-line);
+    background:var(--card);
+    color:var(--ink);
+    transition:.12s ease;
+  }
+  button:hover:not(:disabled){transform:translateY(-1px);}
+  button:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+  button.ghost{background:transparent;border-color:transparent;color:var(--ink-soft);text-decoration:underline;padding:8px 8px;}
+  button.danger{background:var(--red);border-color:var(--red-deep);color:#fff;}
+  button.primary{background:var(--teal);border-color:var(--teal-deep);color:#fff;font-size:13.5px;}
+  button.outline-teal{background:transparent;border-color:var(--teal);color:var(--teal-deep);}
+
+  /* ---------- Page grid ---------- */
+  .grid{
+    margin-top:22px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(168px,1fr));
+    gap:20px;
+  }
+  .empty-state{
+    margin-top:22px;padding:50px 20px;text-align:center;color:var(--ink-soft);
+    border:1px dashed var(--kraft-line);border-radius:var(--radius);
+    font-size:14px;
+  }
+  .page-card{
+    position:relative;
+    background:var(--card);
+    border:1px solid var(--kraft-line);
+    border-radius:7px;
+    box-shadow:var(--shadow);
+    padding:9px 9px 8px;
+    cursor:grab;
+    user-select:none;
+  }
+  .page-card:nth-child(2n){transform:rotate(.5deg);}
+  .page-card:nth-child(3n){transform:rotate(-.6deg);}
+  .page-card.dragging{opacity:.35;}
+  .page-card.drag-over{outline:2px dashed var(--teal);outline-offset:2px;}
+  .page-card.marked{box-shadow:0 0 0 2px var(--red) inset, var(--shadow);}
+  .thumb-frame{
+    position:relative;
+    border:1px solid var(--kraft-line);
+    border-radius:4px;
+    overflow:hidden;
+    background:#fff;
+    aspect-ratio:3/4;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .thumb-frame img{width:100%;height:100%;object-fit:contain;display:block;}
+
+  .order-stamp{
+    position:absolute;top:-10px;left:-10px;
+    width:30px;height:30px;border-radius:50%;
+    background:var(--teal);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px;
+    transform:rotate(-8deg);
+    box-shadow:0 2px 4px rgba(0,0,0,.25);
+    border:2px solid var(--paper);
+  }
+  .checkbox-btn{
+    position:absolute;top:6px;right:6px;z-index:2;
+    width:22px;height:22px;border-radius:5px;
+    background:rgba(255,255,255,.9);
+    border:1.5px solid var(--kraft-line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:13px;cursor:pointer;
+  }
+  .page-card.marked .checkbox-btn{background:var(--red);border-color:var(--red-deep);color:#fff;}
+  .remove-btn{
+    position:absolute;bottom:6px;right:6px;z-index:2;
+    width:20px;height:20px;border-radius:50%;
+    background:rgba(255,255,255,.92);border:1px solid var(--kraft-line);
+    font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:var(--ink-soft);
+  }
+  .remove-btn:hover{background:var(--red);color:#fff;border-color:var(--red-deep);}
+  .delete-stamp{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    pointer-events:none;
+  }
+  .delete-stamp span{
+    border:3px solid var(--red);color:var(--red);
+    font-family:'Fraunces',serif;font-weight:900;font-style:italic;
+    font-size:16px;letter-spacing:.06em;text-transform:uppercase;
+    padding:4px 10px;border-radius:4px;
+    transform:rotate(-11deg);
+    background:rgba(255,255,255,.55);
+    opacity:0;transition:opacity .12s ease, transform .12s ease;
+  }
+  .page-card.marked .delete-stamp span{opacity:.92;}
+  .match-stamp{
+    position:absolute;top:-10px;right:-10px;z-index:3;
+    min-width:22px;height:22px;border-radius:50%;
+    background:var(--gold);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+    border:2px solid var(--paper);
+    transform:rotate(7deg);
+    padding:0 4px;
+  }
+  .source-label{
+    margin-top:7px;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-soft);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+
+  /* ---------- Find & replace panel ---------- */
+  .panel{
+    margin-top:34px;
+    background:var(--card);
+    border:1px solid var(--kraft-line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:22px 24px 24px;
+  }
+  .panel h2{
+    font-family:'Fraunces',serif;font-weight:700;font-size:21px;margin:0 0 4px;
+  }
+  .panel .sub{color:var(--ink-soft);font-size:13px;margin:0 0 16px;line-height:1.5;}
+  .fr-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+  .fr-row input[type=text]{
+    flex:1;min-width:180px;
+    padding:9px 11px;border:1px solid var(--kraft-line);border-radius:7px;
+    font-family:'Inter',sans-serif;font-size:13.5px;background:#fff;color:var(--ink);
+  }
+  .fr-row input[type=text]:focus{outline:2px solid var(--teal);outline-offset:1px;}
+  .arrow-label{color:var(--ink-soft);font-size:13px;}
+  .matches{margin-top:18px;border-top:1px solid var(--kraft-line);padding-top:14px;}
+  .match-row{
+    display:flex;align-items:center;gap:10px;
+    padding:8px 4px;border-bottom:1px solid #EDE4CD;font-size:13px;
+  }
+  .match-row label{display:flex;align-items:center;gap:8px;flex:1;cursor:pointer;}
+  .match-row .loc{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);min-width:140px;}
+  .match-row .before{color:var(--red);text-decoration:line-through;}
+  .match-row .after{color:var(--gold);font-weight:600;}
+  .matches-summary{font-size:13px;color:var(--ink-soft);margin-bottom:6px;}
+
+  /* ---------- Patch tool (image/logo text) ---------- */
+  .edit-btn{
+    position:absolute;bottom:6px;left:6px;z-index:2;
+    width:20px;height:20px;border-radius:50%;
+    background:rgba(255,255,255,.92);border:1px solid var(--kraft-line);
+    font-size:11px;line-height:1;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:var(--ink-soft);
+  }
+  .edit-btn:hover{background:var(--teal);color:#fff;border-color:var(--teal-deep);}
+  .patch-stamp{
+    position:absolute;bottom:-9px;left:-9px;z-index:3;
+    min-width:20px;height:20px;border-radius:50%;
+    background:#5B5FA6;color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;
+    border:2px solid var(--paper);
+    transform:rotate(-6deg);
+    padding:0 4px;
+  }
+  .modal-backdrop{
+    position:fixed;inset:0;background:rgba(20,18,14,.62);
+    display:flex;align-items:center;justify-content:center;
+    z-index:200;padding:24px;
+  }
+  .modal-card{
+    background:var(--card);border:1px solid var(--kraft-line);border-radius:12px;
+    box-shadow:var(--shadow);max-width:820px;width:100%;max-height:92vh;
+    overflow:auto;padding:18px 20px 22px;
+  }
+  .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .modal-head h3{font-family:'Fraunces',serif;font-size:18px;margin:0;}
+  .modal-close{background:transparent;border:none;font-size:20px;color:var(--ink-soft);cursor:pointer;padding:2px 6px;}
+  .modal-hint{font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;line-height:1.5;}
+  .editor-stage{
+    position:relative;display:inline-block;max-width:100%;
+    border:1px solid var(--kraft-line);border-radius:6px;overflow:hidden;
+    cursor:crosshair;background:#fff;
+  }
+  .editor-stage img{display:block;max-width:100%;user-select:none;-webkit-user-drag:none;}
+  .draw-rect{
+    position:absolute;border:2px dashed var(--teal);background:rgba(43,111,115,.12);
+    pointer-events:none;
+  }
+  .patch-box{
+    position:absolute;display:flex;align-items:center;justify-content:center;
+    overflow:hidden;cursor:move;border:1px solid rgba(91,95,166,.5);
+    font-family:'Inter',sans-serif;font-weight:700;
+  }
+  .patch-box:hover{outline:2px solid #5B5FA6;}
+  .resize-handle{
+    position:absolute;width:11px;height:11px;
+    background:#fff;border:2px solid var(--teal);border-radius:2px;
+    transform:translate(-50%,-50%);z-index:5;
+  }
+  .handle-nw, .handle-se{cursor:nwse-resize;}
+  .handle-ne, .handle-sw{cursor:nesw-resize;}
+  .modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
+
+  .patch-form-backdrop{
+    position:fixed;inset:0;background:rgba(20,18,14,.5);
+    display:flex;align-items:center;justify-content:center;z-index:210;padding:20px;
+  }
+  .patch-form{
+    background:var(--card);border:1px solid var(--kraft-line);border-radius:10px;
+    box-shadow:var(--shadow);width:100%;max-width:340px;padding:18px 18px 16px;
+  }
+  .patch-form h4{font-family:'Fraunces',serif;font-size:16px;margin:0 0 12px;}
+  .patch-form label{display:block;font-size:12px;color:var(--ink-soft);margin:10px 0 4px;}
+  .patch-form input[type=text], .patch-form input[type=number]{
+    width:100%;padding:8px 10px;border:1px solid var(--kraft-line);border-radius:6px;
+    font-family:'Inter',sans-serif;font-size:13.5px;background:#fff;color:var(--ink);
+  }
+  .patch-form .color-row{display:flex;gap:14px;}
+  .patch-form .color-row > div{flex:1;}
+  .patch-form input[type=color]{width:100%;height:32px;border:1px solid var(--kraft-line);border-radius:6px;padding:2px;background:#fff;}
+  .patch-form-foot{display:flex;justify-content:space-between;gap:8px;margin-top:16px;}
+
+  /* ---------- Workbench layout: main grid + right navigator ---------- */
+  .workbench{display:flex;gap:20px;align-items:flex-start;margin-top:22px;}
+  .workbench-main{flex:1;min-width:0;}
+  .workbench-nav{
+    width:230px;flex-shrink:0;position:sticky;top:90px;
+    max-height:calc(100vh - 110px);overflow-y:auto;
+    background:var(--card);border:1px solid var(--kraft-line);border-radius:var(--radius);
+    padding:10px;box-shadow:var(--shadow);
+  }
+  .workbench-nav h4{margin:2px 4px 8px;font-family:'Fraunces',serif;font-size:14px;color:var(--ink-soft);}
+  .nav-quickactions{display:flex;gap:12px;margin:0 4px 10px;}
+  .nav-quickactions span{font-size:11.5px;color:var(--teal-deep);text-decoration:underline;cursor:pointer;}
+  .nav-quickactions span:hover{color:var(--teal);}
+  .file-row{
+    display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:6px;
+    background:var(--paper-deep);margin-bottom:6px;font-size:12px;
+  }
+  .file-row .file-icon{flex-shrink:0;font-size:14px;}
+  .file-row .file-info{flex:1;min-width:0;}
+  .file-row .file-name{font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .file-row .file-meta{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink-soft);}
+  .file-row .file-remove{
+    flex-shrink:0;width:20px;height:20px;border-radius:50%;border:1px solid var(--kraft-line);
+    background:#fff;font-size:11px;color:var(--ink-soft);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .file-row .file-remove:hover{background:var(--red);color:#fff;border-color:var(--red-deep);}
+  .nav-row{display:flex;align-items:center;gap:8px;padding:6px;border-radius:6px;cursor:pointer;}
+  .nav-row:hover{background:var(--paper-deep);}
+  .nav-row.active{background:rgba(43,111,115,.15);outline:1px solid var(--teal);}
+  .nav-row.marked{background:rgba(189,59,34,.08);}
+  .nav-row.marked.active{background:rgba(43,111,115,.18);}
+  .nav-row .nav-check{display:flex;align-items:center;flex-shrink:0;}
+  .nav-row .nav-check input{width:14px;height:14px;cursor:pointer;accent-color:var(--red);margin:0;}
+  .nav-row img{width:30px;border:1px solid var(--kraft-line);border-radius:3px;display:block;}
+  .nav-row .nav-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);width:20px;text-align:right;flex-shrink:0;}
+  .nav-row .nav-name{font-size:11px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+
+  .focus-viewer{
+    position:relative;margin-bottom:18px;background:var(--card);
+    border:1px solid var(--kraft-line);border-radius:var(--radius);
+    box-shadow:var(--shadow);padding:16px;text-align:center;
+  }
+  .focus-viewer img{max-width:100%;max-height:540px;border:1px solid var(--kraft-line);border-radius:6px;}
+  .focus-viewer .focus-close{
+    position:absolute;top:8px;right:10px;background:transparent;border:none;
+    font-size:18px;color:var(--ink-soft);cursor:pointer;
+  }
+  .focus-caption{margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-soft);}
+
+  @keyframes flashHighlight{0%{box-shadow:0 0 0 3px var(--teal), var(--shadow);}100%{box-shadow:var(--shadow);}}
+  .page-card.flash{animation:flashHighlight 1.1s ease;}
+
+  @media (max-width:760px){
+    .workbench{flex-direction:column;}
+    .workbench-nav{width:100%;position:static;max-height:280px;}
+  }
+
+  /* ---------- Extract to Word panel ---------- */
+  .ew-row{display:flex;flex-wrap:wrap;gap:18px;align-items:center;}
+  .ew-field{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--ink-soft);}
+  .ew-field select{
+    padding:8px 10px;border:1px solid var(--kraft-line);border-radius:7px;
+    font-family:'Inter',sans-serif;font-size:13.5px;background:#fff;color:var(--ink);
+  }
+  .ew-check{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--ink);cursor:pointer;}
+  .ew-check input{width:15px;height:15px;cursor:pointer;accent-color:var(--teal);}
+  .ew-progress{
+    margin-top:14px;border:1px solid var(--kraft-line);border-radius:7px;
+    background:#FBF8EF;padding:10px 12px;max-height:160px;overflow-y:auto;
+    font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink-soft);line-height:1.7;
+  }
+  .ew-progress .ew-line.done{color:var(--teal-deep);}
+  .ew-progress .ew-line.warn{color:var(--gold);}
+
+  /* ---------- Help / User Guide ---------- */
+  .guide-card{ max-width:880px; }
+  .guide-toc{
+    display:flex;flex-wrap:wrap;gap:6px 10px;
+    background:var(--paper-deep);border:1px solid var(--kraft-line);border-radius:8px;
+    padding:10px 12px;margin-bottom:18px;font-size:12.5px;
+  }
+  .guide-toc a{color:var(--teal-deep);text-decoration:none;font-weight:600;}
+  .guide-toc a:hover{text-decoration:underline;}
+  .guide-section{margin-bottom:22px;padding-bottom:18px;border-bottom:1px solid #EDE4CD;}
+  .guide-section:last-child{border-bottom:none;}
+  .guide-section h4{
+    font-family:'Fraunces',serif;font-size:17px;margin:0 0 4px;
+    display:flex;align-items:center;gap:8px;
+  }
+  .guide-section .guide-icon{font-size:16px;}
+  .guide-section p{margin:6px 0;font-size:13.5px;line-height:1.6;color:var(--ink);}
+  .guide-section ol, .guide-section ul{margin:8px 0 8px 20px;padding:0;font-size:13.5px;line-height:1.7;color:var(--ink);}
+  .guide-section li{margin-bottom:4px;}
+  .guide-note{
+    margin-top:8px;padding:9px 12px;border-radius:7px;
+    background:#FBF3E2;border:1px solid #E5CE9B;font-size:12.5px;color:#6B5526;line-height:1.6;
+  }
+  #printGuideArea{ display:none; }
+  @media print{
+    body > .wrap, body > #toast, body > #modalRoot{ display:none !important; }
+    #printGuideArea{ display:block !important; padding:24px; max-width:800px; margin:0 auto; }
+    #printGuideArea h2{ font-family:'Fraunces',serif; font-size:24px; margin:0 0 4px; }
+    #printGuideArea .guide-toc{ display:none; }
+    #printGuideArea .guide-section{ page-break-inside:avoid; }
+  }
+
+  /* ---------- Split modal ---------- */
+  .split-modal .modal-card{ max-width:520px; }
+  .split-page-list{ max-height:320px; overflow-y:auto; border:1px solid var(--kraft-line); border-radius:7px; margin:12px 0; }
+  .split-page-row{
+    display:flex;align-items:center;gap:10px;padding:8px 10px;
+    border-bottom:1px solid var(--kraft-line);font-size:13px;
+  }
+  .split-page-row:last-child{ border-bottom:none; }
+  .split-page-row img{ width:28px;border:1px solid var(--kraft-line);border-radius:3px;flex-shrink:0; }
+  .split-page-row label{ display:flex;align-items:center;gap:9px;flex:1;cursor:pointer; }
+  .split-page-row .sp-num{ font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);width:22px;text-align:right;flex-shrink:0; }
+  .split-options{ display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px; }
+  .split-options label{ display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer; }
+
+  /* ---------- Footer / toast ---------- */
+  footer{margin-top:30px;color:var(--ink-soft);font-size:12.5px;line-height:1.6;font-style:italic;}
+  #toast{
+    position:fixed;bottom:22px;left:50%;transform:translate(-50%,12px);
+    background:var(--ink);color:var(--paper);padding:10px 18px;border-radius:8px;
+    font-size:13px;opacity:0;pointer-events:none;transition:.18s ease;z-index:99;
+    max-width:90vw;text-align:center;
+  }
+  #toast.show{opacity:1;transform:translate(-50%,0);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="tab">📁 document tray</div>
+    <div class="header-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;">
+        <div>
+          <h1>PDF Workbench</h1>
+          <p>Drop in one or more PDFs, lay the pages out like a light table, drag to reorder, stamp the ones you don't need, and merge it all into a single file. Everything happens in your browser — nothing is uploaded anywhere.</p>
+        </div>
+        <button id="helpBtn" style="flex-shrink:0;background:var(--teal);border-color:var(--teal-deep);color:#fff;font-size:13.5px;font-weight:600;border-radius:7px;padding:9px 16px;cursor:pointer;border-width:1px;border-style:solid;white-space:nowrap;">📖 How to use this</button>
+      </div>
+
+      <div id="dropzone" class="dropzone">
+        <strong>Drop PDF files here, or click to browse</strong>
+        <span>You can add more than one file — every page lands in the same workbench below.</span>
+        <input id="fileInput" type="file" accept="application/pdf" multiple>
+      </div>
+    </div>
+  </header>
+
+  <div class="toolbar" id="toolbar">
+    <button class="ghost" id="addMoreBtn">+ Add PDFs</button>
+    <button class="ghost" id="selectAllBtn">Select all</button>
+    <button class="ghost" id="clearSelBtn">Clear selection</button>
+    <button class="ghost" id="undoBtn" disabled>↺ Undo last change</button>
+    <span class="count" id="countLabel">No pages yet</span>
+    <button class="danger" id="deleteSelBtn" disabled>Delete selected (0)</button>
+    <button id="splitBtn" disabled style="background:#A9780B;border-color:#7A5608;color:#fff;font-size:13px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;border-width:1px;border-style:solid;">✂ Split selected</button>
+    <button class="primary" id="downloadBtn" disabled>⬇ Download merged PDF</button>
+    <button id="newProjectBtn" disabled title="Remove every file and page and start fresh" style="background:transparent;border-color:var(--red);color:var(--red);font-size:13px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;border-width:1px;border-style:solid;">🗑 New project</button>
+  </div>
+
+  <div class="workbench">
+    <div class="workbench-main">
+      <div class="focus-viewer" id="focusViewer" style="display:none;">
+        <button class="focus-close" id="focusClose" title="Close preview">✕</button>
+        <img id="focusImg" alt="Page preview">
+        <div class="focus-caption" id="focusCaption"></div>
+      </div>
+      <div id="gridArea">
+        <div class="empty-state" id="emptyState">No pages yet — add a PDF above to start building your workbench.</div>
+        <div class="grid" id="grid" style="display:none;"></div>
+      </div>
+    </div>
+    <div class="workbench-nav" id="workbenchNav" style="display:none;">
+      <h4>Files in this project</h4>
+      <div id="filesList"></div>
+      <h4 style="margin-top:16px;">Page navigator</h4>
+      <div class="nav-quickactions">
+        <span id="navSelectAll">Select all</span>
+        <span id="navClearSel">Clear</span>
+      </div>
+      <div id="navList"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Find &amp; replace text</h2>
+    <p class="sub">Scans every page's real text for a match and swaps it during export. Best on clean, text-based PDFs with white backgrounds — scanned/image pages have no searchable text, and the replacement won't perfectly match the original font. For text baked into a logo or scanned image (like a name inside an image), use the ✎ pencil button on that page's card instead — it lets you paint over the exact spot by hand.</p>
+    <div class="fr-row">
+      <input type="text" id="findInput" placeholder="Find this text…">
+      <span class="arrow-label">→</span>
+      <input type="text" id="replaceInput" placeholder="Replace with…">
+      <button class="outline-teal" id="scanBtn">Scan document</button>
+    </div>
+    <div class="matches" id="matchesArea" style="display:none;">
+      <div class="matches-summary" id="matchesSummary"></div>
+      <div id="matchesList"></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>Extract text to a Word document</h2>
+    <p class="sub">Pulls real text out of normal PDF pages — keeping paragraphs, bold, rough heading sizes, and side-by-side columns where it detects them — and runs OCR automatically on any page that's actually a scanned image with no real text underneath, so even scanned PDFs convert. Everything happens in your browser; large or scanned documents take longer because OCR runs page by page. Column detection is best-effort and works well for clean two-column layouts (like address blocks or newsletter-style body text); very complex or irregular layouts may still need manual cleanup. <strong>Note:</strong> if you're trying this inside a chat preview window, OCR may be blocked by that preview's security sandbox — download the file and open it directly in a browser tab for OCR to work. Normal text extraction works fine either way.</p>
+    <div class="ew-row">
+      <label class="ew-field">
+        <span>Pages to convert</span>
+        <select id="ewScope">
+          <option value="all">All pages</option>
+          <option value="selected">Selected pages only</option>
+        </select>
+      </label>
+      <label class="ew-check"><input type="checkbox" id="ewUseOcr" checked> Use OCR for scanned/image pages</label>
+      <label class="ew-check"><input type="checkbox" id="ewPageBreaks" checked> Start a new Word page for each PDF page</label>
+    </div>
+    <button class="primary" id="ewExtractBtn" style="margin-top:14px;">📝 Extract &amp; download Word file</button>
+    <div class="ew-progress" id="ewProgress" style="display:none;"></div>
+  </div>
+
+  <div class="panel">
+    <h2>Extract text to an Excel spreadsheet</h2>
+    <p class="sub">Looks for table-like rows of data — figures lined up in columns, like financial statements or schedules — and lays them out as real spreadsheet columns. Pages without a clear table structure still export, just as one row of text per PDF line. OCR runs automatically on scanned/image pages, same as the Word export. Column detection is best-effort: very clean tables come out cleanly, dense or irregular ones may need a little tidying afterward.</p>
+    <div class="ew-row">
+      <label class="ew-field">
+        <span>Pages to convert</span>
+        <select id="xlScope">
+          <option value="all">All pages</option>
+          <option value="selected">Selected pages only</option>
+        </select>
+      </label>
+      <label class="ew-field">
+        <span>Sheet layout</span>
+        <select id="xlSheetMode">
+          <option value="separate">One sheet per PDF page</option>
+          <option value="combine">Combine into a single sheet</option>
+        </select>
+      </label>
+      <label class="ew-check"><input type="checkbox" id="xlUseOcr" checked> Use OCR for scanned/image pages</label>
+    </div>
+    <button class="primary" id="xlExtractBtn" style="margin-top:14px;">📊 Extract &amp; download Excel file</button>
+    <div class="ew-progress" id="xlProgress" style="display:none;"></div>
+  </div>
+
+  <footer>
+    Tip: text replacements and image patches are both only baked in the moment you click "Download merged PDF" — nothing is written until then. Reordering and deleting pages happen instantly, but you get one step of undo if you change your mind.
+  </footer>
+</div>
+
+<div id="toast"></div>
+<div id="modalRoot"></div>
+<div id="printGuideArea"></div>
+
+<script>
+const { PDFDocument, StandardFonts, rgb } = PDFLib;
+
+// This sandbox blocks both real cross-origin Workers and blob: script loads,
+// so we point pdf.js straight at the worker URL and let it fall back to
+// running on the main thread if needed. That fallback only logs a benign
+// console warning ("Setting up fake worker") — rendering still works fine,
+// just a touch slower on very large PDFs.
+pdfjsLib.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.6.347/pdf.worker.min.js";
+let workerReady = Promise.resolve();
+
+// ---------- state ----------
+let fileStore = {};      // fileId -> {name, bytes, pdfjsDoc, pdfLibDoc, textCache:{pageIndex:textContent}}
+let fileOrder = [];      // fileId order as uploaded, for the "Files in this project" list
+let pages = [];          // {uid, fileId, pageIndex(1-based), thumb, marked, patches:[{id,xPct,yPct,wPct,hPct,text,fontSize,textColor,boxColor}]}
+let matches = [];        // {key, uidPage, fileId, pageIndex, itemIndex, original, replaced, transform, width, enabled}
+let lastSnapshot = null;
+let idCounter = 1;
+const genId = () => 'id' + (idCounter++) + '_' + Math.random().toString(36).slice(2,7);
+const modalRoot = document.getElementById('modalRoot');
+
+// ---------- dom refs ----------
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const addMoreBtn = document.getElementById('addMoreBtn');
+const grid = document.getElementById('grid');
+const emptyState = document.getElementById('emptyState');
+const countLabel = document.getElementById('countLabel');
+const deleteSelBtn = document.getElementById('deleteSelBtn');
+const splitBtn = document.getElementById('splitBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const undoBtn = document.getElementById('undoBtn');
+const newProjectBtn = document.getElementById('newProjectBtn');
+const selectAllBtn = document.getElementById('selectAllBtn');
+const clearSelBtn = document.getElementById('clearSelBtn');
+const findInput = document.getElementById('findInput');
+const replaceInput = document.getElementById('replaceInput');
+const scanBtn = document.getElementById('scanBtn');
+const matchesArea = document.getElementById('matchesArea');
+const matchesSummary = document.getElementById('matchesSummary');
+const matchesList = document.getElementById('matchesList');
+const toast = document.getElementById('toast');
+const workbenchNav = document.getElementById('workbenchNav');
+const filesList = document.getElementById('filesList');
+const navList = document.getElementById('navList');
+const focusViewer = document.getElementById('focusViewer');
+const focusImg = document.getElementById('focusImg');
+const focusCaption = document.getElementById('focusCaption');
+document.getElementById('focusClose').addEventListener('click', () => {
+  focusViewer.style.display = 'none';
+  focusActiveUid = null;
+});
+let focusActiveUid = null;
+
+let toastTimer = null;
+function showToast(msg){
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toast.classList.remove('show'), 3200);
+}
+
+// ---------- upload handling ----------
+dropzone.addEventListener('click', () => fileInput.click());
+addMoreBtn.addEventListener('click', () => fileInput.click());
+['dragenter','dragover'].forEach(ev => dropzone.addEventListener(ev, e=>{e.preventDefault(); dropzone.classList.add('drag');}));
+['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e=>{e.preventDefault(); dropzone.classList.remove('drag');}));
+dropzone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
+fileInput.addEventListener('change', e => { handleFiles(e.target.files); fileInput.value=''; });
+
+async function handleFiles(fileList){
+  const files = Array.from(fileList || []);
+  if(!files.length) return;
+  await workerReady;
+  for(const file of files){
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    if(!isPdf){ showToast('Skipped "' + file.name + '" — not a PDF'); continue; }
+    showToast('Reading ' + file.name + '…');
+    try{
+      const buf = await file.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      const pdfjsDoc = await pdfjsLib.getDocument({ data: bytes.slice() }).promise;
+      const fileId = genId();
+      fileStore[fileId] = { name: file.name, bytes, pdfjsDoc, pdfLibDoc: null, textCache: {} };
+      fileOrder.push(fileId);
+      const numPages = pdfjsDoc.numPages;
+      for(let i = 1; i <= numPages; i++){
+        const thumb = await renderThumb(pdfjsDoc, i);
+        pages.push({ uid: genId(), fileId, pageIndex: i, thumb, marked: false, patches: [] });
+        renderAll(); // progressive render so big files feel responsive
+      }
+    }catch(err){
+      console.error(err);
+      showToast('Could not read "' + file.name + '" — it may be corrupted or password-protected.');
+    }
+  }
+  showToast('Ready.');
+}
+
+async function renderThumb(doc, pageNum){
+  const page = await doc.getPage(pageNum);
+  const baseViewport = page.getViewport({ scale: 1 });
+  const targetWidth = 240;
+  const scale = targetWidth / baseViewport.width;
+  const viewport = page.getViewport({ scale });
+  const canvas = document.createElement('canvas');
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  const ctx = canvas.getContext('2d');
+  await page.render({ canvasContext: ctx, viewport }).promise;
+  return canvas.toDataURL('image/png');
+}
+
+// ---------- remove a single uploaded file (e.g. wrong file picked) ----------
+function removeFile(fileId){
+  const fs = fileStore[fileId];
+  const name = fs ? fs.name : 'this file';
+  const pageCount = pages.filter(p => p.fileId === fileId).length;
+  openConfirmModal(
+    'Remove "' + name + '"?',
+    'This removes ' + pageCount + ' page' + (pageCount===1?'':'s') + ' that came from this file from the workbench. Other files and their pages are untouched.',
+    'Remove file',
+    () => {
+      snapshot();
+      pages = pages.filter(p => p.fileId !== fileId);
+      matches = matches.filter(m => m.fileId !== fileId);
+      delete fileStore[fileId];
+      fileOrder = fileOrder.filter(id => id !== fileId);
+      if(focusActiveUid){
+        const stillExists = pages.find(p => p.uid === focusActiveUid);
+        if(!stillExists){ focusViewer.style.display = 'none'; focusActiveUid = null; }
+      }
+      renderAll();
+      renderMatches();
+      showToast('Removed "' + name + '" from the project.');
+    }
+  );
+}
+
+// ---------- New Project: wipe everything and start fresh ----------
+newProjectBtn.addEventListener('click', () => {
+  if(pages.length === 0 && fileOrder.length === 0) return;
+  openConfirmModal(
+    'Start a new project?',
+    'This removes every uploaded file, every page, all reordering, all patches, and all find & replace matches from the current workbench. This can\'t be undone — make sure you\'ve already downloaded anything you want to keep.',
+    'Clear everything',
+    () => {
+      fileStore = {};
+      fileOrder = [];
+      pages = [];
+      matches = [];
+      lastSnapshot = null;
+      undoBtn.disabled = true;
+      focusActiveUid = null;
+      focusViewer.style.display = 'none';
+      findInput.value = '';
+      replaceInput.value = '';
+      ewProgress.innerHTML = '';
+      ewProgress.style.display = 'none';
+      xlProgress.innerHTML = '';
+      xlProgress.style.display = 'none';
+      renderAll();
+      renderMatches();
+      showToast('Workbench cleared — ready for a new project.');
+    }
+  );
+});
+
+// Small reusable yes/no confirmation modal for destructive actions.
+function openConfirmModal(title, message, confirmLabel, onConfirm){
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal-card" style="max-width:420px;">
+      <div class="modal-head">
+        <h3>${escapeHtml(title)}</h3>
+        <button class="modal-close">✕</button>
+      </div>
+      <p class="modal-hint">${escapeHtml(message)}</p>
+      <div class="modal-foot">
+        <button class="ghost" id="confirmCancel">Cancel</button>
+        <button class="danger" id="confirmOk">${escapeHtml(confirmLabel)}</button>
+      </div>
+    </div>
+  `;
+  modalRoot.appendChild(backdrop);
+  backdrop.querySelector('.modal-close').addEventListener('click', () => backdrop.remove());
+  backdrop.querySelector('#confirmCancel').addEventListener('click', () => backdrop.remove());
+  backdrop.querySelector('#confirmOk').addEventListener('click', () => {
+    backdrop.remove();
+    onConfirm();
+  });
+}
+
+// Clears the hidden print container once the print dialog closes (works for
+// both actual printing and "Save as PDF", since both trigger afterprint).
+window.addEventListener('afterprint', () => {
+  const printArea = document.getElementById('printGuideArea');
+  if(printArea) printArea.innerHTML = '';
+});
+
+// ---------- Help / User Guide ----------
+document.getElementById('helpBtn').addEventListener('click', openUserGuide);
+
+function openUserGuide(){
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal-card guide-card">
+      <div class="modal-head">
+        <h3>📖 How to use PDF Workbench</h3>
+        <button class="modal-close" id="guideCloseTop">✕</button>
+      </div>
+      <div id="guidePrintArea">
+        <div class="guide-toc">
+          <a href="#g-upload">1. Adding PDFs</a>
+          <a href="#g-merge">2. Merging files</a>
+          <a href="#g-reorder">3. Reordering pages</a>
+          <a href="#g-delete">4. Deleting pages</a>
+          <a href="#g-files">5. Files list</a>
+          <a href="#g-nav">6. Page navigator &amp; preview</a>
+          <a href="#g-split">7. Splitting out pages</a>
+          <a href="#g-findreplace">8. Find &amp; replace text</a>
+          <a href="#g-patch">9. Fixing text inside logos/images</a>
+          <a href="#g-word">10. Converting to a Word file</a>
+          <a href="#g-excel">11. Converting to an Excel file</a>
+          <a href="#g-undo">12. Undo &amp; starting over</a>
+          <a href="#g-tips">13. General tips</a>
+        </div>
+
+        <div class="guide-section" id="g-upload">
+          <h4><span class="guide-icon">📁</span>1. Adding your PDF files</h4>
+          <p>At the very top of the page is a box that says "Drop PDF files here, or click to browse."</p>
+          <ol>
+            <li>Either drag a PDF file from your computer straight onto that box, or click the box and choose a file the normal way.</li>
+            <li>You can select more than one file at a time — every page from every file you add lands together in the work area below, ready to be arranged.</li>
+            <li>To add more files later, use the <strong>"+ Add PDFs"</strong> button in the toolbar (the row of buttons just under the dropzone).</li>
+          </ol>
+          <div class="guide-note">Nothing you upload leaves your computer — all the work happens right inside your browser.</div>
+        </div>
+
+        <div class="guide-section" id="g-merge">
+          <h4><span class="guide-icon">🔗</span>2. Merging multiple PDFs into one</h4>
+          <p>You don't need a separate "merge" button — merging happens automatically. As soon as you add more than one PDF, all their pages sit together in the same work area, in the order they appear on screen.</p>
+          <ol>
+            <li>Add your first PDF, then add your second (and third, and so on) using "+ Add PDFs."</li>
+            <li>Arrange the pages into the order you want them in the final file (see "Reordering pages" below).</li>
+            <li>Click the green <strong>"⬇ Download merged PDF"</strong> button at the top right of the toolbar. This downloads one single PDF file containing every page, in the order shown on screen.</li>
+          </ol>
+        </div>
+
+        <div class="guide-section" id="g-reorder">
+          <h4><span class="guide-icon">↕️</span>3. Reordering pages</h4>
+          <p>Each page appears as its own little card with a number badge in the corner showing its position.</p>
+          <ol>
+            <li>Click and hold on any page card, drag it to where you want it, and let go — the page moves there and every page number updates automatically.</li>
+            <li>If you have a lot of pages and need to drag one a long way, drag your mouse near the very top or bottom edge of the screen — it will scroll automatically while you're still holding the page.</li>
+            <li>You can also reorder using the small list on the right-hand side of the screen (the <strong>Page navigator</strong>) the same way — drag a row up or down.</li>
+          </ol>
+        </div>
+
+        <div class="guide-section" id="g-delete">
+          <h4><span class="guide-icon">🗑️</span>4. Deleting pages</h4>
+          <p>There are two ways to remove pages you don't want:</p>
+          <ol>
+            <li><strong>One page at a time:</strong> click the small ✕ in the corner of any page card to remove just that page.</li>
+            <li><strong>Several pages at once:</strong> click on a page (or tick its checkbox) to mark it — marked pages get a red outline and a "Delete" stamp. Mark as many as you like, then click <strong>"Delete selected"</strong> in the toolbar.</li>
+            <li>Use <strong>"Select all"</strong> or <strong>"Clear selection"</strong> in the toolbar to quickly mark or unmark every page at once.</li>
+          </ol>
+          <div class="guide-note">Made a mistake? Use the <strong>"↺ Undo last change"</strong> button in the toolbar straight after — it reverses your most recent action (one step only).</div>
+        </div>
+
+        <div class="guide-section" id="g-files">
+          <h4><span class="guide-icon">📋</span>5. The "Files in this project" list</h4>
+          <p>On the right-hand side, above the page list, you'll see every PDF you've uploaded, numbered 1, 2, 3 and so on, with how many of its pages are currently in your workbench.</p>
+          <ol>
+            <li>If you realize you uploaded the wrong file, click the ✕ next to that file's name.</li>
+            <li>You'll be asked to confirm — once you do, only that file's pages are removed. Every other file and its pages stay exactly as they were.</li>
+            <li>Then just use "+ Add PDFs" to upload the correct file instead.</li>
+          </ol>
+        </div>
+
+        <div class="guide-section" id="g-nav">
+          <h4><span class="guide-icon">🧭</span>6. Page navigator &amp; full-size preview</h4>
+          <p>When you have a lot of pages, scrolling through a big grid to find one page can be slow. The panel on the right-hand side solves that.</p>
+          <ol>
+            <li>It lists every page as a small thumbnail with its page number and file name.</li>
+            <li>Click any row to open that page in a large preview at the top of the screen, so you can see it clearly without zooming.</li>
+            <li>Each row also has its own checkbox so you can select pages (for deleting or splitting) without having to scroll through the whole page grid.</li>
+            <li>You can also double-click any page thumbnail in the main grid to open the same large preview.</li>
+          </ol>
+        </div>
+
+        <div class="guide-section" id="g-split">
+          <h4><span class="guide-icon">✂️</span>7. Splitting out specific pages into their own PDF</h4>
+          <p>Use this when you only want to save or share a few pages, rather than the whole document.</p>
+          <ol>
+            <li>Tick the pages you want (using the checkboxes on the page cards or in the navigator on the right).</li>
+            <li>Click the gold <strong>"✂ Split selected"</strong> button in the toolbar.</li>
+            <li>A window opens showing just your chosen pages — you can untick any you change your mind about.</li>
+            <li>Choose whether to also <strong>remove these pages from the main workbench</strong> after exporting (off by default, so splitting doesn't disturb your main file unless you ask it to).</li>
+            <li>Click <strong>"✂ Export split PDF"</strong> to download just those pages as their own separate PDF file.</li>
+          </ol>
+        </div>
+
+        <div class="guide-section" id="g-findreplace">
+          <h4><span class="guide-icon">🔍</span>8. Finding and replacing text</h4>
+          <p>This works on real, selectable text in the PDF (the kind you could normally click and copy) — not text that's part of a picture or logo (for that, see the next section).</p>
+          <ol>
+            <li>Scroll down to the <strong>"Find & replace text"</strong> section.</li>
+            <li>Type the word or phrase you want to find, and what you want to replace it with.</li>
+            <li>Click <strong>"Scan document"</strong>. Every match found across all your pages will be listed, showing the original text crossed out and the replacement next to it.</li>
+            <li>Untick any matches you don't actually want changed.</li>
+            <li>The changes are only applied when you click "Download merged PDF" — nothing is altered until then.</li>
+          </ol>
+          <div class="guide-note">This works best on clean PDFs with plain text and a white background. It won't find words inside a scanned page or a picture/logo.</div>
+        </div>
+
+        <div class="guide-section" id="g-patch">
+          <h4><span class="guide-icon">✎</span>9. Changing text that's part of a logo, picture, or scanned page</h4>
+          <p>If a word you need to change is actually part of an image — like a company name baked into a logo — the Find &amp; Replace tool above can't reach it, because there's no real selectable text there, just a picture. This tool covers that case by hand.</p>
+          <ol>
+            <li>On any page card, click the small pencil (✎) button.</li>
+            <li>A larger view of that page opens. Click and drag a box over the exact spot you want to change (for example, directly over a company name in a logo).</li>
+            <li>A small form appears — type the new text, and adjust the colors if needed (the cover color is automatically guessed from the page behind it, so it usually doesn't need changing).</li>
+            <li>Click Save. You'll see a small purple badge appear on that page's card showing it now has a patch.</li>
+            <li>If the same logo appears on every page (like a letterhead), tick the box to <strong>apply this patch to all pages</strong> instead of repeating the steps for each one.</li>
+            <li>You can drag a patch to move it, drag its corner handles to resize it, or click it again to edit or delete it — at any time before downloading.</li>
+            <li>Click "Done" to close the editor. As with everything else, the patch is only baked into the file once you click "Download merged PDF".</li>
+          </ol>
+        </div>
+
+        <div class="guide-section" id="g-word">
+          <h4><span class="guide-icon">📝</span>10. Turning a PDF into an editable Word document</h4>
+          <p>Use this when you want to open and edit the content in Microsoft Word, rather than just reading it as a PDF.</p>
+          <ol>
+            <li>Scroll to the <strong>"Extract text to a Word document"</strong> section.</li>
+            <li>Choose whether to convert all pages, or only the ones you've ticked.</li>
+            <li>Leave <strong>"Use OCR for scanned/image pages"</strong> ticked if some of your pages are scanned photos rather than typed text — this lets the tool "read" the words off the picture and turn them into real, editable text.</li>
+            <li>Click <strong>"📝 Extract & download Word file"</strong>. A progress list shows what's happening page by page (scanned pages take longer than typed ones).</li>
+            <li>A .docx file downloads automatically once it's done, ready to open in Word.</li>
+          </ol>
+          <div class="guide-note">This rebuilds the words and basic formatting (bold, headings, and side-by-side columns where they're detected) — it does not produce a pixel-for-pixel copy of the original PDF's exact design.</div>
+        </div>
+
+        <div class="guide-section" id="g-excel">
+          <h4><span class="guide-icon">📊</span>11. Turning a PDF into an Excel spreadsheet</h4>
+          <p>Use this for PDFs that contain tables of figures — like a financial statement, schedule, or list — that you'd like to work with in Excel.</p>
+          <ol>
+            <li>Scroll to the <strong>"Extract text to an Excel spreadsheet"</strong> section.</li>
+            <li>Choose which pages to include, the same way as the Word tool.</li>
+            <li>Choose your <strong>Sheet layout</strong>: either a separate tab for every PDF page, or everything combined into one single tab.</li>
+            <li>Click <strong>"📊 Extract & download Excel file"</strong>. Pages that look like real tables get laid out into proper rows and columns automatically; pages that don't will still come through as plain text, one line per row.</li>
+          </ol>
+          <div class="guide-note">Very tightly packed or unusually shaped tables might not line up perfectly — a quick check and tidy-up in Excel afterward is always a good idea for anything important.</div>
+        </div>
+
+        <div class="guide-section" id="g-undo">
+          <h4><span class="guide-icon">↺</span>12. Undo, and starting a brand new project</h4>
+          <p><strong>Undo:</strong> the "↺ Undo last change" button in the toolbar reverses your most recent action — deleting a page, reordering, etc. It only remembers one step back, so use it right away if something looks wrong.</p>
+          <p><strong>Starting over completely:</strong> if you're finished with one document and want to begin a fresh project, click the red <strong>"🗑 New project"</strong> button in the toolbar. You'll be asked to confirm, since this clears everything — every file, every page, every edit — back to an empty workbench.</p>
+          <div class="guide-note">Make sure you've already downloaded anything you want to keep before clicking "New project" — it cannot be undone.</div>
+        </div>
+
+        <div class="guide-section" id="g-tips">
+          <h4><span class="guide-icon">💡</span>13. A few general tips</h4>
+          <ul>
+            <li>Nothing is saved or changed in your final PDF until you actually click a download button — feel free to experiment freely beforehand.</li>
+            <li>Working with a very large PDF (many pages, or large scanned images) may take a little longer to load and process — this is normal.</li>
+            <li>If you're trying the scanned-page (OCR) features and they don't seem to start, try downloading this tool and opening it directly in your browser rather than viewing it inside another app's preview window — some preview windows restrict background processing that OCR needs.</li>
+            <li>You can come back to this guide any time by clicking "📖 How to use this" at the top of the page.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="ghost" id="guidePrintBtn">🖨️ Print / Save as PDF</button>
+        <button class="primary" id="guideCloseBtn">Got it</button>
+      </div>
+    </div>
+  `;
+  modalRoot.appendChild(backdrop);
+  backdrop.querySelector('.modal-close').addEventListener('click', () => backdrop.remove());
+  backdrop.querySelector('#guideCloseBtn').addEventListener('click', () => backdrop.remove());
+  backdrop.querySelector('#guidePrintBtn').addEventListener('click', () => {
+    const printArea = document.getElementById('printGuideArea');
+    const content = backdrop.querySelector('#guidePrintArea').cloneNode(true);
+    printArea.innerHTML = '';
+    const title = document.createElement('h2');
+    title.textContent = '📖 How to use PDF Workbench';
+    printArea.appendChild(title);
+    printArea.appendChild(content);
+    window.print();
+  });
+}
+
+// ---------- snapshot / undo ----------
+function snapshot(){
+  lastSnapshot = pages.map(p => ({...p}));
+  undoBtn.disabled = false;
+}
+undoBtn.addEventListener('click', () => {
+  if(!lastSnapshot) return;
+  pages = lastSnapshot;
+  lastSnapshot = null;
+  undoBtn.disabled = true;
+  renderAll();
+  showToast('Undone.');
+});
+
+// ---------- rendering ----------
+let dragUid = null;
+
+// Auto-scroll while the user drags a card near the top/bottom of the viewport
+let autoScrollRAF = null;
+function startAutoScroll(e){
+  cancelAnimationFrame(autoScrollRAF);
+  const zone = 100, speed = 14;
+  function tick(){
+    const y = e.clientY;
+    if(y < zone) window.scrollBy(0, -speed);
+    else if(y > window.innerHeight - zone) window.scrollBy(0, speed);
+    autoScrollRAF = requestAnimationFrame(tick);
+  }
+  autoScrollRAF = requestAnimationFrame(tick);
+}
+document.addEventListener('dragover', e => startAutoScroll(e));
+document.addEventListener('dragend', () => cancelAnimationFrame(autoScrollRAF));
+document.addEventListener('drop', () => cancelAnimationFrame(autoScrollRAF));
+
+function focusPage(uid){
+  const p = pages.find(x => x.uid === uid);
+  if(!p) return;
+  focusActiveUid = uid;
+  focusImg.src = p.thumb;
+  const fileName = fileStore[p.fileId] ? fileStore[p.fileId].name : '';
+  const idx = pages.findIndex(x => x.uid === uid);
+  focusCaption.textContent = 'Page ' + (idx+1) + ' · ' + fileName + ' · original p.' + p.pageIndex;
+  focusViewer.style.display = 'block';
+  focusViewer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  renderNavHighlight();
+  // Flash the grid card
+  const card = grid.querySelector('[data-uid="'+uid+'"]');
+  if(card){ card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash'); }
+}
+
+function renderNavHighlight(){
+  navList.querySelectorAll('.nav-row').forEach(row => {
+    row.classList.toggle('active', row.dataset.uid === focusActiveUid);
+  });
+}
+
+function renderAll(){
+  const fileCount = new Set(pages.map(p => p.fileId)).size;
+  if(pages.length === 0){
+    emptyState.style.display = 'block';
+    grid.style.display = 'none';
+    workbenchNav.style.display = 'none';
+    countLabel.textContent = 'No pages yet';
+  } else {
+    emptyState.style.display = 'none';
+    grid.style.display = 'grid';
+    workbenchNav.style.display = 'block';
+    countLabel.textContent = pages.length + ' page' + (pages.length===1?'':'s') + ' · ' + fileCount + ' file' + (fileCount===1?'':'s');
+  }
+
+  const markedCount = pages.filter(p => p.marked).length;
+  deleteSelBtn.textContent = 'Delete selected (' + markedCount + ')';
+  deleteSelBtn.disabled = markedCount === 0;
+  splitBtn.disabled = markedCount === 0;
+  splitBtn.textContent = markedCount > 0 ? '✂ Split selected (' + markedCount + ')' : '✂ Split selected';
+  downloadBtn.disabled = pages.length === 0;
+  newProjectBtn.disabled = pages.length === 0 && fileOrder.length === 0;
+
+  // ---- files list ----
+  filesList.innerHTML = '';
+  fileOrder.forEach((fileId, fIdx) => {
+    const fs = fileStore[fileId];
+    if(!fs) return;
+    const pageCount = pages.filter(p => p.fileId === fileId).length;
+    const row = document.createElement('div');
+    row.className = 'file-row';
+    row.innerHTML = `
+      <span class="file-icon">📄</span>
+      <span class="file-info">
+        <div class="file-name" title="${escapeHtml(fs.name)}">${fIdx+1}. ${escapeHtml(fs.name)}</div>
+        <div class="file-meta">${pageCount} page${pageCount===1?'':'s'} in workbench</div>
+      </span>
+      <button class="file-remove" title="Remove this file and its pages">✕</button>
+    `;
+    row.querySelector('.file-remove').addEventListener('click', () => removeFile(fileId));
+    filesList.appendChild(row);
+  });
+  if(fileOrder.length === 0){
+    filesList.innerHTML = '<div style="font-size:11.5px;color:var(--ink-soft);padding:4px;">No files uploaded yet.</div>';
+  }
+
+  // ---- right navigator ----
+  navList.innerHTML = '';
+  pages.forEach((p, idx) => {
+    const row = document.createElement('div');
+    row.className = 'nav-row' + (p.uid === focusActiveUid ? ' active' : '') + (p.marked ? ' marked' : '');
+    row.dataset.uid = p.uid;
+    row.title = 'Click row to preview · checkbox to select · drag to reorder';
+    const fileName = fileStore[p.fileId] ? fileStore[p.fileId].name : '';
+    row.innerHTML = `
+      <span class="nav-check"><input type="checkbox" ${p.marked ? 'checked' : ''}></span>
+      <span class="nav-num">${idx+1}</span>
+      <img src="${p.thumb}" alt="p${idx+1}">
+      <span class="nav-name">${escapeHtml(fileName)} p.${p.pageIndex}</span>
+    `;
+    row.querySelector('.nav-check input').addEventListener('click', e => {
+      e.stopPropagation();
+      p.marked = !p.marked;
+      renderAll();
+    });
+    row.addEventListener('click', () => focusPage(p.uid));
+
+    // Drag-to-reorder inside the navigator
+    row.draggable = true;
+    row.addEventListener('dragstart', e => {
+      dragUid = p.uid;
+      e.dataTransfer.setData('text/plain', p.uid);
+      row.style.opacity = '.4';
+    });
+    row.addEventListener('dragend', () => { row.style.opacity = ''; });
+    row.addEventListener('dragover', e => { e.preventDefault(); row.style.background = 'rgba(43,111,115,.18)'; });
+    row.addEventListener('dragleave', () => { row.style.background = ''; });
+    row.addEventListener('drop', e => {
+      e.preventDefault(); row.style.background = '';
+      if(dragUid && dragUid !== p.uid){
+        snapshot();
+        const srcIdx = pages.findIndex(x => x.uid === dragUid);
+        const destIdx = pages.findIndex(x => x.uid === p.uid);
+        const [moved] = pages.splice(srcIdx, 1);
+        pages.splice(destIdx, 0, moved);
+        renderAll();
+      }
+      dragUid = null;
+    });
+
+    navList.appendChild(row);
+  });
+
+  // ---- grid cards ----
+  grid.innerHTML = '';
+  pages.forEach((p, idx) => {
+    const card = document.createElement('div');
+    card.className = 'page-card' + (p.marked ? ' marked' : '');
+    card.draggable = true;
+    card.dataset.uid = p.uid;
+
+    const matchCount = matches.filter(m => m.uidPage === p.uid && m.enabled).length;
+    const fileName = fileStore[p.fileId] ? fileStore[p.fileId].name : '';
+    const patchCount = (p.patches || []).length;
+
+    card.innerHTML = `
+      <div class="order-stamp">${idx + 1}</div>
+      ${matchCount ? `<div class="match-stamp">${matchCount}</div>` : ''}
+      ${patchCount ? `<div class="patch-stamp" title="${patchCount} patch${patchCount===1?'':'es'}">✎${patchCount}</div>` : ''}
+      <div class="checkbox-btn">${p.marked ? '✓' : ''}</div>
+      <button class="remove-btn" title="Remove this page">✕</button>
+      <button class="edit-btn" title="Patch text in this page (logos, images, scans)">✎</button>
+      <div class="thumb-frame">
+        <img src="${p.thumb}" alt="Page ${idx+1} thumbnail">
+        <div class="delete-stamp"><span>Delete</span></div>
+      </div>
+      <div class="source-label">${escapeHtml(fileName)} · p.${p.pageIndex}</div>
+    `;
+
+    // ▸ double-click thumbnail to focus-view (single click still toggles select)
+    card.querySelector('.thumb-frame img').addEventListener('dblclick', e => {
+      e.stopPropagation();
+      focusPage(p.uid);
+    });
+    card.querySelector('.edit-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      openPageEditor(p);
+    });
+    card.querySelector('.checkbox-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      p.marked = !p.marked;
+      renderAll();
+    });
+    card.querySelector('.remove-btn').addEventListener('click', e => {
+      e.stopPropagation();
+      snapshot();
+      pages = pages.filter(x => x.uid !== p.uid);
+      if(focusActiveUid === p.uid){ focusViewer.style.display='none'; focusActiveUid=null; }
+      renderAll();
+    });
+    card.addEventListener('click', () => {
+      p.marked = !p.marked;
+      renderAll();
+    });
+
+    card.addEventListener('dragstart', e => {
+      dragUid = p.uid;
+      e.dataTransfer.setData('text/plain', p.uid);
+      setTimeout(() => card.classList.add('dragging'), 0);
+    });
+    card.addEventListener('dragend', () => { card.classList.remove('dragging'); dragUid = null; });
+    card.addEventListener('dragover', e => { e.preventDefault(); card.classList.add('drag-over'); });
+    card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
+    card.addEventListener('drop', e => {
+      e.preventDefault();
+      card.classList.remove('drag-over');
+      if(dragUid && dragUid !== p.uid){
+        snapshot();
+        const srcIdx = pages.findIndex(x => x.uid === dragUid);
+        const destIdx = pages.findIndex(x => x.uid === p.uid);
+        const [moved] = pages.splice(srcIdx, 1);
+        pages.splice(destIdx, 0, moved);
+        renderAll();
+        // Sync nav scroll so dropped item is visible
+        const activeNavRow = navList.querySelector('[data-uid="'+moved.uid+'"]');
+        if(activeNavRow) activeNavRow.scrollIntoView({ block:'nearest' });
+      }
+      dragUid = null;
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+function escapeHtml(s){
+  return (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ---------- patch editor (manual cover-and-relabel for logos/images/scans) ----------
+async function renderEditorCanvas(fileId, pageIndex, targetWidth){
+  const fs = fileStore[fileId];
+  const page = await fs.pdfjsDoc.getPage(pageIndex);
+  const baseViewport = page.getViewport({ scale: 1 });
+  const width = targetWidth || 860;
+  const scale = width / baseViewport.width;
+  const viewport = page.getViewport({ scale });
+  const canvas = document.createElement('canvas');
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  const ctx = canvas.getContext('2d');
+  await page.render({ canvasContext: ctx, viewport }).promise;
+  return canvas;
+}
+
+function hexToRgb01(hex){
+  const h = hex.replace('#','');
+  return rgb(
+    parseInt(h.substring(0,2),16)/255,
+    parseInt(h.substring(2,4),16)/255,
+    parseInt(h.substring(4,6),16)/255
+  );
+}
+function rgbToHex(r,g,b){
+  const c = v => Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0');
+  return '#' + c(r) + c(g) + c(b);
+}
+function relativeLuminance(r,g,b){
+  return (0.299*r + 0.587*g + 0.114*b) / 255;
+}
+function clamp(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
+
+// Samples pixels just inside the four edges of a box (avoiding the centre,
+// where the text/logo mark itself usually sits) and averages them — gives a
+// much closer match to the real background than a fixed default color.
+function sampleBackgroundColor(canvas, xPct, yPct, wPct, hPct){
+  const ctx = canvas.getContext('2d');
+  const x = xPct * canvas.width, y = yPct * canvas.height;
+  const w = wPct * canvas.width, h = hPct * canvas.height;
+  const inset = Math.max(2, Math.min(w, h) * 0.08);
+  const points = [
+    [x + w/2, y + inset],          // top mid
+    [x + w/2, y + h - inset],      // bottom mid
+    [x + inset, y + h/2],          // left mid
+    [x + w - inset, y + h/2],      // right mid
+    [x + inset, y + inset],        // corners
+    [x + w - inset, y + inset],
+    [x + inset, y + h - inset],
+    [x + w - inset, y + h - inset]
+  ];
+  let r=0,g=0,b=0,n=0;
+  for(const [px,py] of points){
+    const cx = clamp(Math.round(px), 0, canvas.width-1);
+    const cy = clamp(Math.round(py), 0, canvas.height-1);
+    try{
+      const d = ctx.getImageData(cx, cy, 1, 1).data;
+      r += d[0]; g += d[1]; b += d[2]; n++;
+    }catch(e){ /* ignore (e.g. tainted canvas) */ }
+  }
+  if(n === 0) return '#1a4fa0';
+  return rgbToHex(r/n, g/n, b/n);
+}
+
+async function openPageEditor(p){
+  const canvas = await renderEditorCanvas(p.fileId, p.pageIndex);
+  const dataUrl = canvas.toDataURL('image/png');
+  const fileName = fileStore[p.fileId] ? fileStore[p.fileId].name : '';
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Patch page · ${escapeHtml(fileName)} p.${p.pageIndex}</h3>
+        <button class="modal-close" title="Close">✕</button>
+      </div>
+      <p class="modal-hint">Drag a box over anything you want to relabel — a logo, a stamped name, a scanned line of text. The cover color is auto-matched to the page behind it. Drag a patch to move it, drag its corner squares to resize, or click it to edit the text and colors.</p>
+      <div class="editor-stage" id="editorStage">
+        <img src="${dataUrl}" alt="Page preview" draggable="false">
+      </div>
+      <div class="modal-foot">
+        <button class="primary" id="editorDoneBtn">Done</button>
+      </div>
+    </div>
+  `;
+  modalRoot.appendChild(backdrop);
+
+  const stage = backdrop.querySelector('#editorStage');
+  const img = stage.querySelector('img');
+
+  function drawPatchBoxes(){
+    stage.querySelectorAll('.patch-box, .resize-handle').forEach(el => el.remove());
+    (p.patches || []).forEach(patch => {
+      const box = document.createElement('div');
+      box.className = 'patch-box';
+      box.style.left = (patch.xPct * 100) + '%';
+      box.style.top = (patch.yPct * 100) + '%';
+      box.style.width = (patch.wPct * 100) + '%';
+      box.style.height = (patch.hPct * 100) + '%';
+      box.style.background = patch.boxColor;
+      box.style.color = patch.textColor;
+      box.style.fontWeight = patch.bold === false ? '500' : '700';
+      box.style.fontSize = Math.max(9, patch.fontSize * 0.85) + 'px';
+      box.textContent = patch.text;
+      stage.appendChild(box);
+      attachDrag(box, patch, 'move');
+
+      ['nw','ne','sw','se'].forEach(corner => {
+        const h = document.createElement('div');
+        h.className = 'resize-handle handle-' + corner;
+        h.style.left = corner.includes('w') ? (patch.xPct*100)+'%' : ((patch.xPct+patch.wPct)*100)+'%';
+        h.style.top = corner.includes('n') ? (patch.yPct*100)+'%' : ((patch.yPct+patch.hPct)*100)+'%';
+        stage.appendChild(h);
+        attachDrag(h, patch, 'resize-' + corner);
+      });
+    });
+  }
+
+  function attachDrag(el, patch, mode){
+    el.addEventListener('mousedown', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const stageRect = stage.getBoundingClientRect();
+      const startX = e.clientX, startY = e.clientY;
+      const orig = { xPct: patch.xPct, yPct: patch.yPct, wPct: patch.wPct, hPct: patch.hPct };
+      let moved = false;
+
+      function onMove(ev){
+        const dx = (ev.clientX - startX) / stageRect.width;
+        const dy = (ev.clientY - startY) / stageRect.height;
+        if(Math.abs(ev.clientX - startX) > 2 || Math.abs(ev.clientY - startY) > 2) moved = true;
+
+        if(mode === 'move'){
+          patch.xPct = clamp(orig.xPct + dx, 0, 1 - orig.wPct);
+          patch.yPct = clamp(orig.yPct + dy, 0, 1 - orig.hPct);
+        } else {
+          let { xPct, yPct, wPct, hPct } = orig;
+          if(mode.includes('w')){ xPct = orig.xPct + dx; wPct = orig.wPct - dx; }
+          if(mode.includes('e')){ wPct = orig.wPct + dx; }
+          if(mode.includes('n')){ yPct = orig.yPct + dy; hPct = orig.hPct - dy; }
+          if(mode.includes('s')){ hPct = orig.hPct + dy; }
+          patch.xPct = clamp(xPct, 0, 0.98);
+          patch.yPct = clamp(yPct, 0, 0.98);
+          patch.wPct = clamp(wPct, 0.02, 1 - patch.xPct);
+          patch.hPct = clamp(hPct, 0.02, 1 - patch.yPct);
+        }
+        drawPatchBoxes();
+      }
+      function onUp(){
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+        if(mode === 'move' && !moved){
+          openPatchForm(p, patch, drawPatchBoxes);
+        }
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  }
+
+  drawPatchBoxes();
+
+  let dragStart = null;
+  let drawEl = null;
+  stage.addEventListener('mousedown', e => {
+    if(e.target !== img && e.target !== stage) return;
+    const rect = stage.getBoundingClientRect();
+    dragStart = { x: e.clientX - rect.left, y: e.clientY - rect.top, rect };
+    drawEl = document.createElement('div');
+    drawEl.className = 'draw-rect';
+    stage.appendChild(drawEl);
+  });
+  stage.addEventListener('mousemove', e => {
+    if(!dragStart) return;
+    const rect = dragStart.rect;
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    const left = Math.min(x, dragStart.x), top = Math.min(y, dragStart.y);
+    const w = Math.abs(x - dragStart.x), h = Math.abs(y - dragStart.y);
+    drawEl.style.left = left + 'px';
+    drawEl.style.top = top + 'px';
+    drawEl.style.width = w + 'px';
+    drawEl.style.height = h + 'px';
+  });
+  stage.addEventListener('mouseup', e => {
+    if(!dragStart) return;
+    const rect = dragStart.rect;
+    const x = e.clientX - rect.left, y = e.clientY - rect.top;
+    const left = Math.min(x, dragStart.x), top = Math.min(y, dragStart.y);
+    const w = Math.abs(x - dragStart.x), h = Math.abs(y - dragStart.y);
+    drawEl.remove();
+    dragStart = null;
+    if(w < 10 || h < 10) return; // too small, probably an accidental click
+    const xPct = left / rect.width;
+    const yPct = top / rect.height;
+    const wPct = w / rect.width;
+    const hPct = h / rect.height;
+    const fontSize = Math.max(8, Math.round(h * 0.62));
+    const boxColor = sampleBackgroundColor(canvas, xPct, yPct, wPct, hPct);
+    const rgbMatch = boxColor.match(/^#(..)(..)(..)$/);
+    const lum = rgbMatch ? relativeLuminance(parseInt(rgbMatch[1],16), parseInt(rgbMatch[2],16), parseInt(rgbMatch[3],16)) : 0;
+    const textColor = lum > 0.55 ? '#000000' : '#ffffff';
+    const newPatch = {
+      id: genId(), xPct, yPct, wPct, hPct,
+      text: '', fontSize, textColor, boxColor, bold: true
+    };
+    openPatchForm(p, newPatch, () => {
+      if(!p.patches.includes(newPatch)) p.patches.push(newPatch);
+      drawPatchBoxes();
+    }, /*isNew*/ true);
+  });
+
+  backdrop.querySelector('.modal-close').addEventListener('click', () => backdrop.remove());
+  backdrop.querySelector('#editorDoneBtn').addEventListener('click', () => {
+    backdrop.remove();
+    renderAll();
+  });
+}
+
+function openPatchForm(p, patch, onSaved, isNew){
+  const formBackdrop = document.createElement('div');
+  formBackdrop.className = 'patch-form-backdrop';
+  formBackdrop.innerHTML = `
+    <div class="patch-form">
+      <h4>${isNew ? 'New patch' : 'Edit patch'}</h4>
+      <label>Replacement text</label>
+      <input type="text" id="pfText" value="${escapeHtml(patch.text)}" placeholder="e.g. PAJAJ">
+      <label>Font size (pt)</label>
+      <input type="number" id="pfSize" value="${patch.fontSize}" min="6" max="160">
+      <label style="display:flex;align-items:center;gap:7px;margin-top:12px;">
+        <input type="checkbox" id="pfBold" ${patch.bold === false ? '' : 'checked'} style="width:auto;">
+        Bold text (matches most logo wordmarks)
+      </label>
+      <div class="color-row">
+        <div>
+          <label>Text color</label>
+          <input type="color" id="pfTextColor" value="${patch.textColor}">
+        </div>
+        <div>
+          <label>Cover color</label>
+          <input type="color" id="pfBoxColor" value="${patch.boxColor}">
+        </div>
+      </div>
+      <div class="patch-form-foot">
+        ${isNew ? '<span></span>' : '<button class="danger" id="pfDelete">Delete patch</button>'}
+        <span>
+          <button class="ghost" id="pfCancel">Cancel</button>
+          <button class="primary" id="pfSave">Save</button>
+        </span>
+      </div>
+      <button class="outline-teal" id="pfApplyAll" style="width:100%;margin-top:10px;">Save &amp; apply this patch to all pages</button>
+    </div>
+  `;
+  document.body.appendChild(formBackdrop);
+  formBackdrop.querySelector('#pfText').focus();
+
+  formBackdrop.querySelector('#pfCancel').addEventListener('click', () => formBackdrop.remove());
+  formBackdrop.addEventListener('mousedown', e => { if(e.target === formBackdrop) formBackdrop.remove(); });
+
+  function readFormIntoPatch(){
+    patch.text = formBackdrop.querySelector('#pfText').value;
+    patch.fontSize = parseFloat(formBackdrop.querySelector('#pfSize').value) || patch.fontSize;
+    patch.bold = formBackdrop.querySelector('#pfBold').checked;
+    patch.textColor = formBackdrop.querySelector('#pfTextColor').value;
+    patch.boxColor = formBackdrop.querySelector('#pfBoxColor').value;
+  }
+
+  formBackdrop.querySelector('#pfSave').addEventListener('click', () => {
+    readFormIntoPatch();
+    formBackdrop.remove();
+    onSaved();
+  });
+
+  formBackdrop.querySelector('#pfApplyAll').addEventListener('click', () => {
+    readFormIntoPatch();
+    if(!p.patches.includes(patch)) p.patches.push(patch);
+    if(pages.length <= 1){
+      formBackdrop.remove();
+      onSaved();
+      showToast('Saved. There\'s only one page loaded, so there are no other pages to apply it to.');
+      return;
+    }
+    let copiedCount = 0;
+    pages.forEach(pg => {
+      if(pg.uid === p.uid) return;
+      pg.patches = pg.patches || [];
+      pg.patches.push({ ...patch, id: genId() });
+      copiedCount++;
+    });
+    formBackdrop.remove();
+    onSaved();
+    renderAll();
+    showToast('Applied to ' + copiedCount + ' other page' + (copiedCount===1?'':'s') + '.');
+  });
+
+  if(!isNew){
+    formBackdrop.querySelector('#pfDelete').addEventListener('click', () => {
+      p.patches = p.patches.filter(x => x.id !== patch.id);
+      formBackdrop.remove();
+      onSaved();
+    });
+  }
+}
+
+// ---------- selection / bulk delete ----------
+selectAllBtn.addEventListener('click', () => { pages.forEach(p => p.marked = true); renderAll(); });
+clearSelBtn.addEventListener('click', () => { pages.forEach(p => p.marked = false); renderAll(); });
+document.getElementById('navSelectAll').addEventListener('click', () => { pages.forEach(p => p.marked = true); renderAll(); });
+document.getElementById('navClearSel').addEventListener('click', () => { pages.forEach(p => p.marked = false); renderAll(); });
+deleteSelBtn.addEventListener('click', () => {
+  snapshot();
+  pages = pages.filter(p => !p.marked);
+  if(focusActiveUid && !pages.find(p=>p.uid===focusActiveUid)){ focusViewer.style.display='none'; focusActiveUid=null; }
+  renderAll();
+  showToast('Selected pages removed.');
+});
+
+splitBtn.addEventListener('click', () => openSplitModal());
+
+function openSplitModal(){
+  const selected = pages.filter(p => p.marked);
+  if(selected.length === 0){ showToast('Select pages first to split.'); return; }
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop split-modal';
+
+  const rows = selected.map((p, i) => {
+    const fileName = fileStore[p.fileId] ? fileStore[p.fileId].name : '';
+    const globalIdx = pages.findIndex(x => x.uid === p.uid);
+    return `<div class="split-page-row">
+      <label>
+        <input type="checkbox" data-uid="${p.uid}" checked>
+        <span class="sp-num">${globalIdx+1}</span>
+        <img src="${escapeHtml(p.thumb)}" alt="">
+        <span>${escapeHtml(fileName)} · p.${p.pageIndex}</span>
+      </label>
+    </div>`;
+  }).join('');
+
+  backdrop.innerHTML = `
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>Split — export pages as a new PDF</h3>
+        <button class="modal-close">✕</button>
+      </div>
+      <p class="modal-hint">The pages below (all currently selected) will be exported together as a separate PDF. Uncheck any you don't want in the split file. They stay in the main workbench — splitting never removes pages.</p>
+      <div class="split-options">
+        <label><input type="checkbox" id="spRemoveAfter"> Remove these pages from the workbench after export</label>
+        <label><input type="checkbox" id="spApplyPatches" checked> Apply patches &amp; text replacements</label>
+      </div>
+      <div class="split-page-list">${rows}</div>
+      <div class="modal-foot" style="justify-content:space-between;">
+        <span style="font-size:12.5px;color:var(--ink-soft);align-self:center;" id="spCountLabel">${selected.length} page${selected.length===1?'':'s'} selected</span>
+        <span style="display:flex;gap:8px;">
+          <button class="ghost" id="spCancel">Cancel</button>
+          <button style="background:#A9780B;border-color:#7A5608;color:#fff;font-size:13.5px;font-weight:600;border-radius:7px;padding:9px 16px;cursor:pointer;border-width:1px;border-style:solid;" id="spExport">✂ Export split PDF</button>
+        </span>
+      </div>
+    </div>
+  `;
+  modalRoot.appendChild(backdrop);
+
+  const checkboxes = backdrop.querySelectorAll('input[data-uid]');
+  const countLabel = backdrop.querySelector('#spCountLabel');
+  function updateCount(){
+    const n = [...checkboxes].filter(c=>c.checked).length;
+    countLabel.textContent = n + ' page' + (n===1?'':'s') + ' selected';
+  }
+  checkboxes.forEach(cb => cb.addEventListener('change', updateCount));
+
+  backdrop.querySelector('.modal-close').addEventListener('click', () => backdrop.remove());
+  backdrop.querySelector('#spCancel').addEventListener('click', () => backdrop.remove());
+
+  backdrop.querySelector('#spExport').addEventListener('click', async () => {
+    const chosenUids = new Set([...checkboxes].filter(c=>c.checked).map(c=>c.dataset.uid));
+    const chosenPages = pages.filter(p => chosenUids.has(p.uid));
+    if(chosenPages.length === 0){ showToast('No pages selected.'); return; }
+
+    const applyPatches = backdrop.querySelector('#spApplyPatches').checked;
+    const removeAfter = backdrop.querySelector('#spRemoveAfter').checked;
+
+    backdrop.querySelector('#spExport').disabled = true;
+    backdrop.querySelector('#spExport').textContent = 'Exporting…';
+
+    try{
+      const outDoc = await PDFDocument.create();
+      const helv = await outDoc.embedFont(StandardFonts.Helvetica);
+      const helvBold = await outDoc.embedFont(StandardFonts.HelveticaBold);
+
+      for(const p of chosenPages){
+        const fs = fileStore[p.fileId];
+        if(!fs.pdfLibDoc) fs.pdfLibDoc = await PDFDocument.load(fs.bytes);
+      }
+
+      for(const p of chosenPages){
+        const fs = fileStore[p.fileId];
+        const [copied] = await outDoc.copyPages(fs.pdfLibDoc, [p.pageIndex - 1]);
+        outDoc.addPage(copied);
+
+        if(applyPatches){
+          // text find-replace
+          const pageMatches = matches.filter(m => m.uidPage === p.uid && m.enabled);
+          for(const m of pageMatches){
+            const fontSize = Math.abs(m.transform[0]) || Math.abs(m.transform[3]) || 11;
+            const x = m.transform[4], y = m.transform[5];
+            const w = (m.width || fontSize*0.6*m.original.length) + 2;
+            copied.drawRectangle({ x:x-1, y:y-fontSize*0.28, width:w, height:fontSize*1.2, color:rgb(1,1,1) });
+            copied.drawText(m.replaced, { x, y, size:fontSize, font:helv, color:rgb(0,0,0) });
+          }
+          // image/logo patches
+          const pw = copied.getWidth(), ph = copied.getHeight();
+          for(const patch of (p.patches||[])){
+            const rx=patch.xPct*pw, rw=patch.wPct*pw, rh=patch.hPct*ph;
+            const ry=ph-(patch.yPct+patch.hPct)*ph;
+            copied.drawRectangle({ x:rx, y:ry, width:rw, height:rh, color:hexToRgb01(patch.boxColor) });
+            if(patch.text){
+              const font = patch.bold===false ? helv : helvBold;
+              let fs2 = patch.fontSize;
+              while(fs2>6 && font.widthOfTextAtSize(patch.text,fs2) > rw*0.92) fs2--;
+              const tw = font.widthOfTextAtSize(patch.text, fs2);
+              copied.drawText(patch.text, { x:rx+Math.max(2,(rw-tw)/2), y:ry+Math.max(2,(rh-fs2)/2)+fs2*0.12, size:fs2, font, color:hexToRgb01(patch.textColor) });
+            }
+          }
+        }
+      }
+
+      const outBytes = await outDoc.save();
+      const blob = new Blob([outBytes], { type:'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'split-export.pdf';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+
+      if(removeAfter){
+        snapshot();
+        pages = pages.filter(p => !chosenUids.has(p.uid));
+        pages.forEach(p => p.marked = false);
+        if(focusActiveUid && chosenUids.has(focusActiveUid)){ focusViewer.style.display='none'; focusActiveUid=null; }
+        renderAll();
+      }
+
+      backdrop.remove();
+      showToast('Split PDF downloaded (' + chosenPages.length + ' page' + (chosenPages.length===1?'':'s') + ').');
+    }catch(err){
+      console.error(err);
+      showToast('Export failed: ' + err.message);
+      backdrop.querySelector('#spExport').disabled = false;
+      backdrop.querySelector('#spExport').textContent = '✂ Export split PDF';
+    }
+  });
+}
+
+// ---------- find & replace ----------
+scanBtn.addEventListener('click', scanDocument);
+findInput.addEventListener('keydown', e => { if(e.key === 'Enter') scanDocument(); });
+
+async function getTextContentCached(fileId, pageIndex){
+  const fs = fileStore[fileId];
+  if(fs.textCache[pageIndex]) return fs.textCache[pageIndex];
+  const page = await fs.pdfjsDoc.getPage(pageIndex);
+  const content = await page.getTextContent();
+  fs.textCache[pageIndex] = content;
+  return content;
+}
+
+function replaceAllCI(str, find, repl){
+  if(!find) return str;
+  const re = new RegExp(find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+  return str.replace(re, repl);
+}
+
+async function scanDocument(){
+  const findText = findInput.value.trim();
+  const replaceText = replaceInput.value;
+  if(!findText){ showToast('Type something to find first.'); return; }
+  if(pages.length === 0){ showToast('Add a PDF first.'); return; }
+
+  scanBtn.disabled = true;
+  scanBtn.textContent = 'Scanning…';
+  const prevEnabled = {};
+  matches.forEach(m => prevEnabled[m.key] = m.enabled);
+  matches = [];
+
+  for(const p of pages){
+    try{
+      const content = await getTextContentCached(p.fileId, p.pageIndex);
+      content.items.forEach((item, itemIndex) => {
+        if(item.str && item.str.toLowerCase().includes(findText.toLowerCase())){
+          const key = p.fileId + '_' + p.pageIndex + '_' + itemIndex;
+          matches.push({
+            key,
+            uidPage: p.uid,
+            fileId: p.fileId,
+            pageIndex: p.pageIndex,
+            itemIndex,
+            original: item.str,
+            replaced: replaceAllCI(item.str, findText, replaceText),
+            transform: item.transform,
+            width: item.width,
+            enabled: key in prevEnabled ? prevEnabled[key] : true
+          });
+        }
+      });
+    }catch(err){ console.error('Scan failed for a page', err); }
+  }
+
+  scanBtn.disabled = false;
+  scanBtn.textContent = 'Scan document';
+  renderMatches();
+  renderAll();
+  showToast(matches.length ? matches.length + ' match' + (matches.length===1?'':'es') + ' found.' : 'No matches found.');
+}
+
+function renderMatches(){
+  if(matches.length === 0){
+    matchesArea.style.display = 'none';
+    return;
+  }
+  matchesArea.style.display = 'block';
+  const enabledCount = matches.filter(m=>m.enabled).length;
+  matchesSummary.textContent = enabledCount + ' of ' + matches.length + ' match' + (matches.length===1?'':'es') + ' will be replaced on export.';
+  matchesList.innerHTML = '';
+  matches.forEach(m => {
+    const fileName = fileStore[m.fileId] ? fileStore[m.fileId].name : '';
+    const row = document.createElement('div');
+    row.className = 'match-row';
+    row.innerHTML = `
+      <label>
+        <input type="checkbox" ${m.enabled ? 'checked' : ''}>
+        <span class="loc">${escapeHtml(fileName)} · p.${m.pageIndex}</span>
+        <span class="before">${escapeHtml(m.original)}</span>
+        <span>→</span>
+        <span class="after">${escapeHtml(m.replaced)}</span>
+      </label>
+    `;
+    row.querySelector('input').addEventListener('change', e => {
+      m.enabled = e.target.checked;
+      renderMatches();
+      renderAll();
+    });
+    matchesList.appendChild(row);
+  });
+}
+
+// ---------- export ----------
+downloadBtn.addEventListener('click', mergeAndDownload);
+
+async function mergeAndDownload(){
+  if(pages.length === 0) return;
+  downloadBtn.disabled = true;
+  downloadBtn.textContent = 'Building PDF…';
+  try{
+    const outDoc = await PDFDocument.create();
+    const helv = await outDoc.embedFont(StandardFonts.Helvetica);
+    const helvBold = await outDoc.embedFont(StandardFonts.HelveticaBold);
+
+    for(const p of pages){
+      const fs = fileStore[p.fileId];
+      if(!fs.pdfLibDoc){ fs.pdfLibDoc = await PDFDocument.load(fs.bytes); }
+    }
+
+    for(const p of pages){
+      const fs = fileStore[p.fileId];
+      const [copied] = await outDoc.copyPages(fs.pdfLibDoc, [p.pageIndex - 1]);
+      outDoc.addPage(copied);
+
+      const pageMatches = matches.filter(m => m.uidPage === p.uid && m.enabled);
+      for(const m of pageMatches){
+        const fontSize = Math.abs(m.transform[0]) || Math.abs(m.transform[3]) || 11;
+        const x = m.transform[4];
+        const y = m.transform[5];
+        const w = (m.width || fontSize * 0.6 * m.original.length) + 2;
+        copied.drawRectangle({
+          x: x - 1,
+          y: y - fontSize * 0.28,
+          width: w,
+          height: fontSize * 1.2,
+          color: rgb(1, 1, 1)
+        });
+        copied.drawText(m.replaced, {
+          x, y, size: fontSize, font: helv, color: rgb(0, 0, 0)
+        });
+      }
+
+      const pageWidthPts = copied.getWidth();
+      const pageHeightPts = copied.getHeight();
+      for(const patch of (p.patches || [])){
+        const rectX = patch.xPct * pageWidthPts;
+        const rectWidth = patch.wPct * pageWidthPts;
+        const rectHeight = patch.hPct * pageHeightPts;
+        const rectY = pageHeightPts - (patch.yPct + patch.hPct) * pageHeightPts; // PDF y is bottom-up
+        copied.drawRectangle({
+          x: rectX, y: rectY, width: rectWidth, height: rectHeight,
+          color: hexToRgb01(patch.boxColor)
+        });
+        if(patch.text){
+          const font = patch.bold === false ? helv : helvBold;
+          let fontSize = patch.fontSize;
+          const maxTextWidth = rectWidth * 0.92;
+          while(fontSize > 6 && font.widthOfTextAtSize(patch.text, fontSize) > maxTextWidth){
+            fontSize -= 1;
+          }
+          const textWidth = font.widthOfTextAtSize(patch.text, fontSize);
+          const tx = rectX + Math.max(2, (rectWidth - textWidth) / 2);
+          const ty = rectY + Math.max(2, (rectHeight - fontSize) / 2) + fontSize * 0.12;
+          copied.drawText(patch.text, {
+            x: tx, y: ty, size: fontSize, font, color: hexToRgb01(patch.textColor)
+          });
+        }
+      }
+    }
+
+    const outBytes = await outDoc.save();
+    const blob = new Blob([outBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'merged-document.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    showToast('Downloaded merged-document.pdf');
+  }catch(err){
+    console.error(err);
+    showToast('Export failed: ' + err.message);
+  }finally{
+    downloadBtn.disabled = pages.length === 0;
+    downloadBtn.textContent = '⬇ Download merged PDF';
+  }
+}
+
+// ---------- extract to Word (.docx) ----------
+const ewScope = document.getElementById('ewScope');
+const ewUseOcr = document.getElementById('ewUseOcr');
+const ewPageBreaks = document.getElementById('ewPageBreaks');
+const ewExtractBtn = document.getElementById('ewExtractBtn');
+const ewProgress = document.getElementById('ewProgress');
+
+function ewLog(msg, cls){
+  ewProgress.style.display = 'block';
+  const line = document.createElement('div');
+  line.className = 'ew-line' + (cls ? ' ' + cls : '');
+  line.textContent = msg;
+  ewProgress.appendChild(line);
+  ewProgress.scrollTop = ewProgress.scrollHeight;
+}
+
+function median(arr){
+  if(!arr.length) return null;
+  const s = [...arr].sort((a,b)=>a-b);
+  const mid = Math.floor(s.length/2);
+  return s.length % 2 ? s[mid] : (s[mid-1]+s[mid])/2;
+}
+
+// Groups raw pdf.js text items (which arrive unordered, one per word/run) into
+// visual lines based on shared baseline Y, then sorts each line left-to-right.
+function extractLines(textContent){
+  const items = (textContent.items || []).filter(it => it.str && it.str.trim().length > 0);
+  if(items.length === 0) return [];
+  const withSize = items.map(it => {
+    const fontSize = Math.hypot(it.transform[2], it.transform[3]) || Math.abs(it.transform[3]) || 10;
+    return { ...it, fontSize };
+  });
+  const sorted = withSize.slice().sort((a,b) => b.transform[5] - a.transform[5] || a.transform[4] - b.transform[4]);
+  const lines = [];
+  let cur = null, lastY = null;
+  sorted.forEach(it => {
+    const y = it.transform[5];
+    if(cur === null || Math.abs(lastY - y) > it.fontSize * 0.5){
+      cur = { y, fontSize: it.fontSize, items: [] };
+      lines.push(cur);
+      lastY = y;
+    }
+    cur.items.push(it);
+  });
+  lines.forEach(l => l.items.sort((a,b) => a.transform[4] - b.transform[4]));
+  return lines;
+}
+
+function itemsToText(items){
+  let text = '';
+  let prevEndX = null;
+  items.forEach(it => {
+    const x = it.transform[4];
+    const fs = it.fontSize || Math.hypot(it.transform[2], it.transform[3]) || 10;
+    if(prevEndX !== null && (x - prevEndX) > fs * 0.3 && !text.endsWith(' ')){
+      text += ' ';
+    }
+    text += it.str;
+    prevEndX = x + (it.width || 0);
+  });
+  return text.replace(/\s+/g, ' ').trim();
+}
+function lineText(line){ return itemsToText(line.items); }
+function lineBold(line){ return line.items.some(it => /bold/i.test(it.fontName || '')); }
+function lineItalic(line){ return line.items.some(it => /italic|oblique/i.test(it.fontName || '')); }
+
+// Groups consecutive lines into paragraphs based on vertical gap relative to
+// font size — a big gap (or sudden font-size jump) starts a new paragraph.
+function groupParagraphs(lines){
+  const paras = [];
+  let cur = null, prevY = null;
+  lines.forEach(line => {
+    const gap = prevY === null ? 0 : (prevY - line.y);
+    const startNew = cur === null || gap > line.fontSize * 1.7 || gap < -2;
+    if(startNew){
+      cur = { lines: [line], fontSize: line.fontSize };
+      paras.push(cur);
+    } else {
+      cur.lines.push(line);
+    }
+    prevY = line.y;
+  });
+  return paras;
+}
+
+// Detects whether a line likely straddles two side-by-side columns by finding
+// its single biggest internal horizontal gap. Returns the gap's x-midpoint if
+// that gap is unusually wide (clearly more than normal word-spacing), else null.
+function detectLineSplit(line, pageWidthPts){
+  if(line.items.length < 2) return null;
+  let maxGap = 0, maxGapMidX = null, prevEndX = null;
+  line.items.forEach(it => {
+    const x = it.transform[4];
+    if(prevEndX !== null){
+      const gap = x - prevEndX;
+      if(gap > maxGap){ maxGap = gap; maxGapMidX = (prevEndX + x) / 2; }
+    }
+    prevEndX = x + (it.width || 0);
+  });
+  const threshold = Math.max(pageWidthPts * 0.035, line.fontSize * 2.5);
+  return maxGap > threshold ? maxGapMidX : null;
+}
+
+async function getPageWidthPts(fileId, pageIndex){
+  const fs = fileStore[fileId];
+  fs.widthCache = fs.widthCache || {};
+  if(fs.widthCache[pageIndex] != null) return fs.widthCache[pageIndex];
+  const page = await fs.pdfjsDoc.getPage(pageIndex);
+  const w = page.getViewport({ scale: 1 }).width;
+  fs.widthCache[pageIndex] = w;
+  return w;
+}
+
+// Walks a page's lines top-to-bottom and builds a flat list of "elements":
+// either a normal paragraph, or a "columns" block (when 2+ consecutive lines
+// share a wide internal gap at roughly the same x — a real column gutter,
+// not a one-off coincidence). Each column block computes its own local
+// gutter position, so a page can have several stacked multi-column regions
+// at different gutter positions (e.g. an address block, then a separate
+// 2-column body paragraph lower down) and each is read fully top-to-bottom
+// within its own column before moving to the next column.
+function buildPageElements(lines, pageWidthPts){
+  const annotated = lines.map(line => ({ line, splitX: detectLineSplit(line, pageWidthPts) }));
+  const elements = [];
+  let i = 0;
+  while(i < annotated.length){
+    let runLen = 0;
+    while(i + runLen < annotated.length && annotated[i + runLen].splitX !== null) runLen++;
+
+    if(runLen >= 2){
+      const slice = annotated.slice(i, i + runLen);
+      const gutterX = median(slice.map(a => a.splitX));
+      const leftLines = [], rightLines = [];
+      slice.forEach(a => {
+        const ln = a.line;
+        const leftItems = ln.items.filter(it => it.transform[4] < gutterX);
+        const rightItems = ln.items.filter(it => it.transform[4] >= gutterX);
+        if(leftItems.length) leftLines.push({ y: ln.y, fontSize: ln.fontSize, items: leftItems });
+        if(rightItems.length) rightLines.push({ y: ln.y, fontSize: ln.fontSize, items: rightItems });
+      });
+      elements.push({ type: 'columns', left: groupParagraphs(leftLines), right: groupParagraphs(rightLines) });
+      i += runLen;
+      continue;
+    }
+
+    // Not a confirmed column run — collect a normal run of lines until the
+    // next confirmed column run starts (peeking ahead the same way).
+    const normalLines = [];
+    while(i < annotated.length){
+      let peekLen = 0;
+      while(i + peekLen < annotated.length && annotated[i + peekLen].splitX !== null) peekLen++;
+      if(peekLen >= 2) break;
+      normalLines.push(annotated[i].line);
+      i++;
+    }
+    groupParagraphs(normalLines).forEach(par => elements.push({ type: 'para', par }));
+  }
+  return elements;
+}
+
+ewExtractBtn.addEventListener('click', extractToWord);
+
+async function extractToWord(){
+  if(pages.length === 0){ showToast('Add a PDF first.'); return; }
+  const scope = ewScope.value;
+  const targetPages = scope === 'selected' ? pages.filter(p => p.marked) : pages.slice();
+  if(targetPages.length === 0){ showToast('No pages selected. Tick some pages first, or choose "All pages".'); return; }
+
+  const { Document, Packer, Paragraph, TextRun, HeadingLevel, PageBreak, Table, TableRow, TableCell, WidthType, BorderStyle } = docx;
+  const useOcr = ewUseOcr.checked;
+  const insertBreaks = ewPageBreaks.checked;
+
+  ewProgress.innerHTML = '';
+  ewProgress.style.display = 'block';
+  ewExtractBtn.disabled = true;
+  ewExtractBtn.textContent = 'Extracting…';
+  ewLog('Starting extraction of ' + targetPages.length + ' page' + (targetPages.length===1?'':'s') + '…');
+
+  let ocrWorker = null;
+  let ocrUnavailable = false;
+  const pageData = [];
+  const allFontSizes = [];
+
+  try{
+    for(let i = 0; i < targetPages.length; i++){
+      const p = targetPages[i];
+      const globalIdx = pages.findIndex(x => x.uid === p.uid) + 1;
+      const content = await getTextContentCached(p.fileId, p.pageIndex);
+      const totalChars = (content.items || []).reduce((s, it) => s + (it.str || '').trim().length, 0);
+      const isLikelyImage = totalChars < 12;
+
+      if(isLikelyImage && useOcr && !ocrUnavailable){
+        ewLog('Page ' + globalIdx + ': no real text found — running OCR (this can take a while)…');
+        try{
+          if(!ocrWorker){
+            ewLog('Loading OCR engine (first time only)…');
+            ocrWorker = await Tesseract.createWorker('eng');
+          }
+          const canvas = await renderEditorCanvas(p.fileId, p.pageIndex, 1500);
+          const { data } = await ocrWorker.recognize(canvas);
+          pageData.push({ p, globalIdx, mode: 'ocr', text: data.text || '' });
+          ewLog('Page ' + globalIdx + ': OCR complete.', 'done');
+        }catch(ocrErr){
+          console.error(ocrErr);
+          ocrUnavailable = true;
+          ocrWorker = null;
+          const blocked = /worker|blob/i.test(ocrErr.message || '');
+          ewLog(
+            blocked
+              ? 'OCR can\'t start in this preview window (it blocks background workers for security). This is a limitation of viewing the app here — download the file and open it directly in a browser tab and OCR will work normally there. Continuing without OCR for now.'
+              : ('OCR failed to start: ' + ocrErr.message + ' — continuing without OCR.'),
+            'warn'
+          );
+          pageData.push({ p, globalIdx, mode: 'skip' });
+        }
+      } else if(isLikelyImage && useOcr && ocrUnavailable){
+        pageData.push({ p, globalIdx, mode: 'skip' });
+      } else if(isLikelyImage && !useOcr){
+        ewLog('Page ' + globalIdx + ': image page, OCR is off — skipping text for this page.', 'warn');
+        pageData.push({ p, globalIdx, mode: 'skip' });
+      } else {
+        const pageWidthPts = await getPageWidthPts(p.fileId, p.pageIndex);
+        const lines = extractLines(content);
+        const elements = buildPageElements(lines, pageWidthPts);
+        elements.forEach(el => {
+          if(el.type === 'para') allFontSizes.push(el.par.fontSize);
+          else { el.left.forEach(par => allFontSizes.push(par.fontSize)); el.right.forEach(par => allFontSizes.push(par.fontSize)); }
+        });
+        const colBlockCount = elements.filter(el => el.type === 'columns').length;
+        pageData.push({ p, globalIdx, mode: 'text', elements });
+        ewLog('Page ' + globalIdx + ': extracted ' + elements.length + ' block' + (elements.length===1?'':'s') + (colBlockCount ? ' (' + colBlockCount + ' multi-column region' + (colBlockCount===1?'':'s') + ' detected)' : '') + '.', 'done');
+      }
+    }
+
+    if(ocrWorker){ await ocrWorker.terminate(); ocrWorker = null; }
+
+    const bodySize = median(allFontSizes) || 11;
+    const docParagraphs = [];
+
+    function buildRunParagraph(par){
+      const text = par.lines.map(lineText).join(' ').replace(/\s+/g, ' ').trim();
+      if(!text) return null;
+      const bold = par.lines.some(lineBold);
+      const italic = par.lines.some(lineItalic);
+      let heading = undefined;
+      if(par.fontSize >= bodySize * 1.45) heading = HeadingLevel.HEADING_1;
+      else if(par.fontSize >= bodySize * 1.18) heading = HeadingLevel.HEADING_2;
+      return new Paragraph({
+        heading,
+        spacing: { after: 160 },
+        children: [ new TextRun({ text, bold: heading ? undefined : bold, italics: italic, size: Math.max(16, Math.round(par.fontSize * 2)) }) ]
+      });
+    }
+
+    const noBorder = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+
+    function buildColumnCell(paras){
+      const children = paras.map(buildRunParagraph).filter(Boolean);
+      if(children.length === 0) children.push(new Paragraph({ children: [] }));
+      return new TableCell({
+        width: { size: 50, type: WidthType.PERCENTAGE },
+        margins: { top: 80, bottom: 80, left: 0, right: 160 },
+        borders: { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder },
+        children
+      });
+    }
+
+    pageData.forEach((pd, idx) => {
+      if(idx > 0 && insertBreaks){
+        docParagraphs.push(new Paragraph({ children: [ new PageBreak() ] }));
+      }
+
+      if(pd.mode === 'text'){
+        if(pd.elements.length === 0){
+          docParagraphs.push(new Paragraph({ children: [ new TextRun({ text: '[Page ' + pd.globalIdx + ' had no readable text.]', italics: true, color: '8A8270' }) ] }));
+        }
+        pd.elements.forEach(el => {
+          if(el.type === 'para'){
+            const para = buildRunParagraph(el.par);
+            if(para) docParagraphs.push(para);
+          } else {
+            try{
+              docParagraphs.push(new Table({
+                width: { size: 100, type: WidthType.PERCENTAGE },
+                borders: { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder, insideHorizontal: noBorder, insideVertical: noBorder },
+                rows: [ new TableRow({ children: [ buildColumnCell(el.left), buildColumnCell(el.right) ] }) ]
+              }));
+              docParagraphs.push(new Paragraph({ children: [], spacing: { after: 120 } }));
+            }catch(tableErr){
+              // Fallback if the Table API differs: print left column fully, then right column.
+              el.left.map(buildRunParagraph).filter(Boolean).forEach(p => docParagraphs.push(p));
+              el.right.map(buildRunParagraph).filter(Boolean).forEach(p => docParagraphs.push(p));
+            }
+          }
+        });
+      } else if(pd.mode === 'ocr'){
+        docParagraphs.push(new Paragraph({
+          spacing: { after: 100 },
+          children: [ new TextRun({ text: '[Page ' + pd.globalIdx + ' — text extracted via OCR; layout is approximate]', italics: true, size: 16, color: '8A8270' }) ]
+        }));
+        const text = (pd.text || '').trim();
+        const blocks = text.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
+        if(blocks.length === 0 && text) blocks.push(text);
+        blocks.forEach(b => {
+          docParagraphs.push(new Paragraph({
+            spacing: { after: 160 },
+            children: [ new TextRun(b.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim()) ]
+          }));
+        });
+      } else if(pd.mode === 'skip'){
+        docParagraphs.push(new Paragraph({
+          children: [ new TextRun({ text: '[Page ' + pd.globalIdx + ' appears to be a scanned image with no extractable text — turn on "Use OCR" to include it.]', italics: true, color: '8A8270' }) ]
+        }));
+      }
+    });
+
+    ewLog('Building Word document…');
+    const doc = new Document({ sections: [ { children: docParagraphs } ] });
+    const blob = await Packer.toBlob(doc);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'extracted-document.docx';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+
+    ewLog('Done — downloaded extracted-document.docx', 'done');
+    showToast('Word document downloaded.');
+  }catch(err){
+    console.error(err);
+    if(ocrWorker){ try{ await ocrWorker.terminate(); }catch(e){} }
+    ewLog('Extraction failed: ' + err.message, 'warn');
+    showToast('Extraction failed: ' + err.message);
+  }finally{
+    ewExtractBtn.disabled = false;
+    ewExtractBtn.textContent = '📝 Extract & download Word file';
+  }
+}
+
+// ---------- extract to Excel (.xlsx) ----------
+const xlScope = document.getElementById('xlScope');
+const xlSheetMode = document.getElementById('xlSheetMode');
+const xlUseOcr = document.getElementById('xlUseOcr');
+const xlExtractBtn = document.getElementById('xlExtractBtn');
+const xlProgress = document.getElementById('xlProgress');
+
+function xlLog(msg, cls){
+  xlProgress.style.display = 'block';
+  const line = document.createElement('div');
+  line.className = 'ew-line' + (cls ? ' ' + cls : '');
+  line.textContent = msg;
+  xlProgress.appendChild(line);
+  xlProgress.scrollTop = xlProgress.scrollHeight;
+}
+
+// Splits one line's items into "cells" wherever the horizontal gap between
+// items is wider than ordinary word-spacing — a smaller threshold than the
+// Word export's column-gutter check, since table columns sit closer together
+// than full prose columns.
+function splitLineIntoSegments(line){
+  const items = line.items;
+  if(items.length === 0) return [];
+  const fontSize = line.fontSize;
+  const gapThreshold = Math.max(fontSize * 1.0, 6);
+  const groups = [[items[0]]];
+  let prevEndX = items[0].transform[4] + (items[0].width || 0);
+  for(let k = 1; k < items.length; k++){
+    const it = items[k];
+    const x = it.transform[4];
+    if((x - prevEndX) > gapThreshold){
+      groups.push([it]);
+    } else {
+      groups[groups.length - 1].push(it);
+    }
+    prevEndX = x + (it.width || 0);
+  }
+  return groups.map(g => ({ x: g[0].transform[4], text: itemsToText(g) }));
+}
+
+// Builds a 2D grid (array of row arrays) from a page's lines. If enough lines
+// share a multi-cell pattern, their cell x-positions are clustered into
+// column anchors and every line is laid out against those columns. Otherwise
+// falls back to one plain-text row per line.
+function buildTableFromLines(lines){
+  const lineSegs = lines.map(line => ({ line, segments: splitLineIntoSegments(line) }));
+  const candidateLines = lineSegs.filter(ls => ls.segments.length >= 2);
+  const isTabular = lines.length > 0 && candidateLines.length >= 2 && (candidateLines.length / lines.length) >= 0.35;
+
+  if(!isTabular){
+    return { rows: lines.map(line => [ lineText(line) ]), isTabular: false, columnCount: 1 };
+  }
+
+  const anchors = [];
+  lineSegs.forEach(ls => ls.segments.forEach(seg => anchors.push(seg.x)));
+  anchors.sort((a,b) => a - b);
+  const clusters = [];
+  const tolerance = 18;
+  anchors.forEach(x => {
+    if(clusters.length === 0 || x - clusters[clusters.length-1].max > tolerance){
+      clusters.push({ min: x, max: x, sum: x, count: 1 });
+    } else {
+      const c = clusters[clusters.length-1];
+      c.max = x; c.sum += x; c.count++;
+    }
+  });
+
+  if(clusters.length > 14){
+    return { rows: lines.map(line => [ lineText(line) ]), isTabular: false, columnCount: 1 };
+  }
+
+  const colAnchors = clusters.map(c => c.sum / c.count);
+  const rows = lineSegs.map(ls => {
+    const row = new Array(colAnchors.length).fill('');
+    ls.segments.forEach(seg => {
+      let bestIdx = 0, bestDist = Infinity;
+      colAnchors.forEach((a, idx) => {
+        const d = Math.abs(seg.x - a);
+        if(d < bestDist){ bestDist = d; bestIdx = idx; }
+      });
+      row[bestIdx] = row[bestIdx] ? (row[bestIdx] + ' ' + seg.text) : seg.text;
+    });
+    return row;
+  });
+  return { rows, isTabular: true, columnCount: colAnchors.length };
+}
+
+function autoSizeColumns(rows){
+  const widths = [];
+  rows.forEach(row => {
+    row.forEach((cell, i) => {
+      const len = (cell || '').toString().length;
+      widths[i] = Math.min(60, Math.max(widths[i] || 8, len + 2));
+    });
+  });
+  return widths.map(w => ({ wch: w }));
+}
+
+xlExtractBtn.addEventListener('click', extractToExcel);
+
+async function extractToExcel(){
+  if(pages.length === 0){ showToast('Add a PDF first.'); return; }
+  const scope = xlScope.value;
+  const targetPages = scope === 'selected' ? pages.filter(p => p.marked) : pages.slice();
+  if(targetPages.length === 0){ showToast('No pages selected. Tick some pages first, or choose "All pages".'); return; }
+
+  const sheetMode = xlSheetMode.value;
+  const useOcr = xlUseOcr.checked;
+
+  xlProgress.innerHTML = '';
+  xlProgress.style.display = 'block';
+  xlExtractBtn.disabled = true;
+  xlExtractBtn.textContent = 'Extracting…';
+  xlLog('Starting extraction of ' + targetPages.length + ' page' + (targetPages.length===1?'':'s') + '…');
+
+  const wb = XLSX.utils.book_new();
+  const usedNames = new Set();
+  function makeSheetName(base){
+    let name = base.replace(/[\\\/\?\*\[\]:]/g, '-').slice(0, 31) || 'Sheet';
+    let finalName = name, n = 1;
+    while(usedNames.has(finalName)){ n++; finalName = (name.slice(0, 28) + '-' + n).slice(0, 31); }
+    usedNames.add(finalName);
+    return finalName;
+  }
+
+  let ocrWorker = null;
+  let ocrUnavailable = false;
+  const combinedRows = [];
+
+  try{
+    for(let i = 0; i < targetPages.length; i++){
+      const p = targetPages[i];
+      const globalIdx = pages.findIndex(x => x.uid === p.uid) + 1;
+      const content = await getTextContentCached(p.fileId, p.pageIndex);
+      const totalChars = (content.items || []).reduce((s, it) => s + (it.str || '').trim().length, 0);
+      const isLikelyImage = totalChars < 12;
+      let rows = [];
+
+      if(isLikelyImage && useOcr && !ocrUnavailable){
+        xlLog('Page ' + globalIdx + ': no real text found — running OCR (this can take a while)…');
+        try{
+          if(!ocrWorker){
+            xlLog('Loading OCR engine (first time only)…');
+            ocrWorker = await Tesseract.createWorker('eng');
+          }
+          const canvas = await renderEditorCanvas(p.fileId, p.pageIndex, 1500);
+          const { data } = await ocrWorker.recognize(canvas);
+          const lines = (data.text || '').split('\n').map(l => l.trim()).filter(Boolean);
+          rows = [ [ 'OCR extracted — page ' + globalIdx + ', text approximate' ], ...lines.map(l => [l]) ];
+          xlLog('Page ' + globalIdx + ': OCR complete.', 'done');
+        }catch(ocrErr){
+          console.error(ocrErr);
+          ocrUnavailable = true;
+          ocrWorker = null;
+          const blocked = /worker|blob/i.test(ocrErr.message || '');
+          xlLog(
+            blocked
+              ? 'OCR can\'t start in this preview window (it blocks background workers for security). Download the file and open it directly in a browser tab and OCR will work normally there. Continuing without OCR.'
+              : ('OCR failed to start: ' + ocrErr.message + ' — continuing without OCR.'),
+            'warn'
+          );
+          rows = [ [ 'Page ' + globalIdx + ' appears to be a scanned image — OCR was unavailable.' ] ];
+        }
+      } else if(isLikelyImage && !useOcr){
+        xlLog('Page ' + globalIdx + ': image page, OCR is off — skipping.', 'warn');
+        rows = [ [ 'Page ' + globalIdx + ' appears to be a scanned image with no extractable text — turn on "Use OCR" to include it.' ] ];
+      } else {
+        const lines = extractLines(content);
+        const result = buildTableFromLines(lines);
+        rows = result.rows;
+        xlLog('Page ' + globalIdx + ': ' + (result.isTabular ? ('detected a table with ' + result.columnCount + ' columns, ' + rows.length + ' rows.') : (rows.length + ' line' + (rows.length===1?'':'s') + ' extracted as plain rows (no clear table structure found).')), 'done');
+      }
+
+      if(sheetMode === 'separate'){
+        const ws = XLSX.utils.aoa_to_sheet(rows);
+        ws['!cols'] = autoSizeColumns(rows);
+        XLSX.utils.book_append_sheet(wb, ws, makeSheetName('Page ' + globalIdx));
+      } else {
+        combinedRows.push([ '— Page ' + globalIdx + ' —' ]);
+        rows.forEach(r => combinedRows.push(r));
+        combinedRows.push([]);
+      }
+    }
+
+    if(ocrWorker){ await ocrWorker.terminate(); ocrWorker = null; }
+
+    if(sheetMode === 'combine'){
+      const ws = XLSX.utils.aoa_to_sheet(combinedRows);
+      ws['!cols'] = autoSizeColumns(combinedRows);
+      XLSX.utils.book_append_sheet(wb, ws, makeSheetName('Extracted Data'));
+    }
+
+    xlLog('Building Excel file…');
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([wbout], { type: 'application/octet-stream' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'extracted-data.xlsx';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+
+    xlLog('Done — downloaded extracted-data.xlsx', 'done');
+    showToast('Excel file downloaded.');
+  }catch(err){
+    console.error(err);
+    if(ocrWorker){ try{ await ocrWorker.terminate(); }catch(e){} }
+    xlLog('Extraction failed: ' + err.message, 'warn');
+    showToast('Extraction failed: ' + err.message);
+  }finally{
+    xlExtractBtn.disabled = false;
+    xlExtractBtn.textContent = '📊 Extract & download Excel file';
+  }
+}
+
+renderAll();
+</script>
+</body>
+</html>
