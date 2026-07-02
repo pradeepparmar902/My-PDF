@@ -1650,6 +1650,172 @@ function sampleBackgroundColor(canvas, xPct, yPct, wPct, hPct){
   return rgbToHex(r/n, g/n, b/n);
 }
 
+// Samples the dominant color from the CENTER of the text run — this is where
+// the ink is, so it returns the approximate text color rather than background.
+// ── Color sampling helpers ─────────────────────────────────────────────────
+
+// Returns the DOMINANT (most-common) color in a canvas region using a coarse
+// histogram (4-bit per channel = 4096 buckets). Background pixels always
+// outnumber text glyph pixels in any region, so the peak bucket is always the
+// ── Color sampling — two-pass histogram approach ─────────────────────────
+//
+// PASS 1: coarse 5-bit-per-channel histogram (32 levels/channel, 32768
+//         buckets total) finds the DOMINANT bucket — the one with most
+//         pixels. Background pixels always outnumber text glyph pixels so
+//         the peak is always background, regardless of what else is on the
+//         page row.
+// PASS 2: from all pixels whose 5-bit bucket matches the winner, compute
+//         the TRUE arithmetic mean. This gives the exact background color,
+//         not the bucket center, so pure white → #ffffff, exact blue →
+//         #1a5e8a, etc.
+// Post-processing: snap near-pure values (>245 → 255, <10 → 0) to wipe
+//         out anti-aliasing blur so a white background stays #ffffff.
+
+function exactDominantColor(ctx, px, py, pw, ph){
+  px = clamp(Math.round(px), 0, ctx.canvas.width  - 1);
+  py = clamp(Math.round(py), 0, ctx.canvas.height - 1);
+  pw = clamp(Math.round(pw), 1, ctx.canvas.width  - px);
+  ph = clamp(Math.round(ph), 1, ctx.canvas.height - py);
+  let data;
+  try{ data = ctx.getImageData(px, py, pw, ph).data; }catch(e){ return '#ffffff'; }
+  if(!data || data.length < 4) return '#ffffff';
+
+  // Pass 1 — coarse 5-bit histogram
+  const hist = {};
+  for(let i = 0; i < data.length; i += 4){
+    const key = ((data[i]>>3) << 10) | ((data[i+1]>>3) << 5) | (data[i+2]>>3);
+    hist[key] = (hist[key] || 0) + 1;
+  }
+  let bestCnt = 0, bestKey = 0x7fff;
+  for(const [k, cnt] of Object.entries(hist)){
+    if(cnt > bestCnt){ bestCnt = cnt; bestKey = Number(k); }
+  }
+  const winR = (bestKey >> 10) & 0x1f;
+  const winG = (bestKey >>  5) & 0x1f;
+  const winB =  bestKey        & 0x1f;
+
+  // Pass 2 — true average of pixels inside the winning bucket
+  let r=0, g=0, b=0, n=0;
+  for(let i = 0; i < data.length; i += 4){
+    if((data[i]>>3)===winR && (data[i+1]>>3)===winG && (data[i+2]>>3)===winB){
+      r+=data[i]; g+=data[i+1]; b+=data[i+2]; n++;
+    }
+  }
+  if(n === 0) return '#ffffff';
+
+  // Snap near-pure values to remove anti-aliasing blur
+  const snap = v => v > 245 ? 255 : v < 10 ? 0 : v;
+  return rgbToHex(snap(r/n), snap(g/n), snap(b/n));
+}
+
+function exactDominantInkColor(ctx, px, py, pw, ph, bgHex){
+  px = clamp(Math.round(px), 0, ctx.canvas.width  - 1);
+  py = clamp(Math.round(py), 0, ctx.canvas.height - 1);
+  pw = clamp(Math.round(pw), 1, ctx.canvas.width  - px);
+  ph = clamp(Math.round(ph), 1, ctx.canvas.height - py);
+  const bgR=parseInt(bgHex.slice(1,3),16), bgG=parseInt(bgHex.slice(3,5),16), bgBl=parseInt(bgHex.slice(5,7),16);
+  const fallback = () => relativeLuminance(bgR,bgG,bgBl) > 0.5 ? '#000000' : '#ffffff';
+  let data;
+  try{ data = ctx.getImageData(px, py, pw, ph).data; }catch(e){ return fallback(); }
+  if(!data || data.length < 4) return fallback();
+
+  // Pass 1 — histogram of pixels that differ enough from background
+  const hist = {};
+  for(let i = 0; i < data.length; i += 4){
+    if(Math.abs(data[i]-bgR)+Math.abs(data[i+1]-bgG)+Math.abs(data[i+2]-bgBl) > 80){
+      const key = ((data[i]>>3) << 10) | ((data[i+1]>>3) << 5) | (data[i+2]>>3);
+      hist[key] = (hist[key] || 0) + 1;
+    }
+  }
+  let bestCnt = 0, bestKey = -1;
+  for(const [k, cnt] of Object.entries(hist)){
+    if(cnt > bestCnt){ bestCnt = cnt; bestKey = Number(k); }
+  }
+  if(bestKey < 0) return fallback();
+
+  const winR=(bestKey>>10)&0x1f, winG=(bestKey>>5)&0x1f, winB=bestKey&0x1f;
+
+  // Pass 2 — true average of winning ink pixels
+  let r=0, g=0, b=0, n=0;
+  for(let i = 0; i < data.length; i += 4){
+    if((data[i]>>3)===winR && (data[i+1]>>3)===winG && (data[i+2]>>3)===winB){
+      r+=data[i]; g+=data[i+1]; b+=data[i+2]; n++;
+    }
+  }
+  if(n === 0) return fallback();
+  const snap = v => v > 245 ? 255 : v < 10 ? 0 : v;
+  return rgbToHex(snap(r/n), snap(g/n), snap(b/n));
+}
+
+// Cache rendered canvases to avoid re-rendering the same page multiple times
+const pageCanvasCache = {};
+async function getPageCanvas(fileId, pageIndex){
+  const key = fileId + ':' + pageIndex;
+  if(pageCanvasCache[key]) return pageCanvasCache[key];
+  // Render at higher resolution so sampling covers more pixels per glyph
+  const canvas = await renderEditorCanvas(fileId, pageIndex, 1800);
+  pageCanvasCache[key] = canvas;
+  return canvas;
+}
+
+async function applyTextReplacement(pdfPage, match, font, fileId, pageIndex){
+  const m        = match;
+  const fontSize = Math.abs(m.transform[0]) || Math.abs(m.transform[3]) || 11;
+  const x        = m.transform[4];
+  const y        = m.transform[5];
+
+  const origWidth = m.width || fontSize * 0.58 * m.original.length;
+  const coverH    = fontSize * 1.35;
+  const coverY    = y - fontSize * 0.32;
+  const replWidth = font.widthOfTextAtSize(m.replaced, fontSize);
+
+  let bgColor   = rgb(1, 1, 1);
+  let textColor = rgb(0, 0, 0);
+
+  try{
+    const canvas = await getPageCanvas(fileId, pageIndex);
+    const ctx    = canvas.getContext('2d');
+    const pageW  = pdfPage.getWidth();
+    const pageH  = pdfPage.getHeight();
+    const scaleX = canvas.width  / pageW;
+    const scaleY = canvas.height / pageH;
+
+    // Sample DIRECTLY from the text's own bounding box — no padding.
+    // Within any word's bounding box, background pixels always outnumber
+    // glyph ink pixels (80-90% background regardless of font weight), so the
+    // two-pass histogram reliably picks the background whether it's white,
+    // blue, or any other solid color. Extending the sample area vertically
+    // (padding) was pulling in out-of-band white page pixels and corrupting
+    // the result on thin colored header bands.
+    const sX = x           * scaleX;
+    const sY = (pageH - coverY - coverH) * scaleY;
+    const sW = Math.max(4, origWidth  * scaleX);
+    const sH = Math.max(4, coverH     * scaleY);
+
+    const bgHex = exactDominantColor(ctx, sX, sY, sW, sH);
+    bgColor     = hexToRgb01(bgHex);
+
+    // Ink: same bounding box — the ink histogram ignores background pixels
+    textColor  = hexToRgb01(exactDominantInkColor(ctx, sX, sY, sW, sH, bgHex));
+
+  }catch(e){ /* canvas unavailable — keep white/black defaults */ }
+
+  // Auto-shrink font if replacement is wider than original bounding box
+  let drawFontSize = fontSize;
+  if(replWidth > origWidth + 2){
+    while(drawFontSize > 5 && font.widthOfTextAtSize(m.replaced, drawFontSize) > origWidth * 1.05){
+      drawFontSize -= 0.5;
+    }
+  }
+
+  // Cover original text with exact sampled background color
+  const coverW = Math.max(origWidth, font.widthOfTextAtSize(m.replaced, drawFontSize)) + 4;
+  pdfPage.drawRectangle({ x: x - 1, y: coverY, width: coverW, height: coverH, color: bgColor });
+
+  // Draw replacement text at the original baseline
+  pdfPage.drawText(m.replaced, { x, y, size: drawFontSize, font, color: textColor });
+}
+
 async function openPageEditor(p){
   const canvas = await renderEditorCanvas(p.fileId, p.pageIndex);
   const dataUrl = canvas.toDataURL('image/png');
@@ -1986,14 +2152,10 @@ function openSplitModal(){
         outDoc.addPage(copied);
 
         if(applyPatches){
-          // text find-replace
+          // text find-replace (colour-matched, auto-fitting)
           const pageMatches = matches.filter(m => m.uidPage === p.uid && m.enabled);
           for(const m of pageMatches){
-            const fontSize = Math.abs(m.transform[0]) || Math.abs(m.transform[3]) || 11;
-            const x = m.transform[4], y = m.transform[5];
-            const w = (m.width || fontSize*0.6*m.original.length) + 2;
-            copied.drawRectangle({ x:x-1, y:y-fontSize*0.28, width:w, height:fontSize*1.2, color:rgb(1,1,1) });
-            copied.drawText(m.replaced, { x, y, size:fontSize, font:helv, color:rgb(0,0,0) });
+            await applyTextReplacement(copied, m, helv, p.fileId, p.pageIndex);
           }
           // image/logo patches
           const pw = copied.getWidth(), ph = copied.getHeight();
@@ -2064,35 +2226,45 @@ function replaceAllCI(str, find, repl){
 }
 
 async function scanDocument(){
-  const findText = findInput.value.trim();
+  const findText   = findInput.value.trim();
   const replaceText = replaceInput.value;
   if(!findText){ showToast('Type something to find first.'); return; }
   if(pages.length === 0){ showToast('Add a PDF first.'); return; }
 
   scanBtn.disabled = true;
   scanBtn.textContent = 'Scanning…';
+
+  // Preserve enabled state across re-scans
   const prevEnabled = {};
   matches.forEach(m => prevEnabled[m.key] = m.enabled);
-  matches = [];
 
+  // Remove only existing matches for THIS search term (handles re-scan of same word).
+  // Matches for OTHER terms are left completely untouched — this is the fix.
+  const findLower = findText.toLowerCase();
+  matches = matches.filter(m => m.findTerm !== findLower);
+
+  let newCount = 0;
   for(const p of pages){
     try{
       const content = await getTextContentCached(p.fileId, p.pageIndex);
       content.items.forEach((item, itemIndex) => {
-        if(item.str && item.str.toLowerCase().includes(findText.toLowerCase())){
-          const key = p.fileId + '_' + p.pageIndex + '_' + itemIndex;
+        if(item.str && item.str.toLowerCase().includes(findLower)){
+          const key = p.fileId + '_' + p.pageIndex + '_' + itemIndex + '_' + findLower;
           matches.push({
             key,
-            uidPage: p.uid,
-            fileId: p.fileId,
-            pageIndex: p.pageIndex,
+            findTerm:    findLower,
+            replaceTerm: replaceText,
+            uidPage:     p.uid,
+            fileId:      p.fileId,
+            pageIndex:   p.pageIndex,
             itemIndex,
-            original: item.str,
-            replaced: replaceAllCI(item.str, findText, replaceText),
-            transform: item.transform,
-            width: item.width,
-            enabled: key in prevEnabled ? prevEnabled[key] : true
+            original:    item.str,
+            replaced:    replaceAllCI(item.str, findText, replaceText),
+            transform:   item.transform,
+            width:       item.width,
+            enabled:     key in prevEnabled ? prevEnabled[key] : true
           });
+          newCount++;
         }
       });
     }catch(err){ console.error('Scan failed for a page', err); }
@@ -2102,7 +2274,14 @@ async function scanDocument(){
   scanBtn.textContent = 'Scan document';
   renderMatches();
   renderAll();
-  showToast(matches.length ? matches.length + ' match' + (matches.length===1?'':'es') + ' found.' : 'No matches found.');
+
+  const ruleCount = new Set(matches.map(m => m.findTerm)).size;
+  showToast(
+    newCount === 0
+      ? 'No matches found for "' + findText + '".'
+      : newCount + ' match' + (newCount===1?'':'es') + ' found for "' + findText + '".'
+        + (ruleCount > 1 ? ' (' + ruleCount + ' replacement rules active in total.)' : '')
+  );
 }
 
 function renderMatches(){
@@ -2111,28 +2290,75 @@ function renderMatches(){
     return;
   }
   matchesArea.style.display = 'block';
-  const enabledCount = matches.filter(m=>m.enabled).length;
-  matchesSummary.textContent = enabledCount + ' of ' + matches.length + ' match' + (matches.length===1?'':'es') + ' will be replaced on export.';
-  matchesList.innerHTML = '';
+
+  // Group by findTerm so each replacement rule is a distinct section
+  const groups = {};
   matches.forEach(m => {
-    const fileName = fileStore[m.fileId] ? fileStore[m.fileId].name : '';
-    const row = document.createElement('div');
-    row.className = 'match-row';
-    row.innerHTML = `
-      <label>
-        <input type="checkbox" ${m.enabled ? 'checked' : ''}>
-        <span class="loc">${escapeHtml(fileName)} · p.${m.pageIndex}</span>
-        <span class="before">${escapeHtml(m.original)}</span>
-        <span>→</span>
-        <span class="after">${escapeHtml(m.replaced)}</span>
-      </label>
+    const k = m.findTerm || m.original;
+    if(!groups[k]) groups[k] = { findTerm: m.findTerm, items: [] };
+    groups[k].items.push(m);
+  });
+
+  const ruleCount    = Object.keys(groups).length;
+  const enabledCount = matches.filter(m => m.enabled).length;
+  matchesSummary.textContent =
+    enabledCount + ' of ' + matches.length + ' match' + (matches.length===1?'':'es')
+    + ' across ' + ruleCount + ' replacement rule' + (ruleCount===1?'':'s')
+    + ' — all will be applied on export.';
+
+  matchesList.innerHTML = '';
+
+  Object.values(groups).forEach(group => {
+    const groupEnabledCount = group.items.filter(m => m.enabled).length;
+    const sampleMatch = group.items[0];
+
+    // Rule header row
+    const header = document.createElement('div');
+    header.style.cssText = `
+      display:flex;align-items:center;flex-wrap:wrap;gap:8px;
+      padding:8px 6px;margin-top:10px;
+      background:var(--paper-deep);border-radius:6px;
+      border:1px solid var(--kraft-line);font-size:12.5px;
     `;
-    row.querySelector('input').addEventListener('change', e => {
-      m.enabled = e.target.checked;
+    header.innerHTML = `
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);">RULE</span>
+      <span style="color:var(--red);text-decoration:line-through;font-weight:600;">${escapeHtml(group.findTerm)}</span>
+      <span style="color:var(--ink-soft);">→</span>
+      <span style="color:var(--gold);font-weight:700;">${escapeHtml(sampleMatch.replaceTerm || sampleMatch.replaced)}</span>
+      <span style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);">${groupEnabledCount}/${group.items.length} active</span>
+      <button class="ghost" style="font-size:11.5px;color:var(--red);padding:2px 8px;border:1px solid var(--red);border-radius:5px;text-decoration:none;" data-findterm="${escapeHtml(group.findTerm || '')}">✕ Remove rule</button>
+    `;
+    header.querySelector('button').addEventListener('click', e => {
+      const ft = e.currentTarget.dataset.findterm;
+      matches = matches.filter(m => (m.findTerm || '') !== ft);
       renderMatches();
       renderAll();
+      showToast('Replacement rule "' + ft + '" removed.');
     });
-    matchesList.appendChild(row);
+    matchesList.appendChild(header);
+
+    // Individual match rows under this rule
+    group.items.forEach(m => {
+      const fileName = fileStore[m.fileId] ? fileStore[m.fileId].name : '';
+      const row = document.createElement('div');
+      row.className = 'match-row';
+      row.style.paddingLeft = '14px';
+      row.innerHTML = `
+        <label>
+          <input type="checkbox" ${m.enabled ? 'checked' : ''}>
+          <span class="loc">${escapeHtml(fileName)} · p.${m.pageIndex}</span>
+          <span class="before">${escapeHtml(m.original)}</span>
+          <span>→</span>
+          <span class="after">${escapeHtml(m.replaced)}</span>
+        </label>
+      `;
+      row.querySelector('input').addEventListener('change', e => {
+        m.enabled = e.target.checked;
+        renderMatches();
+        renderAll();
+      });
+      matchesList.appendChild(row);
+    });
   });
 }
 
@@ -2168,6 +2394,8 @@ async function mergeAndDownload(){
   if(pages.length === 0) return;
   downloadBtn.disabled = true;
   downloadBtn.textContent = 'Building PDF…';
+  // Clear the per-page canvas cache so we re-render fresh if files changed
+  Object.keys(pageCanvasCache).forEach(k => delete pageCanvasCache[k]);
   try{
     const outDoc = await PDFDocument.create();
     const helv = await outDoc.embedFont(StandardFonts.Helvetica);
@@ -2183,22 +2411,10 @@ async function mergeAndDownload(){
       const [copied] = await outDoc.copyPages(fs.pdfLibDoc, [p.pageIndex - 1]);
       outDoc.addPage(copied);
 
+      // text find-replace (colour-matched, auto-fitting)
       const pageMatches = matches.filter(m => m.uidPage === p.uid && m.enabled);
       for(const m of pageMatches){
-        const fontSize = Math.abs(m.transform[0]) || Math.abs(m.transform[3]) || 11;
-        const x = m.transform[4];
-        const y = m.transform[5];
-        const w = (m.width || fontSize * 0.6 * m.original.length) + 2;
-        copied.drawRectangle({
-          x: x - 1,
-          y: y - fontSize * 0.28,
-          width: w,
-          height: fontSize * 1.2,
-          color: rgb(1, 1, 1)
-        });
-        copied.drawText(m.replaced, {
-          x, y, size: fontSize, font: helv, color: rgb(0, 0, 0)
-        });
+        await applyTextReplacement(copied, m, helv, p.fileId, p.pageIndex);
       }
 
       const pageWidthPts = copied.getWidth();
