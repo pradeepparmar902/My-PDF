@@ -42,6 +42,15 @@
   }
   .wrap{max-width:1180px;margin:0 auto;padding:0 22px 60px;}
 
+  /* ---------- License gate & trial banner ---------- */
+  #trialBanner{
+    background:linear-gradient(90deg,#A9780B,#C49A20);
+    color:#fff;text-align:center;font-size:12.5px;font-weight:600;
+    padding:7px 16px;position:sticky;top:0;z-index:40;
+    display:none;
+  }
+  #trialBanner a{color:#fff;text-decoration:underline;}
+
   /* ---------- Header / folder tab ---------- */
   header{padding:34px 0 0;}
   .tab{
@@ -380,14 +389,53 @@
   .focus-viewer{
     position:relative;margin-bottom:18px;background:var(--card);
     border:1px solid var(--kraft-line);border-radius:var(--radius);
-    box-shadow:var(--shadow);padding:16px;text-align:center;
+    box-shadow:var(--shadow);padding:14px 16px 12px;
   }
-  .focus-viewer img{max-width:100%;max-height:540px;border:1px solid var(--kraft-line);border-radius:6px;}
+  .focus-viewer-topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:10px;gap:10px;flex-wrap:wrap;
+  }
+  .focus-caption{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-soft);}
+  .zoom-controls{display:flex;align-items:center;gap:6px;}
+  .zoom-btn{
+    width:30px;height:30px;border-radius:6px;border:1px solid var(--kraft-line);
+    background:var(--card);font-size:16px;font-weight:700;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink);
+    user-select:none;
+  }
+  .zoom-btn:hover{background:var(--paper-deep);border-color:var(--teal);}
+  .zoom-level{
+    font-family:'JetBrains Mono',monospace;font-size:12px;
+    color:var(--ink-soft);min-width:42px;text-align:center;font-weight:600;
+  }
+  .zoom-reset{
+    font-size:11.5px;font-family:'JetBrains Mono',monospace;
+    background:transparent;border:1px solid var(--kraft-line);border-radius:5px;
+    padding:3px 8px;cursor:pointer;color:var(--ink-soft);
+  }
+  .zoom-reset:hover{border-color:var(--teal);color:var(--teal-deep);}
+  .focus-viewport{
+    overflow:auto;
+    border:1px solid var(--kraft-line);border-radius:6px;
+    background:#fff;
+    max-height:580px;
+    text-align:center;
+    cursor:zoom-in;
+  }
+  .focus-viewport.zoomed{cursor:grab;}
+  .focus-viewport.zoomed:active{cursor:grabbing;}
+  .focus-viewport img{
+    display:inline-block;
+    transform-origin:top center;
+    transition:transform .15s ease, opacity .2s ease;
+    max-width:100%;
+    border-radius:4px;
+    user-select:none;
+  }
   .focus-viewer .focus-close{
-    position:absolute;top:8px;right:10px;background:transparent;border:none;
-    font-size:18px;color:var(--ink-soft);cursor:pointer;
+    background:transparent;border:none;font-size:20px;
+    color:var(--ink-soft);cursor:pointer;padding:2px 6px;
   }
-  .focus-caption{margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-soft);}
 
   @keyframes flashHighlight{0%{box-shadow:0 0 0 3px var(--teal), var(--shadow);}100%{box-shadow:var(--shadow);}}
   .page-card.flash{animation:flashHighlight 1.1s ease;}
@@ -460,6 +508,115 @@
   .split-options{ display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 4px; }
   .split-options label{ display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer; }
 
+  /* ---------- Floating Quick-Nav Button ---------- */
+  #quickNavBtn{
+    position:fixed;bottom:24px;right:20px;z-index:500;
+    display:flex;align-items:center;gap:7px;
+    background:var(--teal);color:#fff;
+    border:none;border-radius:50px;
+    padding:11px 18px 11px 14px;
+    font-family:'Inter',sans-serif;font-size:13.5px;font-weight:700;
+    cursor:pointer;white-space:nowrap;
+    box-shadow:0 4px 18px rgba(43,111,115,.45),0 1px 4px rgba(0,0,0,.2);
+    transition:transform .15s ease,background .15s ease,box-shadow .15s ease;
+  }
+  #quickNavBtn:hover{ background:var(--teal-deep);transform:translateY(-2px);box-shadow:0 8px 24px rgba(43,111,115,.5); }
+  #quickNavBtn.at-bottom{ background:#3A3830; }
+  #quickNavBtn.at-bottom:hover{ background:var(--ink); }
+  #quickNavArrow{ font-size:16px;opacity:.85; }
+
+  /* ---------- Mobile responsive ---------- */
+  @media (max-width:900px){
+    .workbench-nav{ width:190px; }
+    .grid{ grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); }
+    h1{ font-size:26px; }
+    .toolbar{ gap:6px; }
+  }
+
+  @media (max-width:680px){
+    .wrap{ padding:0 12px 90px; }
+    .header-card{ padding:16px 14px 18px; }
+    h1{ font-size:22px; }
+    header p{ font-size:13px; }
+    .tab{ font-size:10px;padding:5px 12px 18px; }
+
+    /* Header button row — stack */
+    .header-card > div:first-child{ flex-direction:column;align-items:flex-start;gap:10px; }
+    .header-card > div:first-child > div:last-child{ width:100%;display:flex;flex-wrap:wrap;gap:6px; }
+    #accountBtn{ font-size:12px !important;padding:6px 10px !important; }
+    #privacyBtn,#helpBtn{ font-size:12px !important;padding:7px 10px !important; }
+    #licenseBadge{ font-size:11px !important; }
+
+    /* Toolbar — wrap and condense */
+    .toolbar{ flex-wrap:wrap;gap:5px;padding:8px 10px;position:relative;top:0; }
+    .toolbar .count{ width:100%;order:-1;font-size:12px;text-align:center; }
+    .toolbar button{ font-size:12px;padding:7px 9px; }
+    .toolbar .ghost{ padding:7px 6px; }
+    #newProjectBtn{ font-size:12px !important;padding:7px 9px !important; }
+    #watermarkLabel{ display:none !important; }
+
+    /* Workbench — stack, navigator above grid */
+    .workbench{ flex-direction:column;gap:12px;margin-top:12px; }
+    .workbench-nav{ width:100%;position:static;max-height:200px;order:-1; }
+    .workbench-main{ order:2; }
+
+    /* Grid — 2 columns */
+    .grid{ grid-template-columns:repeat(2,1fr);gap:10px; }
+    .page-card{ padding:6px; }
+    .order-stamp{ width:24px;height:24px;font-size:11px;top:-8px;left:-8px; }
+
+    /* Focus viewer */
+    .focus-viewport{ max-height:58vw; }
+    .focus-viewer-topbar{ flex-direction:column;gap:6px;align-items:flex-start; }
+    .zoom-controls{ gap:5px; }
+
+    /* Panels */
+    .panel{ padding:16px 14px 18px; }
+    .panel h2{ font-size:17px; }
+    .ew-row{ flex-direction:column;gap:8px; }
+    .fr-row{ flex-direction:column;gap:8px; }
+    .fr-row input[type=text]{ min-width:unset;width:100%; }
+    .fr-row .arrow-label{ display:none; }
+    .matches{ margin-top:12px; }
+    .match-row{ flex-wrap:wrap;gap:6px; }
+    .match-row .loc{ min-width:unset;font-size:10px; }
+
+    /* Pricing modal */
+    .pricing-card{ padding:20px 14px 16px; }
+    .pricing-header h2{ font-size:18px; }
+    .pricing-plans{ grid-template-columns:1fr !important; }
+    .pp{ padding:14px 12px 12px; }
+
+    /* Auth modal */
+    .auth-card{ padding:20px 16px 16px; }
+    .plan-grid{ grid-template-columns:1fr !important; }
+
+    /* Modal cards */
+    .modal-card{ padding:16px 14px 14px;max-height:95vh; }
+    .guide-card{ max-width:100%; }
+
+    /* Split modal page list */
+    .split-page-list{ max-height:240px; }
+
+    /* FAB */
+    #quickNavBtn{ bottom:16px;right:14px;padding:10px 14px 10px 12px;font-size:13px; }
+  }
+
+  @media (max-width:400px){
+    h1{ font-size:19px; }
+    .grid{ grid-template-columns:repeat(2,1fr);gap:7px; }
+    .page-card{ padding:5px; }
+    .toolbar button{ font-size:11px;padding:6px 7px; }
+    /* Hide FAB label on tiny screens — show only icon + arrow */
+    #quickNavLabel{ display:none; }
+    #quickNavBtn{ padding:10px 12px; }
+  }
+
+  @media (max-width:680px) and (orientation:landscape){
+    .focus-viewport{ max-height:75vw; }
+    .workbench-nav{ max-height:150px; }
+  }
+
   /* ---------- Footer / toast ---------- */
   footer{margin-top:30px;color:var(--ink-soft);font-size:12.5px;line-height:1.6;font-style:italic;}
   #toast{
@@ -469,10 +626,417 @@
     max-width:90vw;text-align:center;
   }
   #toast.show{opacity:1;transform:translate(-50%,0);}
+
+  /* ═══════════════════════════════════════════════════════
+     AUTH SYSTEM — Login / Signup / Account / Upgrade
+     🔥 REPLACE WITH FIREBASE: marked throughout
+     ═══════════════════════════════════════════════════════ */
+
+  /* ── Pricing modal ─────────────────────────────────────────── */
+  .pricing-backdrop{
+    position:fixed;inset:0;z-index:8000;
+    background:rgba(15,35,48,.72);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .pricing-card{
+    background:#F6F1E6;border-radius:16px;
+    max-width:680px;width:100%;
+    padding:28px 26px 24px;
+    box-shadow:0 24px 60px rgba(0,0,0,.45);
+    font-family:'Inter',sans-serif;
+    max-height:92vh;overflow-y:auto;position:relative;
+  }
+  .pricing-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:20px;color:var(--ink-soft);cursor:pointer;}
+  .pricing-header{text-align:center;margin-bottom:16px;}
+  .pricing-header h2{font-family:'Fraunces',serif;font-size:22px;font-weight:900;margin:0 0 4px;color:var(--ink);}
+  .pricing-header p{font-size:13px;color:var(--ink-soft);margin:0;}
+  .pricing-feature-pill{
+    display:inline-block;background:rgba(43,111,115,.12);border:1px solid var(--teal);
+    border-radius:5px;padding:2px 10px;font-size:12px;font-weight:700;
+    color:var(--teal-deep);margin-bottom:12px;
+  }
+  .pp-offer{
+    display:inline-block;background:#FBF3E2;border:1px solid #E5CE9B;
+    border-radius:6px;padding:3px 10px;font-size:11px;font-weight:700;
+    color:#6B5526;margin-bottom:14px;
+  }
+  .pricing-plans{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px;}
+  @media(max-width:520px){.pricing-plans{grid-template-columns:1fr;}}
+  .pp{
+    background:#fff;border:1.5px solid #B7A37D;border-radius:12px;
+    padding:18px 14px 14px;text-align:center;
+    display:flex;flex-direction:column;position:relative;
+    transition:.15s ease;
+  }
+  .pp:hover{border-color:var(--teal);transform:translateY(-2px);box-shadow:0 6px 18px rgba(43,111,115,.14);}
+  .pp.best{border:2px solid var(--teal);background:#F0F7F7;}
+  .pp .pp-badge{
+    position:absolute;top:-10px;left:50%;transform:translateX(-50%);
+    background:var(--teal);color:#fff;font-size:9px;font-weight:800;
+    padding:2px 9px;border-radius:20px;white-space:nowrap;
+  }
+  .pp .pp-name{font-size:12px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;}
+  .pp .pp-was{font-size:11px;color:var(--red);text-decoration:line-through;margin-top:6px;}
+  .pp .pp-price{font-family:'Fraunces',serif;font-size:30px;font-weight:900;color:var(--ink);line-height:1.1;}
+  .pp.best .pp-price{color:var(--teal-deep);}
+  .pp .pp-mo{font-size:10.5px;color:var(--ink-soft);}
+  .pp .pp-feats{
+    margin:10px 0 0;text-align:left;font-size:12px;color:var(--ink);
+    list-style:none;padding:0 0 10px;border-top:1px solid #EDE4CD;padding-top:10px;
+    flex:1;
+  }
+  .pp .pp-feats li{padding:3px 0;display:flex;align-items:center;gap:6px;}
+  .pp .pp-feats li::before{content:'✓';color:var(--teal);font-weight:700;flex-shrink:0;}
+  .pp .pp-cta{
+    margin-top:12px;padding:10px;border:none;border-radius:8px;width:100%;
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;
+  }
+  .pp .pp-cta.primary{background:var(--teal);color:#fff;}
+  .pp .pp-cta.primary:hover{background:var(--teal-deep);}
+  .pp .pp-cta.outline{background:#fff;border:1.5px solid var(--kraft-line);color:var(--ink);}
+  .pp .pp-cta.outline:hover{border-color:var(--teal);color:var(--teal-deep);}
+  .pricing-footer{display:flex;justify-content:center;gap:20px;font-size:12.5px;color:var(--ink-soft);flex-wrap:wrap;}
+  .pricing-footer span,.pricing-footer a{color:var(--teal-deep);font-weight:600;cursor:pointer;text-decoration:underline;}
+
+  /* Auth modal backdrop */
+  .auth-backdrop{
+    position:fixed;inset:0;z-index:8000;
+    background:rgba(15,35,48,.72);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .auth-card{
+    background:var(--card);border-radius:14px;
+    max-width:420px;width:100%;
+    padding:28px 26px 22px;
+    box-shadow:0 24px 60px rgba(0,0,0,.45);
+    font-family:'Inter',sans-serif;
+    position:relative;max-height:92vh;overflow-y:auto;
+  }
+  .auth-close{
+    position:absolute;top:14px;right:16px;
+    background:none;border:none;font-size:20px;
+    color:var(--ink-soft);cursor:pointer;
+  }
+  .auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+  .auth-logo span{font-family:'Fraunces',serif;font-size:20px;font-weight:900;color:var(--ink);}
+  .auth-logo sub{font-size:11px;color:var(--ink-soft);display:block;margin-top:1px;}
+  .auth-title{font-family:'Fraunces',serif;font-size:19px;font-weight:900;margin:0 0 4px;}
+  .auth-sub{font-size:12.5px;color:var(--ink-soft);margin:0 0 18px;line-height:1.5;}
+  .auth-field{margin-bottom:12px;}
+  .auth-field label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:4px;}
+  .auth-field input{
+    width:100%;padding:10px 12px;border:1.5px solid var(--kraft-line);
+    border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;
+    background:#fff;color:var(--ink);box-sizing:border-box;
+  }
+  .auth-field input:focus{outline:2px solid var(--teal);outline-offset:1px;}
+  .auth-btn{
+    width:100%;padding:11px;border:none;border-radius:9px;
+    font-family:'Inter',sans-serif;font-size:14px;font-weight:700;
+    cursor:pointer;margin-bottom:8px;
+  }
+  .auth-btn.primary{background:var(--teal);color:#fff;}
+  .auth-btn.primary:hover{background:var(--teal-deep);}
+  .auth-btn.outline{background:#fff;border:1.5px solid var(--kraft-line);color:var(--ink);}
+  .auth-btn.outline:hover{border-color:var(--teal);color:var(--teal-deep);}
+  .auth-divider{text-align:center;font-size:12px;color:var(--ink-soft);margin:10px 0;position:relative;}
+  .auth-divider::before,.auth-divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--kraft-line);}
+  .auth-divider::before{left:0;}.auth-divider::after{right:0;}
+  .auth-error{background:#FDE8E8;border:1px solid #F5C0C0;border-radius:7px;padding:8px 12px;font-size:12.5px;color:#BD3B22;margin-bottom:10px;display:none;}
+  .auth-success{background:#E8F5F0;border:1px solid #A8DBC8;border-radius:7px;padding:8px 12px;font-size:12.5px;color:#1D5256;margin-bottom:10px;display:none;}
+  .auth-switch{text-align:center;font-size:12.5px;color:var(--ink-soft);margin-top:10px;}
+  .auth-switch a{color:var(--teal-deep);font-weight:600;cursor:pointer;text-decoration:underline;}
+  .auth-trial-badge{
+    background:linear-gradient(90deg,#2B6F73,#1D5256);
+    color:#fff;border-radius:8px;padding:10px 14px;
+    font-size:12.5px;line-height:1.6;margin-bottom:16px;text-align:center;
+  }
+  .auth-trial-badge strong{font-size:14px;display:block;margin-bottom:2px;}
+
+  /* Premium gate pill on disabled features */
+  .premium-pill{
+    display:inline-flex;align-items:center;gap:5px;
+    background:linear-gradient(90deg,#A9780B,#C49A20);
+    color:#fff;font-size:10.5px;font-weight:700;
+    padding:2px 8px;border-radius:20px;
+    margin-left:6px;vertical-align:middle;cursor:pointer;
+    letter-spacing:.03em;
+  }
+
+  /* Plan cards inside upgrade modal */
+  .plan-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:14px 0;}
+  .plan-card{
+    border:1.5px solid var(--kraft-line);border-radius:10px;
+    padding:12px 8px;text-align:center;cursor:pointer;
+    transition:.15s ease;background:#fff;text-decoration:none;color:var(--ink);
+    display:block;
+  }
+  .plan-card:hover{border-color:var(--teal);background:#F0F7F7;}
+  .plan-card.featured{border:2px solid var(--teal);background:#F0F7F7;position:relative;}
+  .plan-card .plan-badge{
+    position:absolute;top:-9px;left:50%;transform:translateX(-50%);
+    background:var(--teal);color:#fff;font-size:9px;font-weight:800;
+    padding:2px 8px;border-radius:20px;white-space:nowrap;
+  }
+  .plan-card .plan-tier{font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;}
+  .plan-card .plan-was{font-size:10.5px;color:var(--red);text-decoration:line-through;margin-top:4px;}
+  .plan-card .plan-price{font-size:22px;font-weight:900;color:var(--ink);line-height:1.1;}
+  .plan-card .plan-note{font-size:10px;color:var(--ink-soft);margin-top:2px;}
+
+  /* Account status panel (in header) */
+  #accountBtn{
+    font-size:12px;font-weight:600;
+    background:transparent;border:1.5px solid var(--teal);
+    color:var(--teal-deep);border-radius:20px;
+    padding:5px 12px;cursor:pointer;white-space:nowrap;
+  }
+  #accountBtn.active{background:var(--teal);color:#fff;}
+  #accountBtn.trial{background:#FBF3E2;border-color:#E5CE9B;color:#6B5526;}
+  #accountBtn.expired{background:#FDE8E8;border-color:#F5C0C0;color:#BD3B22;}
+
+  /* Countdown in account modal */
+  .countdown-ring{
+    width:110px;height:110px;border-radius:50%;
+    background:conic-gradient(var(--teal) var(--pct,0%), #EDE4CD 0%);
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 14px;
+  }
+  .countdown-inner{
+    width:84px;height:84px;border-radius:50%;
+    background:var(--card);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+  }
+  .countdown-num{font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:var(--ink);line-height:1;}
+  /* ---------- PDF Document Scanner Studio ---------- */
+  .scanner-panel{
+    border:1.5px solid var(--teal);
+    background:linear-gradient(180deg, #FCFAF4 0%, #F4EFE2 100%);
+  }
+  .scanner-top-actions{
+    display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px;
+  }
+  .scanner-workspace{
+    display:grid;grid-template-columns:220px 1fr 290px;gap:16px;
+    border:1px solid var(--kraft-line);border-radius:10px;
+    background:var(--card);padding:14px;box-shadow:inset 0 1px 3px rgba(0,0,0,.04);
+  }
+  @media (max-width:960px){
+    .scanner-workspace{grid-template-columns:1fr;}
+  }
+  .scanner-sidebar{
+    border-right:1px solid var(--kraft-line);padding-right:12px;
+    max-height:540px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;
+  }
+  @media (max-width:960px){
+    .scanner-sidebar{border-right:none;border-bottom:1px solid var(--kraft-line);padding-right:0;padding-bottom:10px;flex-direction:row;overflow-x:auto;max-height:none;}
+  }
+  .scan-thumb-item{
+    display:flex;align-items:center;gap:8px;padding:6px 8px;
+    border:1.5px solid var(--kraft-line);border-radius:7px;
+    background:#fff;cursor:pointer;position:relative;transition:.12s ease;
+    flex-shrink:0;
+  }
+  .scan-thumb-item:hover{border-color:var(--teal);}
+  .scan-thumb-item.active{border-color:var(--teal);background:#F0F7F7;box-shadow:0 0 0 2px rgba(43,111,115,.18);}
+  .scan-thumb-item img{width:42px;height:54px;object-fit:cover;border:1px solid #ddd;border-radius:4px;background:#f8f8f8;}
+  .scan-thumb-meta{flex:1;min-width:0;font-size:11.5px;}
+  .scan-thumb-meta strong{display:block;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .scan-thumb-meta span{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-soft);}
+  .scan-thumb-actions{display:flex;flex-direction:column;gap:2px;}
+  .scan-mini-btn{
+    width:20px;height:20px;padding:0;font-size:10px;border-radius:4px;
+    display:flex;align-items:center;justify-content:center;border:1px solid var(--kraft-line);background:#fff;
+  }
+  .scan-mini-btn:hover{background:var(--paper-deep);}
+  .scan-mini-btn.del:hover{background:var(--red);color:#fff;border-color:var(--red-deep);}
+
+  .scanner-stage-wrap{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:#26241F;border-radius:8px;padding:14px;min-height:420px;position:relative;overflow:hidden;
+  }
+  .scanner-canvas-container{
+    position:relative;display:inline-block;max-width:100%;max-height:460px;
+    box-shadow:0 8px 28px rgba(0,0,0,.45);background:#fff;
+  }
+  .scanner-canvas-container canvas{
+    display:block;max-width:100%;max-height:460px;width:auto;height:auto;
+  }
+  .scan-crop-overlay{
+    position:absolute;border:2px dashed #20D6C7;
+    background:rgba(32,214,199,.10);
+    box-shadow:0 0 0 9999px rgba(0,0,0,.48);
+    cursor:move;display:none;
+  }
+  .scan-crop-handle{
+    position:absolute;width:12px;height:12px;background:#fff;border:2px solid var(--teal);
+    border-radius:2px;transform:translate(-50%,-50%);z-index:4;
+  }
+  .scan-crop-handle.nw,.scan-crop-handle.se{cursor:nwse-resize;}
+  .scan-crop-handle.ne,.scan-crop-handle.sw{cursor:nesw-resize;}
+
+  .scanner-controls{
+    display:flex;flex-direction:column;gap:12px;
+    border-left:1px solid var(--kraft-line);padding-left:14px;
+  }
+  @media (max-width:960px){
+    .scanner-controls{border-left:none;border-top:1px solid var(--kraft-line);padding-left:0;padding-top:12px;}
+  }
+  .scan-ctrl-group{
+    background:var(--paper);border:1px solid var(--kraft-line);border-radius:7px;padding:10px 11px;
+  }
+  .scan-ctrl-group h5{
+    margin:0 0 8px;font-family:'Fraunces',serif;font-size:13.5px;color:var(--ink);
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .scan-slider-row{
+    display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:12px;
+  }
+  .scan-slider-row:last-child{margin-bottom:0;}
+  .scan-slider-row label{width:76px;color:var(--ink-soft);flex-shrink:0;}
+  .scan-slider-row input[type=range]{flex:1;accent-color:var(--teal);cursor:pointer;}
+  .scan-slider-row .val{font-family:'JetBrains Mono',monospace;font-size:11px;width:36px;text-align:right;color:var(--ink);}
+  .scan-mode-pills{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .scan-pill{
+    padding:6px 8px;font-size:11.5px;border-radius:6px;text-align:center;
+    border:1px solid var(--kraft-line);background:#fff;cursor:pointer;font-weight:600;
+  }
+  .scan-pill.active{background:var(--teal);color:#fff;border-color:var(--teal-deep);}
+  .scan-export-bar{
+    margin-top:16px;padding-top:14px;border-top:1px solid var(--kraft-line);
+    display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;
+  }
+  .scan-filename-wrap{
+    display:flex;align-items:center;gap:8px;flex:1;min-width:240px;
+  }
+  .scan-filename-wrap input{
+    flex:1;padding:9px 12px;border:1.5px solid var(--kraft-line);border-radius:7px;
+    font-family:'Inter',sans-serif;font-size:13.5px;background:#fff;color:var(--ink);
+  }
+  .scan-camera-video{
+    width:100%;max-height:58vh;background:#000;border-radius:8px;object-fit:contain;display:block;
+  }
+
 </style>
 </head>
 <body>
+
+<!-- Welcome splash — shows USPs + pricing, auto-dismisses, non-blocking -->
+<div id="welcomeSplash" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1D3A4A 0%,#0F2330 100%);display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto;transition:opacity .4s ease;">
+  <div style="background:#FCFAF4;border-radius:16px;max-width:580px;width:100%;padding:28px 26px 22px;box-shadow:0 24px 60px rgba(0,0,0,.55);font-family:'Inter',sans-serif;">
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+      <span style="font-size:36px;">📄</span>
+      <div>
+        <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:#211F1A;line-height:1.1;">PDF Workbench</div>
+        <div style="font-size:11.5px;color:#6B6452;">Professional Edition · by Pradeep Parmar</div>
+      </div>
+      <div style="margin-left:auto;background:#FBF3E2;border:1px solid #E5CE9B;border-radius:6px;padding:4px 10px;font-size:11px;color:#6B5526;font-weight:700;">🎉 50% INTRODUCTORY OFFER</div>
+    </div>
+
+    <!-- USP grid -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:16px;">
+      <div style="background:#F0F7F7;border-radius:8px;padding:9px 11px;">
+        <div style="font-size:16px;margin-bottom:2px;">🔒</div>
+        <div style="font-size:12px;font-weight:700;color:#1D5256;">100% Private — No Upload</div>
+        <div style="font-size:11px;color:#6B6452;line-height:1.4;">Files never leave your device. No server. Your data stays with you.</div>
+      </div>
+      <div style="background:#F0F7F7;border-radius:8px;padding:9px 11px;">
+        <div style="font-size:16px;margin-bottom:2px;">🌐</div>
+        <div style="font-size:12px;font-weight:700;color:#1D5256;">Hindi &amp; Gujarati OCR</div>
+        <div style="font-size:11px;color:#6B6452;line-height:1.4;">Read scanned &amp; handwritten pages in Indian languages.</div>
+      </div>
+      <div style="background:#F0F7F7;border-radius:8px;padding:9px 11px;">
+        <div style="font-size:16px;margin-bottom:2px;">✂️</div>
+        <div style="font-size:12px;font-weight:700;color:#1D5256;">Merge, Split, Edit &amp; Patch</div>
+        <div style="font-size:11px;color:#6B6452;line-height:1.4;">Reorder pages, find &amp; replace text, fix logos/images.</div>
+      </div>
+      <div style="background:#F0F7F7;border-radius:8px;padding:9px 11px;">
+        <div style="font-size:16px;margin-bottom:2px;">📊</div>
+        <div style="font-size:12px;font-weight:700;color:#1D5256;">Export to Word &amp; Excel</div>
+        <div style="font-size:11px;color:#6B6452;line-height:1.4;">Convert any PDF — typed or scanned — to editable files.</div>
+      </div>
+    </div>
+
+    <!-- Pricing cards -->
+    <div style="margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:700;color:#6B6452;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;">Choose a plan — all features, unlimited use</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+
+        <!-- 1 Day -->
+        <a href="https://pradeepparmar.gumroad.com/l/pdf-workbench-day" target="_blank" style="text-decoration:none;">
+          <div style="border:1.5px solid #B7A37D;border-radius:10px;padding:12px 10px;text-align:center;cursor:pointer;transition:.15s ease;background:#fff;" onmouseover="this.style.borderColor='#2B6F73';this.style.background='#F0F7F7'" onmouseout="this.style.borderColor='#B7A37D';this.style.background='#fff'">
+            <div style="font-size:11px;font-weight:700;color:#6B6452;text-transform:uppercase;letter-spacing:.05em;">1 Day</div>
+            <div style="font-size:11px;color:#BD3B22;text-decoration:line-through;margin-top:4px;">₹200</div>
+            <div style="font-size:22px;font-weight:900;color:#211F1A;line-height:1.1;">₹100</div>
+            <div style="font-size:10px;color:#6B6452;margin-top:2px;">One-time task</div>
+          </div>
+        </a>
+
+        <!-- 1 Month -->
+        <a href="https://pradeepparmar.gumroad.com/l/pdf-workbench-month" target="_blank" style="text-decoration:none;">
+          <div style="border:1.5px solid #B7A37D;border-radius:10px;padding:12px 10px;text-align:center;cursor:pointer;transition:.15s ease;background:#fff;" onmouseover="this.style.borderColor='#2B6F73';this.style.background='#F0F7F7'" onmouseout="this.style.borderColor='#B7A37D';this.style.background='#fff'">
+            <div style="font-size:11px;font-weight:700;color:#6B6452;text-transform:uppercase;letter-spacing:.05em;">1 Month</div>
+            <div style="font-size:11px;color:#BD3B22;text-decoration:line-through;margin-top:4px;">₹1,000</div>
+            <div style="font-size:22px;font-weight:900;color:#211F1A;line-height:1.1;">₹500</div>
+            <div style="font-size:10px;color:#6B6452;margin-top:2px;">Regular user</div>
+          </div>
+        </a>
+
+        <!-- 1 Year — highlighted -->
+        <a href="https://pradeepparmar.gumroad.com/l/pdf-workbench-year" target="_blank" style="text-decoration:none;">
+          <div style="border:2px solid #2B6F73;border-radius:10px;padding:12px 10px;text-align:center;cursor:pointer;background:#F0F7F7;position:relative;">
+            <div style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);background:#2B6F73;color:#fff;font-size:9px;font-weight:800;padding:2px 8px;border-radius:20px;white-space:nowrap;letter-spacing:.04em;">⭐ BEST VALUE</div>
+            <div style="font-size:11px;font-weight:700;color:#1D5256;text-transform:uppercase;letter-spacing:.05em;">1 Year</div>
+            <div style="font-size:11px;color:#BD3B22;text-decoration:line-through;margin-top:4px;">₹5,000</div>
+            <div style="font-size:22px;font-weight:900;color:#1D5256;line-height:1.1;">₹1,500</div>
+            <div style="font-size:10px;color:#1D5256;margin-top:2px;font-weight:600;">₹125/month</div>
+          </div>
+        </a>
+
+      </div>
+      <div style="font-size:10.5px;color:#8A8270;text-align:center;margin-top:6px;">After purchase you receive a license key by email — enter it below to activate instantly.</div>
+    </div>
+
+    <!-- Key entry (always visible) -->
+    <div style="border-top:1px solid #EDE4CD;padding-top:12px;margin-bottom:10px;">
+      <div style="display:flex;gap:8px;">
+        <input id="licenseInput" type="text" placeholder="Enter license key  PPWB-1Y-20260702-XXXX"
+          style="flex:1;padding:9px 11px;border:1.5px solid #B7A37D;border-radius:8px;
+                 font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:.06em;
+                 background:#fff;color:#211F1A;min-width:0;">
+        <button id="licenseSubmitBtn" style="padding:9px 16px;background:#2B6F73;border:none;border-radius:8px;color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">Activate</button>
+      </div>
+      <div id="licenseError" style="display:none;color:#BD3B22;font-size:11.5px;margin-top:5px;"></div>
+    </div>
+
+    <!-- Trial / skip -->
+    <button id="splashStartBtn" style="width:100%;padding:11px;background:transparent;border:1.5px solid #B7A37D;border-radius:9px;color:#6B6452;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;">
+      Sign up free — 7-day trial starts after account creation →
+    </button>
+
+    <div style="margin-top:10px;font-size:10.5px;color:#8A8270;text-align:center;">
+      100% private · Secure cloud hosted · Payment via UPI / Card / Net Banking on Gumroad
+    </div>
+  </div>
+</div>
+
 <div class="wrap">
+  <!-- Trial / license status banner -->
+  <div id="trialBanner" style="display:none;">
+    <span id="trialBannerMsg"></span>
+    &nbsp;
+    <span id="trialBannerAction"></span>
+  </div>
+<div class="wrap">
+  <!-- Trial / license status banner — non-blocking, lives at top of app -->
+  <div id="trialBanner" style="display:none;">
+    <span id="trialBannerMsg"></span>
+    &nbsp;
+    <span id="trialBannerAction"></span>
+  </div>
   <header>
     <div class="tab">📁 document tray</div>
     <div class="header-card">
@@ -481,7 +1045,9 @@
           <h1>PDF Workbench</h1>
           <p>Drop in one or more PDFs, lay the pages out like a light table, drag to reorder, stamp the ones you don't need, and merge it all into a single file. Everything happens in your browser — nothing is uploaded anywhere.</p>
         </div>
-        <div style="flex-shrink:0;display:flex;gap:8px;flex-wrap:wrap;">
+        <div style="flex-shrink:0;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <button id="accountBtn" onclick="window._auth.openAccountModal()">Sign in</button>
+          <span id="licenseBadge" style="font-size:11.5px;color:var(--teal-deep);font-weight:600;white-space:nowrap;"></span>
           <button id="privacyBtn" style="background:transparent;border-color:var(--teal);color:var(--teal-deep);font-size:13.5px;font-weight:600;border-radius:7px;padding:9px 16px;cursor:pointer;border-width:1px;border-style:solid;white-space:nowrap;">🔒 Privacy</button>
           <button id="helpBtn" style="background:var(--teal);border-color:var(--teal-deep);color:#fff;font-size:13.5px;font-weight:600;border-radius:7px;padding:9px 16px;cursor:pointer;border-width:1px;border-style:solid;white-space:nowrap;">📖 How to use this</button>
         </div>
@@ -501,21 +1067,41 @@
     <button class="ghost" id="clearSelBtn">Clear selection</button>
     <button class="ghost" id="undoBtn" disabled>↺ Undo last change</button>
     <span class="count" id="countLabel">No pages yet</span>
-    <label class="ew-check" title="If you've used Find & Replace or the logo/image patch tool, exported pages with those changes get a visible 'EDITED' stamp — so an altered document can never be mistaken for the original." style="font-size:12px;">
+    <label class="ew-check" id="watermarkLabel" style="font-size:12px;display:none;" title="Watermark control — managed by administrator.">
       <input type="checkbox" id="watermarkToggle" checked> 🔒 Watermark edited pages
     </label>
     <button class="danger" id="deleteSelBtn" disabled>Delete selected (0)</button>
     <button id="splitBtn" disabled style="background:#A9780B;border-color:#7A5608;color:#fff;font-size:13px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;border-width:1px;border-style:solid;">✂ Split selected</button>
     <button class="primary" id="downloadBtn" disabled>⬇ Download merged PDF</button>
     <button id="newProjectBtn" disabled title="Remove every file and page and start fresh" style="background:transparent;border-color:var(--red);color:var(--red);font-size:13px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;border-width:1px;border-style:solid;">🗑 New project</button>
+    <button id="scannerNavBtn" title="Scan documents with camera or photos, enhance, deblur & save as PDF"
+      style="background:var(--teal-deep);border:1px solid var(--teal);color:#fff;font-size:13px;font-weight:700;border-radius:7px;padding:8px 13px;cursor:pointer;white-space:nowrap;">
+      📷 PDF Scanner ↓
+    </button>
+    <button id="premNavBtn" title="Go to premium tools: Find & Replace, OCR, Word & Excel export"
+      style="background:linear-gradient(135deg,#A9780B,#C49A20);border:none;color:#fff;font-size:13px;font-weight:700;border-radius:7px;padding:8px 13px;cursor:pointer;white-space:nowrap;letter-spacing:.01em;">
+      ⭐ Premium Tools ↓
+    </button>
   </div>
 
   <div class="workbench">
     <div class="workbench-main">
       <div class="focus-viewer" id="focusViewer" style="display:none;">
-        <button class="focus-close" id="focusClose" title="Close preview">✕</button>
-        <img id="focusImg" alt="Page preview">
-        <div class="focus-caption" id="focusCaption"></div>
+        <div class="focus-viewer-topbar">
+          <div class="focus-caption" id="focusCaption"></div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div class="zoom-controls">
+              <button class="zoom-btn" id="zoomOut" title="Zoom out (-)">−</button>
+              <span class="zoom-level" id="zoomLevel">100%</span>
+              <button class="zoom-btn" id="zoomIn" title="Zoom in (+)">+</button>
+              <button class="zoom-reset" id="zoomReset" title="Reset to fit">Fit</button>
+            </div>
+            <button class="focus-close" id="focusClose" title="Close preview">✕</button>
+          </div>
+        </div>
+        <div class="focus-viewport" id="focusViewport">
+          <img id="focusImg" alt="Page preview">
+        </div>
       </div>
       <div id="gridArea">
         <div class="empty-state" id="emptyState">No pages yet — add a PDF above to start building your workbench.</div>
@@ -534,7 +1120,163 @@
     </div>
   </div>
 
-  <div class="panel">
+  <!-- ═══════════════════════════════════════════════════════════════════
+       PDF DOCUMENT SCANNER STUDIO
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div class="panel scanner-panel" id="scannerSection">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
+      <span style="font-size:11.5px;font-family:'JetBrains Mono',monospace;color:var(--teal-deep);font-weight:700;letter-spacing:.05em;text-transform:uppercase;">📷 Document Scanner &amp; Enhancer Studio</span>
+      <button onclick="window.scrollTo({top:0,behavior:'smooth'})"
+        style="background:transparent;border:1.5px solid var(--kraft-line);color:var(--ink-soft);font-size:12px;font-weight:600;border-radius:7px;padding:5px 11px;cursor:pointer;">
+        ↑ Back to workbench
+      </button>
+    </div>
+    <h2>PDF Scanner — Capture, Enhance &amp; Combine into One File</h2>
+    <p class="sub">Scan physical pages using your device camera or upload photos/scans. Edit each scanned page individually — adjust page size (A4, Letter, Fit), fix light/dark exposure, convert to crisp B&amp;W document mode, or remove blur (sharpen) — then save all pages together into a single named PDF file or send straight to the workbench above.</p>
+
+    <div class="scanner-top-actions">
+      <button class="primary" id="scanOpenCamBtn">📸 Scan with Camera</button>
+      <button class="outline-teal" id="scanUploadImgBtn">🖼️ Upload Scanned Images / Photos</button>
+      <input type="file" id="scanImgInput" accept="image/*" multiple style="display:none;">
+      <button class="ghost" id="scanApplyAllBtn" style="display:none;" title="Copy current page's lighting, color, size & sharpen settings to all scanned pages">✨ Apply current filters to all scans</button>
+      <button class="ghost" id="scanClearAllBtn" style="display:none;color:var(--red);">🗑 Clear all scans</button>
+      <span id="scanCountBadge" style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-soft);">0 scanned pages</span>
+    </div>
+
+    <!-- Empty state when no scans yet -->
+    <div id="scannerEmpty" class="empty-state" style="margin-top:8px;padding:36px 20px;background:rgba(255,255,255,.55);cursor:pointer;">
+      <div style="font-size:28px;margin-bottom:6px;">📷</div>
+      <strong style="font-family:'Fraunces',serif;font-size:17px;color:var(--ink);display:block;margin-bottom:4px;">No scanned pages yet</strong>
+      <span>Click <strong>"📸 Scan with Camera"</strong> to snap pages live, or drop/select photos of documents here to combine and edit them.</span>
+    </div>
+
+    <!-- Active Scanner Workspace -->
+    <div id="scannerWorkspace" style="display:none;">
+      <div class="scanner-workspace">
+        <!-- Left: Scanned Pages List -->
+        <div class="scanner-sidebar" id="scanThumbList"></div>
+
+        <!-- Center: Interactive Live Canvas Preview & Crop -->
+        <div class="scanner-stage-wrap">
+          <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:#ECE1C7;font-size:12px;font-family:'JetBrains Mono',monospace;">
+            <span id="scanStageTitle">Page 1</span>
+            <div style="display:flex;gap:6px;">
+              <button id="scanRotateLeftBtn" style="padding:4px 9px;font-size:11.5px;background:#3A3730;color:#fff;border:1px solid #575246;">↺ Rotate Left</button>
+              <button id="scanRotateRightBtn" style="padding:4px 9px;font-size:11.5px;background:#3A3730;color:#fff;border:1px solid #575246;">↻ Rotate Right</button>
+              <button id="scanToggleCropBtn" style="padding:4px 9px;font-size:11.5px;background:#2B6F73;color:#fff;border:1px solid #20D6C7;">✂️ Crop Area</button>
+              <button id="scanApplyCropBtn" style="padding:4px 9px;font-size:11.5px;background:#A9780B;color:#fff;border:none;display:none;">✓ Apply Crop</button>
+              <button id="scanResetCropBtn" style="padding:4px 9px;font-size:11.5px;background:#3A3730;color:#fff;border:1px solid #575246;display:none;">Reset Crop</button>
+            </div>
+          </div>
+          <div class="scanner-canvas-container" id="scanCanvasContainer">
+            <canvas id="scanPreviewCanvas"></canvas>
+            <div class="scan-crop-overlay" id="scanCropOverlay">
+              <div class="scan-crop-handle nw" data-corner="nw" style="left:0%;top:0%;"></div>
+              <div class="scan-crop-handle ne" data-corner="ne" style="left:100%;top:0%;"></div>
+              <div class="scan-crop-handle sw" data-corner="sw" style="left:0%;top:100%;"></div>
+              <div class="scan-crop-handle se" data-corner="se" style="left:100%;top:100%;"></div>
+            </div>
+          </div>
+          <div id="scanDimInfo" style="margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#B7A37D;"></div>
+        </div>
+
+        <!-- Right: Individual Page Enhancement Controls -->
+        <div class="scanner-controls">
+          <!-- Page Size & Scale -->
+          <div class="scan-ctrl-group">
+            <h5><span>📐 Page Size &amp; Quality</span></h5>
+            <div class="scan-slider-row">
+              <label>Page Size</label>
+              <select id="scanPageSize" style="flex:1;padding:5px 7px;border:1px solid var(--kraft-line);border-radius:5px;font-size:12px;background:#fff;">
+                <option value="a4-p">A4 Portrait (Standard)</option>
+                <option value="a4-l">A4 Landscape</option>
+                <option value="letter-p">US Letter Portrait</option>
+                <option value="fit">Fit to Scanned Image</option>
+              </select>
+            </div>
+            <div class="scan-slider-row">
+              <label>Margin</label>
+              <select id="scanMargin" style="flex:1;padding:5px 7px;border:1px solid var(--kraft-line);border-radius:5px;font-size:12px;background:#fff;">
+                <option value="0">No margin (Full bleed)</option>
+                <option value="18" selected>Small margin</option>
+                <option value="36">Standard margin</option>
+              </select>
+            </div>
+            <div class="scan-slider-row">
+              <label title="Scale image resolution to control file size">Resolution</label>
+              <input type="range" id="scanScaleSlider" min="40" max="100" step="5" value="100">
+              <span class="val" id="scanScaleVal">100%</span>
+            </div>
+          </div>
+
+          <!-- Color Mode Preset -->
+          <div class="scan-ctrl-group">
+            <h5><span>🎨 Color Mode</span></h5>
+            <div class="scan-mode-pills" id="scanColorModes">
+              <div class="scan-pill active" data-mode="original">Original Color</div>
+              <div class="scan-pill" data-mode="magic">✨ Magic Color</div>
+              <div class="scan-pill" data-mode="grayscale">Grayscale</div>
+              <div class="scan-pill" data-mode="bw">Crisp B&amp;W Doc</div>
+            </div>
+          </div>
+
+          <!-- Light / Dark & Contrast -->
+          <div class="scan-ctrl-group">
+            <h5>
+              <span>☀️ Light / Dark &amp; Clarity</span>
+              <span id="scanResetFilters" style="font-family:'Inter',sans-serif;font-size:11px;color:var(--teal-deep);text-decoration:underline;cursor:pointer;font-weight:600;">Reset</span>
+            </h5>
+            <div class="scan-slider-row">
+              <label>Light/Dark</label>
+              <input type="range" id="scanBrightSlider" min="-80" max="80" step="2" value="0">
+              <span class="val" id="scanBrightVal">0</span>
+            </div>
+            <div class="scan-slider-row">
+              <label>Contrast</label>
+              <input type="range" id="scanContrastSlider" min="-60" max="90" step="2" value="0">
+              <span class="val" id="scanContrastVal">0</span>
+            </div>
+            <div class="scan-slider-row">
+              <label title="Unsharp mask / deconvolution filter to make blurry text crisp">Remove Blur</label>
+              <input type="range" id="scanSharpenSlider" min="0" max="100" step="5" value="0">
+              <span class="val" id="scanSharpenVal">0%</span>
+            </div>
+            <div class="scan-slider-row" id="scanThresholdRow" style="display:none;">
+              <label title="Black & White cutoff threshold">B&amp;W Cutoff</label>
+              <input type="range" id="scanThreshSlider" min="60" max="220" step="2" value="145">
+              <span class="val" id="scanThreshVal">145</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Bar: File Name + Save / Send to Workbench -->
+      <div class="scan-export-bar">
+        <div class="scan-filename-wrap">
+          <label for="scanFileNameInput" style="font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;">📄 File Name:</label>
+          <input type="text" id="scanFileNameInput" value="Scanned-Document" placeholder="Enter file name (e.g. Invoice-Oct-2026)">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-soft);">.pdf</span>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <button class="outline-teal" id="scanSendToWbBtn" title="Combine all scanned pages into one PDF file and add it to the PDF Workbench above for merging, OCR, or Word/Excel extraction">
+            ➕ Send to Workbench
+          </button>
+          <button class="primary" id="scanSavePdfBtn" title="Combine all scanned pages into a single PDF file and download/store it on your device">
+            💾 Save &amp; Download PDF
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="premiumSection">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+      <span style="font-size:11.5px;font-family:'JetBrains Mono',monospace;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase;">⭐ Premium Tools</span>
+      <button id="backToPagesBtn" title="Back to page grid"
+        style="background:transparent;border:1.5px solid var(--kraft-line);color:var(--ink-soft);font-size:12px;font-weight:600;border-radius:7px;padding:6px 12px;cursor:pointer;white-space:nowrap;">
+        ↑ Back to pages
+      </button>
+    </div>
     <h2>Find &amp; replace text</h2>
     <p class="sub">Scans every page's real text for a match and swaps it during export. Best on clean, text-based PDFs with white backgrounds — scanned/image pages have no searchable text, and the replacement won't perfectly match the original font. For text baked into a logo or scanned image (like a name inside an image), use the ✎ pencil button on that page's card instead — it lets you paint over the exact spot by hand.</p>
     <div class="fr-row">
@@ -606,16 +1348,236 @@
   </div>
 
   <footer>
-    Tip: text replacements and image patches are both only baked in the moment you click "Download merged PDF" — nothing is written until then. Reordering and deleting pages happen instantly, but you get one step of undo if you change your mind.
+    Tip: all edits (text replacements, image patches, page order) are only baked in when you click "Download merged PDF" — nothing is written until then. Reordering and deleting pages happen instantly, with one step of undo available.
     <div style="margin-top:10px;font-style:normal;">
       <span id="adminBtn" style="cursor:pointer;color:var(--ink-soft);text-decoration:underline;font-size:11.5px;">⚙ Admin settings</span>
     </div>
   </footer>
 </div>
 
+<!-- Floating quick-nav button — scrolls between page grid and premium tools -->
+<button id="quickNavBtn" title="Jump to Premium Tools">
+  <span id="quickNavIcon">⭐</span>
+  <span id="quickNavLabel">Premium Tools</span>
+  <span id="quickNavArrow">↓</span>
+</button>
+
+<div id="authRoot"></div>
 <div id="toast"></div>
 <div id="modalRoot"></div>
 <div id="printGuideArea"></div>
+
+<!-- LICENSE ENGINE ─ time-based, fully offline ──────────────────────── -->
+<script>
+(function(){
+  const LICENSE_KEY = 'pdfwb_license';
+  const TRIAL_KEY   = 'pdfwb_trial_start';
+  const TRIAL_DAYS  = 7;
+  const URLS = {
+    '1D': 'https://pradeepparmar.gumroad.com/l/pdf-workbench-day',
+    '1M': 'https://pradeepparmar.gumroad.com/l/pdf-workbench-month',
+    '1Y': 'https://pradeepparmar.gumroad.com/l/pdf-workbench-year',
+    buy:  'https://pradeepparmar.gumroad.com/l/pdf-workbench-year'
+  };
+
+  // ── Key format: PPWB-{TIER}-{YYYYMMDD}-{CHECK4} ─────────────────────
+  // TIER: 1D (1 day) | 1M (1 month) | 1Y (1 year)
+  // YYYYMMDD: issue date
+  // CHECK4: 4-digit suffix making total digit-sum mod 7 === 0
+  function parseKey(raw){
+    const key = (raw||'').toUpperCase().replace(/[\s]/g,'');
+    const m = key.match(/^PPWB-(1D|1M|1Y)-(\d{8})-(\d{4})$/);
+    if(!m) return null;
+    const tier = m[1];
+    const ds   = m[2];
+    // Checksum
+    const digits = key.replace(/[^0-9]/g,'');
+    let sum = 0; for(const d of digits) sum += parseInt(d);
+    if(sum % 7 !== 0) return null;
+    // Parse issue date
+    const issueDate = new Date(
+      parseInt(ds.slice(0,4)),
+      parseInt(ds.slice(4,6))-1,
+      parseInt(ds.slice(6,8))
+    );
+    if(isNaN(issueDate.getTime())) return null;
+    // Expiry
+    const expiry = new Date(issueDate);
+    if(tier==='1D') expiry.setDate(expiry.getDate()+1);
+    else if(tier==='1M') expiry.setMonth(expiry.getMonth()+1);
+    else if(tier==='1Y') expiry.setFullYear(expiry.getFullYear()+1);
+    const now = new Date();
+    now.setHours(0,0,0,0);
+    return { tier, issueDate, expiry, isActive: now <= expiry };
+  }
+
+  function getLicenseInfo(){
+    const stored = localStorage.getItem(LICENSE_KEY);
+    if(!stored) return null;
+    return parseKey(stored);
+  }
+  function isLicensed(){
+    const info = getLicenseInfo();
+    return info && info.isActive;
+  }
+
+  // ── Trial helpers ─────────────────────────────────────────────────
+  function getTrialDaysLeft(){
+    const start = parseInt(localStorage.getItem(TRIAL_KEY)||'0');
+    if(!start) return TRIAL_DAYS;
+    const elapsed = (Date.now()-start)/86400000;
+    return Math.max(0, TRIAL_DAYS-Math.floor(elapsed));
+  }
+  function ensureTrialStarted(){
+    if(!localStorage.getItem(TRIAL_KEY))
+      localStorage.setItem(TRIAL_KEY, Date.now().toString());
+  }
+
+  // ── Format date ───────────────────────────────────────────────────
+  function fmtDate(d){ return d.getDate().toString().padStart(2,'0')+'/'+((d.getMonth()+1).toString().padStart(2,'0'))+'/'+d.getFullYear(); }
+  function tierLabel(t){ return t==='1D'?'1-Day':t==='1M'?'1-Month':'1-Year'; }
+
+  // ── Banner ────────────────────────────────────────────────────────
+  function updateBanner(){
+    const banner = document.getElementById('trialBanner');
+    const msg    = document.getElementById('trialBannerMsg');
+    const action = document.getElementById('trialBannerAction');
+    const badge  = document.getElementById('licenseBadge');
+    if(!banner) return;
+
+    const info = getLicenseInfo();
+    if(info && info.isActive){
+      // Valid license
+      banner.style.display = 'none';
+      if(badge){ badge.textContent='✓ Licensed ('+tierLabel(info.tier)+') — expires '+fmtDate(info.expiry); badge.style.cssText='font-size:11.5px;color:var(--teal-deep);font-weight:600;white-space:nowrap;'; }
+      return;
+    }
+    if(info && !info.isActive){
+      // License expired
+      banner.setAttribute('style','display:block;padding:8px 16px;text-align:center;font-size:12.5px;font-weight:600;color:#fff;position:sticky;top:0;z-index:40;background:#BD3B22;');
+      msg.textContent='⚠️ Your '+tierLabel(info.tier)+' license expired on '+fmtDate(info.expiry)+'. Exports carry a trial watermark.';
+      action.innerHTML='<a href="'+URLS.buy+'" target="_blank" style="color:#fff;text-decoration:underline;margin-left:10px;font-weight:700;">Renew license →</a>'
+        +'<span id="bannerKeyLink" style="color:#fff;text-decoration:underline;cursor:pointer;margin-left:10px;" onclick="window._licenseEngine.openLicenseEntry()">Enter new key</span>';
+      if(badge){ badge.textContent='License expired'; badge.style.cssText='font-size:11.5px;color:#BD3B22;font-weight:700;white-space:nowrap;'; }
+      return;
+    }
+
+    // No license — trial mode
+    const daysLeft = getTrialDaysLeft();
+    if(daysLeft > 0){
+      const bg = daysLeft<=2?'#BD3B22':daysLeft<=4?'#A9780B':'#2B6F73';
+      banner.setAttribute('style','display:block;padding:7px 16px;text-align:center;font-size:12.5px;font-weight:600;color:#fff;position:sticky;top:0;z-index:40;background:'+bg);
+      msg.textContent='⏳ Free trial — '+daysLeft+' day'+(daysLeft===1?'':'s')+' remaining. Upgrade anytime for full professional access.';
+      action.innerHTML='<a href="'+URLS.buy+'" target="_blank" style="color:#fff;text-decoration:underline;margin-left:10px;font-weight:700;">Buy license — get full access →</a>';
+      if(badge){ badge.textContent='Trial: '+daysLeft+'d left'; badge.style.cssText='font-size:11.5px;color:#A9780B;font-weight:700;white-space:nowrap;'; }
+    } else {
+      // Trial expired
+      banner.setAttribute('style','display:block;padding:8px 16px;text-align:center;font-size:13px;font-weight:600;color:#fff;position:sticky;top:0;z-index:40;background:#BD3B22;');
+      msg.textContent='⚠️ Trial ended — upgrade to continue with full professional access.';
+      action.innerHTML='<a href="'+URLS.buy+'" target="_blank" style="color:#fff;text-decoration:underline;margin-left:10px;font-weight:700;">Buy license →</a>'
+        +'<span id="bannerKeyLink" style="color:#fff;text-decoration:underline;cursor:pointer;margin-left:10px;" onclick="window._licenseEngine.openLicenseEntry()">Enter key</span>';
+      if(badge){ badge.textContent='Trial expired'; badge.style.cssText='font-size:11.5px;color:#BD3B22;font-weight:700;white-space:nowrap;'; }
+    }
+  }
+
+  // ── Splash logic ──────────────────────────────────────────────────
+  function dismissSplash(){
+    const s = document.getElementById('welcomeSplash');
+    if(!s) return;
+    s.style.opacity='0';
+    setTimeout(()=>{ s.style.display='none'; },400);
+  }
+
+  // Start trial button
+  const startBtn = document.getElementById('splashStartBtn');
+  if(startBtn) startBtn.addEventListener('click', function(){
+    // Trial only starts after account creation — open signup flow
+    dismissSplash();
+    setTimeout(() => {
+      if(window._auth) window._auth.openLoginModal('PDF Workbench Free Trial');
+    }, 420);
+  });
+
+  // Activate from splash
+  const submitBtn = document.getElementById('licenseSubmitBtn');
+  if(submitBtn) submitBtn.addEventListener('click', activateKey);
+  const licInput = document.getElementById('licenseInput');
+  if(licInput) licInput.addEventListener('keydown', function(e){ if(e.key==='Enter') activateKey(); });
+
+  function activateKey(inputId){
+    const inp = document.getElementById(inputId||'licenseInput');
+    const val = (inp?inp.value:'').trim();
+    const err = document.getElementById((inputId||'licenseInput')==='licenseInput'?'licenseError':'licenseError2');
+    const info = parseKey(val);
+    if(info && info.isActive){
+      localStorage.setItem(LICENSE_KEY, val.toUpperCase());
+      dismissSplash();
+      updateBanner();
+      const modal = document.getElementById('licenseModal');
+      if(modal) modal.remove();
+      // Show success toast if available
+      if(window._showLicenseToast) window._showLicenseToast('✓ Activated! '+tierLabel(info.tier)+' license valid until '+fmtDate(info.expiry));
+    } else if(info && !info.isActive){
+      if(err){ err.textContent='This key has expired ('+fmtDate(info.expiry)+'). Purchase a new license.'; err.style.display='block'; }
+    } else {
+      if(err){ err.textContent='Invalid key — check for typos. Format: PPWB-1Y-YYYYMMDD-XXXX'; err.style.display='block'; }
+    }
+  }
+  window._activateKey = activateKey;
+
+  // ── License entry modal (from expired banner) ─────────────────────
+  function openLicenseEntry(){
+    const existing = document.getElementById('licenseModal');
+    if(existing) existing.remove();
+    const backdrop = document.createElement('div');
+    backdrop.id = 'licenseModal';
+    backdrop.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(15,35,48,.7);display:flex;align-items:center;justify-content:center;padding:24px;';
+    backdrop.innerHTML=`
+      <div style="background:#FCFAF4;border-radius:12px;max-width:420px;width:100%;padding:26px;box-shadow:0 20px 50px rgba(0,0,0,.45);font-family:'Inter',sans-serif;">
+        <div style="font-family:'Fraunces',serif;font-size:19px;font-weight:900;margin-bottom:6px;">Activate your license</div>
+        <p style="font-size:12.5px;color:#6B6452;margin:0 0 12px;line-height:1.5;">Enter the key you received by email after purchase.</p>
+        <input id="licenseInput2" type="text" placeholder="PPWB-1Y-20260702-XXXX"
+          style="width:100%;padding:10px 12px;border:1.5px solid #B7A37D;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:.07em;background:#fff;color:#211F1A;box-sizing:border-box;margin-bottom:8px;">
+        <div id="licenseError2" style="display:none;color:#BD3B22;font-size:11.5px;margin-bottom:7px;"></div>
+        <button onclick="window._activateKey('licenseInput2')" style="width:100%;padding:10px;background:#2B6F73;border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;">Activate</button>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">
+          <a href="${URLS['1D']}" target="_blank" style="text-align:center;padding:7px 4px;border:1px solid #B7A37D;border-radius:7px;text-decoration:none;color:#211F1A;font-size:11px;">
+            <div style="font-weight:700;">1 Day</div><div style="color:#BD3B22;text-decoration:line-through;font-size:10px;">₹200</div><div style="font-weight:900;font-size:14px;">₹100</div>
+          </a>
+          <a href="${URLS['1M']}" target="_blank" style="text-align:center;padding:7px 4px;border:1px solid #B7A37D;border-radius:7px;text-decoration:none;color:#211F1A;font-size:11px;">
+            <div style="font-weight:700;">1 Month</div><div style="color:#BD3B22;text-decoration:line-through;font-size:10px;">₹1,000</div><div style="font-weight:900;font-size:14px;">₹500</div>
+          </a>
+          <a href="${URLS['1Y']}" target="_blank" style="text-align:center;padding:7px 4px;border:2px solid #2B6F73;border-radius:7px;text-decoration:none;color:#1D5256;font-size:11px;background:#F0F7F7;">
+            <div style="font-weight:700;">1 Year ⭐</div><div style="color:#BD3B22;text-decoration:line-through;font-size:10px;">₹5,000</div><div style="font-weight:900;font-size:14px;">₹1,500</div>
+          </a>
+        </div>
+        <div style="text-align:right;"><span style="cursor:pointer;font-size:12px;color:#6B6452;text-decoration:underline;" onclick="document.getElementById('licenseModal').remove()">Close</span></div>
+      </div>
+    `;
+    document.body.appendChild(backdrop);
+    backdrop.querySelector('#licenseInput2').focus();
+  }
+
+  // ── Initial load ──────────────────────────────────────────────────
+  if(isLicensed()){
+    const splash = document.getElementById('welcomeSplash');
+    if(splash) splash.style.display='none';
+    setTimeout(updateBanner, 0);
+  } else {
+    // Do NOT auto-start trial — trial begins only when user creates an account
+    setTimeout(updateBanner, 0);
+    // Auto-dismiss splash after 6 s
+    setTimeout(()=>{
+      const s = document.getElementById('welcomeSplash');
+      if(s && s.style.display!=='none'){ s.style.opacity='0'; setTimeout(()=>{ s.style.display='none'; },400); }
+    }, 6000);
+  }
+
+  window._licenseEngine = { parseKey, isLicensed, getLicenseInfo, getTrialDaysLeft, updateBanner, openLicenseEntry, LICENSE_KEY, TRIAL_KEY, URLS, tierLabel };
+})();
+</script>
+
+
 
 <script>
 const { PDFDocument, StandardFonts, rgb, degrees } = PDFLib;
@@ -667,18 +1629,23 @@ let adminConfig = loadAdminConfig();
 // Applies the admin's watermark policy to the toolbar checkbox: either locks
 // it on, locks it off, or leaves it user-adjustable with a chosen default.
 function applyAdminWatermarkConfig(){
+  const label = document.getElementById('watermarkLabel');
+  // 'forced_on' or 'forced_off' — watermark is internally set but
+  // the toggle is HIDDEN from users entirely. Admin decision, not user.
   if(adminConfig.watermarkMode === 'forced_on'){
-    watermarkToggle.checked = true;
+    watermarkToggle.checked  = true;
     watermarkToggle.disabled = true;
-    watermarkToggle.title = 'Locked on by your administrator — every edited page will always be watermarked.';
+    if(label) label.style.display = 'none'; // hidden from user
   } else if(adminConfig.watermarkMode === 'forced_off'){
-    watermarkToggle.checked = false;
+    watermarkToggle.checked  = false;
     watermarkToggle.disabled = true;
-    watermarkToggle.title = 'Locked off by your administrator.';
+    if(label) label.style.display = 'none'; // hidden from user
   } else {
-    watermarkToggle.checked = !!adminConfig.watermarkDefaultChecked;
+    // 'optional' — admin allows user to choose, show the toggle
+    watermarkToggle.checked  = !!adminConfig.watermarkDefaultChecked;
     watermarkToggle.disabled = false;
-    watermarkToggle.title = "If you've used Find & Replace or the logo/image patch tool, exported pages with those changes get a visible 'EDITED' stamp — so an altered document can never be mistaken for the original.";
+    if(label) label.style.display = 'flex'; // visible to user
+    watermarkToggle.title = "If you've used Find & Replace or the logo/image patch tool, exported pages with those changes get a visible EDITED stamp.";
   }
 }
 
@@ -708,16 +1675,62 @@ const toast = document.getElementById('toast');
 const workbenchNav = document.getElementById('workbenchNav');
 const filesList = document.getElementById('filesList');
 const navList = document.getElementById('navList');
-const focusViewer = document.getElementById('focusViewer');
-const focusImg = document.getElementById('focusImg');
-const focusCaption = document.getElementById('focusCaption');
+const focusViewer   = document.getElementById('focusViewer');
+const focusImg      = document.getElementById('focusImg');
+const focusCaption  = document.getElementById('focusCaption');
+const focusViewport = document.getElementById('focusViewport');
+let focusZoom = 1.0;
+const ZOOM_STEP = 0.25;
+const ZOOM_MIN  = 0.5;
+const ZOOM_MAX  = 4.0;
+
+function applyZoom(z){
+  focusZoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z));
+  focusImg.style.transform = `scale(${focusZoom})`;
+  focusImg.style.transformOrigin = focusZoom <= 1 ? 'top center' : 'top left';
+  // Expand the img wrapper so the scrollable container scrolls correctly
+  focusImg.style.width  = focusZoom > 1 ? (focusZoom * 100) + '%' : '100%';
+  document.getElementById('zoomLevel').textContent = Math.round(focusZoom * 100) + '%';
+  focusViewport.classList.toggle('zoomed', focusZoom > 1);
+}
+
+document.getElementById('zoomIn').addEventListener('click',  () => applyZoom(focusZoom + ZOOM_STEP));
+document.getElementById('zoomOut').addEventListener('click', () => applyZoom(focusZoom - ZOOM_STEP));
+document.getElementById('zoomReset').addEventListener('click', () => applyZoom(1.0));
+
+// Mouse-wheel zoom on the viewport
+focusViewport.addEventListener('wheel', e => {
+  if(!focusViewer.style.display || focusViewer.style.display === 'none') return;
+  e.preventDefault();
+  applyZoom(focusZoom + (e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP));
+}, { passive: false });
+
+// Keyboard shortcuts: +/- when focus viewer is open
+document.addEventListener('keydown', e => {
+  if(!focusViewer || focusViewer.style.display === 'none') return;
+  if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if(e.key === '+' || e.key === '='){ e.preventDefault(); applyZoom(focusZoom + ZOOM_STEP); }
+  if(e.key === '-')                 { e.preventDefault(); applyZoom(focusZoom - ZOOM_STEP); }
+  if(e.key === '0')                 { e.preventDefault(); applyZoom(1.0); }
+  if(e.key === 'Escape')            { focusViewer.style.display='none'; focusActiveUid=null; }
+});
+
+// Click on image cycles through fit → 150% → 200% → fit
+focusImg.addEventListener('click', () => {
+  if(focusZoom < 1.5)      applyZoom(1.5);
+  else if(focusZoom < 2.0) applyZoom(2.0);
+  else                      applyZoom(1.0);
+});
+
 document.getElementById('focusClose').addEventListener('click', () => {
   focusViewer.style.display = 'none';
   focusActiveUid = null;
+  applyZoom(1.0); // reset zoom when closing
 });
 let focusActiveUid = null;
 
 let toastTimer = null;
+window._showLicenseToast = (msg) => showToast(msg);
 function showToast(msg){
   toast.textContent = msg;
   toast.classList.add('show');
@@ -928,8 +1941,8 @@ function openPrivacyPolicy(){
         </div>
 
         <div class="guide-section">
-          <h4><span class="guide-icon">🔒</span>A safeguard against misuse: the "EDITED" watermark</h4>
-          <p>Privacy works both ways. This tool lets you edit text and replace logos directly in a PDF — useful for legitimate fixes, but it could also be used to alter a document and present it as authentic. To guard against that, any page where text was changed (Find &amp; Replace) or an image was patched (logo/picture editing) automatically receives a visible "EDITED" watermark and a dated note in the exported file. This is turned on by default and can be seen by anyone who opens the resulting document — it's there so an edited file can never quietly pass as an unmodified original.</p>
+          <h4><span class="guide-icon">🔒</span>Document integrity</h4>
+          <p>PDF Workbench includes document integrity controls managed by your administrator. These ensure that edited documents are handled in accordance with your organisation's policy. These controls are configured at the administrative level and are not adjustable by end users.</p>
         </div>
       </div>
       <div class="modal-foot">
@@ -1092,6 +2105,51 @@ function openAdminSettingsModal(){
         </div>
       </details>
 
+      <details style="margin-top:12px;">
+        <summary style="cursor:pointer;font-size:12.5px;color:var(--teal-deep);">🔑 License key generator</summary>
+        <div style="margin-top:10px;padding:12px;background:var(--paper-deep);border-radius:8px;">
+          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 10px;line-height:1.5;">Generate a time-based license key for each customer. The key encodes the plan tier and issue date — validated 100% offline. Copy and email to the customer after payment.</p>
+
+          <label style="font-size:12px;color:var(--ink-soft);display:block;margin-bottom:4px;">Plan / tier</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:10px;">
+            <label id="tierLbl1D" style="border:1.5px solid #B7A37D;border-radius:7px;padding:8px;text-align:center;cursor:pointer;background:#fff;">
+              <input type="radio" name="licTier" value="1D" style="display:none;">
+              <div style="font-weight:700;font-size:12px;">1 Day</div>
+              <div style="font-size:10px;color:#6B6452;">₹100</div>
+            </label>
+            <label id="tierLbl1M" style="border:1.5px solid #B7A37D;border-radius:7px;padding:8px;text-align:center;cursor:pointer;background:#fff;">
+              <input type="radio" name="licTier" value="1M" style="display:none;">
+              <div style="font-weight:700;font-size:12px;">1 Month</div>
+              <div style="font-size:10px;color:#6B6452;">₹500</div>
+            </label>
+            <label id="tierLbl1Y" style="border:2px solid #2B6F73;border-radius:7px;padding:8px;text-align:center;cursor:pointer;background:#F0F7F7;">
+              <input type="radio" name="licTier" value="1Y" checked style="display:none;">
+              <div style="font-weight:700;font-size:12px;color:#1D5256;">1 Year ⭐</div>
+              <div style="font-size:10px;color:#1D5256;">₹1,500</div>
+            </label>
+          </div>
+
+          <label style="font-size:12px;color:var(--ink-soft);display:block;margin-bottom:4px;">Issue date (today by default)</label>
+          <input type="date" id="licGenDate" style="width:100%;padding:8px 10px;border:1px solid var(--kraft-line);border-radius:6px;font-size:13px;margin-bottom:8px;background:#fff;">
+
+          <label style="font-size:12px;color:var(--ink-soft);display:block;margin-bottom:4px;">Customer name / reference (for your records)</label>
+          <input type="text" id="licGenName" placeholder="e.g. Sharma CA Firm" style="width:100%;padding:8px 10px;border:1px solid var(--kraft-line);border-radius:6px;font-size:13px;margin-bottom:8px;">
+
+          <button class="outline-teal" id="licGenBtn" style="width:100%;padding:9px;">Generate license key</button>
+          <div id="licGenOutput" style="display:none;margin-top:10px;">
+            <div style="font-size:10px;color:var(--ink-soft);margin-bottom:4px;" id="licGenMeta"></div>
+            <div style="font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;letter-spacing:.1em;color:var(--teal-deep);padding:10px 12px;background:#fff;border:1.5px solid var(--teal);border-radius:7px;text-align:center;" id="licGenKey"></div>
+            <button class="ghost" id="licGenCopy" style="width:100%;margin-top:6px;">📋 Copy key</button>
+            <div style="font-size:11px;color:var(--ink-soft);margin-top:6px;font-style:italic;" id="licGenRecord"></div>
+          </div>
+
+          <div style="margin-top:12px;border-top:1px solid var(--kraft-line);padding-top:10px;">
+            <div style="font-size:12px;color:var(--ink-soft);margin-bottom:6px;font-weight:600;">Issued keys — this browser</div>
+            <div id="licKeyHistory" style="font-size:11px;color:var(--ink-soft);font-family:'JetBrains Mono',monospace;max-height:130px;overflow-y:auto;"></div>
+          </div>
+        </div>
+      </details>
+
       <div class="modal-foot">
         <button class="ghost" id="adminSettingsCancel">Cancel</button>
         <button class="primary" id="adminSettingsSave">Save settings</button>
@@ -1106,10 +2164,96 @@ function openAdminSettingsModal(){
     });
   });
 
+  // ── License key generator (tier-aware) ───────────────────────────
+  const KEY_HISTORY_STORE = 'pdfwb_key_history';
+  function loadKeyHistory(){ try{ return JSON.parse(localStorage.getItem(KEY_HISTORY_STORE)||'[]'); }catch(e){ return []; } }
+  function saveKeyHistory(arr){ try{ localStorage.setItem(KEY_HISTORY_STORE, JSON.stringify(arr.slice(-100))); }catch(e){} }
+
+  // Set today's date as default in the date picker
+  const today = new Date();
+  const todayStr = today.getFullYear()+'-'+String(today.getMonth()+1).padStart(2,'0')+'-'+String(today.getDate()).padStart(2,'0');
+  backdrop.querySelector('#licGenDate').value = todayStr;
+
+  // Tier selector visual feedback
+  backdrop.querySelectorAll('input[name="licTier"]').forEach(r => {
+    r.addEventListener('change', () => {
+      ['1D','1M','1Y'].forEach(t => {
+        const lbl = backdrop.querySelector('#tierLbl'+t);
+        if(lbl){ lbl.style.border = r.value===t ? '2px solid #2B6F73' : '1.5px solid #B7A37D'; lbl.style.background = r.value===t ? '#F0F7F7' : '#fff'; }
+      });
+    });
+  });
+
+  function generateTieredKey(tier, issueDateStr){
+    // issueDateStr: YYYY-MM-DD → strip to YYYYMMDD
+    const ds = issueDateStr.replace(/-/g,'');
+    const base = 'PPWB-'+tier+'-'+ds+'-';
+    const baseDigits = base.replace(/[^0-9]/g,'');
+    let baseSum = 0; for(const d of baseDigits) baseSum += parseInt(d);
+    // Try random 4-digit suffixes until checksum passes
+    for(let i=0;i<5000;i++){
+      const suffix = String(Math.floor(Math.random()*9000+1000));
+      let s=0; for(const d of suffix) s+=parseInt(d);
+      if((baseSum+s)%7===0) return base+suffix;
+    }
+    // Fallback: build suffix digit by digit, force last
+    let s3 = String(Math.floor(Math.random()*900+100));
+    let sum3=baseSum; for(const d of s3) sum3+=parseInt(d);
+    const last=(7-(sum3%7))%7;
+    return base+s3+last;
+  }
+
+  function renderKeyHistory(){
+    const hist = loadKeyHistory();
+    const el = backdrop.querySelector('#licKeyHistory');
+    if(!hist.length){ el.innerHTML='<span style="font-style:italic;">No keys generated yet.</span>'; return; }
+    const engine = window._licenseEngine;
+    el.innerHTML = hist.slice().reverse().map(h=>{
+      const info = engine ? engine.parseKey(h.key) : null;
+      const expiry = info ? ' → expires '+info.expiry.toLocaleDateString() : '';
+      const tierTag = h.tier ? `<span style="background:#2B6F73;color:#fff;padding:1px 5px;border-radius:3px;font-size:9px;margin-right:4px;">${h.tier}</span>` : '';
+      return `<div style="margin-bottom:5px;line-height:1.5;">
+        ${tierTag}<span style="color:var(--teal-deep);font-weight:600;">${escapeHtml(h.key)}</span><br>
+        <span style="font-size:10px;">${escapeHtml(h.name||'—')} · ${new Date(h.date).toLocaleDateString()}${expiry}</span>
+      </div>`;
+    }).join('');
+  }
+  renderKeyHistory();
+
+  backdrop.querySelector('#licGenBtn').addEventListener('click', ()=>{
+    const tier    = (backdrop.querySelector('input[name="licTier"]:checked')||{}).value || '1Y';
+    const dateVal = backdrop.querySelector('#licGenDate').value || todayStr;
+    const name    = backdrop.querySelector('#licGenName').value.trim();
+    const key     = generateTieredKey(tier, dateVal);
+    const engine  = window._licenseEngine;
+    const info    = engine ? engine.parseKey(key) : null;
+    const tierName = engine ? engine.tierLabel(tier) : tier;
+
+    backdrop.querySelector('#licGenKey').textContent = key;
+    backdrop.querySelector('#licGenMeta').textContent =
+      tierName+' license · Issued: '+new Date(dateVal).toLocaleDateString()+
+      (info ? ' · Expires: '+info.expiry.toLocaleDateString() : '');
+    backdrop.querySelector('#licGenRecord').textContent =
+      (name ? 'For: '+name+' · ' : '')+'Generated '+new Date().toLocaleString();
+    backdrop.querySelector('#licGenOutput').style.display='block';
+
+    const hist = loadKeyHistory();
+    hist.push({ key, tier, name, date:Date.now() });
+    saveKeyHistory(hist);
+    renderKeyHistory();
+  });
+
+  backdrop.querySelector('#licGenCopy').addEventListener('click', ()=>{
+    const key = backdrop.querySelector('#licGenKey').textContent;
+    navigator.clipboard.writeText(key)
+      .then(()=>showToast('Key copied to clipboard.'))
+      .catch(()=>showToast('Copy failed — select and copy manually.'));
+  });
+
   backdrop.querySelector('.modal-close').addEventListener('click', () => backdrop.remove());
   backdrop.querySelector('#adminSettingsCancel').addEventListener('click', () => backdrop.remove());
   backdrop.querySelector('#adminSettingsSave').addEventListener('click', () => {
-    const selectedMode = backdrop.querySelector('input[name="wmMode"]:checked').value;
+    const selectedMode   = backdrop.querySelector('input[name="wmMode"]:checked').value;
     const defaultChecked = backdrop.querySelector('#wmDefaultChecked').checked;
     const pw1 = backdrop.querySelector('#wmNewPw1').value;
     const pw2 = backdrop.querySelector('#wmNewPw2').value;
@@ -1120,7 +2264,7 @@ function openAdminSettingsModal(){
       adminConfig.passwordHash = simpleHash(pw1);
     }
 
-    adminConfig.watermarkMode = selectedMode;
+    adminConfig.watermarkMode        = selectedMode;
     adminConfig.watermarkDefaultChecked = defaultChecked;
     saveAdminConfig(adminConfig);
     applyAdminWatermarkConfig();
@@ -1152,7 +2296,6 @@ function openUserGuide(){
           <a href="#g-split">7. Splitting out pages</a>
           <a href="#g-findreplace">8. Find &amp; replace text</a>
           <a href="#g-patch">9. Fixing text inside logos/images</a>
-          <a href="#g-watermark">9b. 🔒 The "EDITED" watermark</a>
           <a href="#g-ocr">10. ⭐ Reading scanned &amp; multi-language text (OCR)</a>
           <a href="#g-word">11. Converting to a Word file</a>
           <a href="#g-excel">12. Converting to an Excel file</a>
@@ -1245,7 +2388,7 @@ function openUserGuide(){
             <li>Untick any matches you don't actually want changed.</li>
             <li>The changes are only applied when you click "Download merged PDF" — nothing is altered until then.</li>
           </ol>
-          <div class="guide-note">This works best on clean PDFs with plain text and a white background. It won't find words inside a scanned page or a picture/logo. <strong>About the watermark:</strong> any page where text was actually changed gets a faint diagonal "EDITED" stamp and a small dated note in the exported file, so it's always clear the page isn't the unmodified original. You can turn this off using the "🔒 Watermark edited pages" checkbox in the toolbar if you have a legitimate reason to (for example, fixing your own typo before a document's first official release) — but please use that responsibly.</div>
+          <div class="guide-note">This works best on clean PDFs with plain text and a white background. It won't find words inside a scanned page or a picture/logo.</div>
         </div>
 
         <div class="guide-section" id="g-patch">
@@ -1260,14 +2403,13 @@ function openUserGuide(){
             <li>You can drag a patch to move it, drag its corner handles to resize it, or click it again to edit or delete it — at any time before downloading.</li>
             <li>Click "Done" to close the editor. As with everything else, the patch is only baked into the file once you click "Download merged PDF".</li>
           </ol>
-          <div class="guide-note">Same as text replacement, any page with a patch on it gets the "EDITED" watermark in the exported file by default — this tool is meant for legitimate corrections (fixing a typo, updating a contact detail), not for disguising an altered document as an unedited original.</div>
+          <div class="guide-note">This tool is meant for legitimate corrections — fixing a typo, updating a contact detail, replacing a logo. Use it responsibly.</div>
         </div>
 
         <div class="guide-section" id="g-watermark" style="background:#FCEDEA;border:1px solid #E8B9AC;border-radius:10px;padding:16px 16px 4px;">
-          <h4><span class="guide-icon">🔒</span>9b. The "EDITED" watermark — why it's there</h4>
-          <p>The "🔒 Watermark edited pages" checkbox sits in the main toolbar near the download buttons, and it's <strong>turned on by default</strong>. When it's on, any page where you've changed real text (Find &amp; Replace) or covered something with a patch (logos/images) gets a faint diagonal "EDITED" stamp plus a small dated note at the bottom of the page, in the file you download.</p>
-          <p>This exists so an edited document can never quietly pass as an untouched original — for example, someone changing a company name or a figure on a scanned document and presenting it as authentic. If you have a genuine reason to turn it off (correcting your own document before it's ever shared as final), you can untick the box, but please use that responsibly.</p>
-          <div class="guide-note">If you're an administrator setting this tool up for a team, see the small <strong>"⚙ Admin settings"</strong> link at the very bottom of the page — it lets you lock the watermark permanently on or off for everyone using this tool on this device, instead of leaving it as an adjustable option.</div>
+          <h4><span class="guide-icon">🔒</span>9b. Document integrity — admin controlled</h4>
+          <p>PDF Workbench includes built-in document integrity features that are configured by your administrator. These settings ensure edited documents are handled appropriately within your organisation. Contact your administrator for details about the document policy in your setup.</p>
+          <div class="guide-note">If you are an administrator, see the <strong>"⚙ Admin settings"</strong> link at the bottom of the page to configure document integrity options for your team.</div>
         </div>
 
         <div class="guide-section" id="g-ocr" style="background:#FBF3E2;border:1px solid #E5CE9B;border-radius:10px;padding:16px 16px 4px;">
@@ -1325,7 +2467,7 @@ function openUserGuide(){
           <ul>
             <li>Nothing is saved or changed in your final PDF until you actually click a download button — feel free to experiment freely beforehand.</li>
             <li>Working with a very large PDF (many pages, or large scanned images) may take a little longer to load and process — this is normal.</li>
-            <li>If you're trying the scanned-page (OCR) features and they don't seem to start, try downloading this tool and opening it directly in your browser rather than viewing it inside another app's preview window — some preview windows restrict background processing that OCR needs.</li>
+            <li>If you're trying the scanned-page (OCR) features and they don't seem to start, ensure you have a stable internet connection and are accessing the tool from a supported browser (Chrome or Edge recommended).</li>
             <li>Your documents are never uploaded anywhere — see the <strong>"🔒 Privacy"</strong> button at the top of the page for the full details.</li>
             <li>You can come back to this guide any time by clicking "📖 How to use this" at the top of the page.</li>
           </ul>
@@ -1387,18 +2529,116 @@ document.addEventListener('dragover', e => startAutoScroll(e));
 document.addEventListener('dragend', () => cancelAnimationFrame(autoScrollRAF));
 document.addEventListener('drop', () => cancelAnimationFrame(autoScrollRAF));
 
+// Returns both width and height of a page in PDF points (cached)
+async function getPageDimsPts(fileId, pageIndex){
+  const fs = fileStore[fileId];
+  fs.dimsCache = fs.dimsCache || {};
+  if(fs.dimsCache[pageIndex]) return fs.dimsCache[pageIndex];
+  const page = await fs.pdfjsDoc.getPage(pageIndex);
+  const vp = page.getViewport({ scale: 1 });
+  fs.dimsCache[pageIndex] = { w: vp.width, h: vp.height };
+  return fs.dimsCache[pageIndex];
+}
+
+// Renders the focus-view canvas with all active edits painted on top,
+// so the user sees exactly what the exported PDF will look like.
+async function renderFocusWithEdits(p){
+  const canvas = await renderEditorCanvas(p.fileId, p.pageIndex, 1600);
+  const ctx    = canvas.getContext('2d');
+  const dims   = await getPageDimsPts(p.fileId, p.pageIndex);
+  const scaleX = canvas.width  / dims.w;
+  const scaleY = canvas.height / dims.h;
+
+  const pageMatches = matches.filter(m => m.uidPage === p.uid && m.enabled);
+  const pagePatches = p.patches || [];
+  if(pageMatches.length === 0 && pagePatches.length === 0) return canvas; // nothing to paint
+
+  // ── Paint find & replace matches ────────────────────────────────────
+  for(const m of pageMatches){
+    const fontSize = Math.abs(m.transform[0]) || Math.abs(m.transform[3]) || 11;
+    const pdfX  = m.transform[4];
+    const pdfY  = m.transform[5];
+    const origW = m.width || fontSize * 0.58 * m.original.length;
+    const coverH = fontSize * 1.35;
+    const coverY = pdfY - fontSize * 0.32;
+
+    // Convert PDF coords (y from bottom) to canvas coords (y from top)
+    const cX = pdfX   * scaleX;
+    const cY = (dims.h - coverY - coverH) * scaleY;
+    const cW = (origW + 4) * scaleX;
+    const cH = coverH * scaleY;
+
+    // Sample real background color (reuse our histogram sampler)
+    const bgHex  = exactDominantColor(ctx, cX, cY, cW, cH);
+    const inkHex = exactDominantInkColor(ctx, cX, cY, cW, cH, bgHex);
+
+    // Cover original text
+    ctx.fillStyle = bgHex;
+    ctx.fillRect(cX, cY, cW, cH);
+
+    // Draw replacement text
+    const fontPx = Math.max(8, fontSize * scaleY);
+    ctx.fillStyle = inkHex;
+    ctx.font = `bold ${fontPx}px Arial, sans-serif`;
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(m.replaced, cX + 1, cY + fontPx * 0.88);
+  }
+
+  // ── Paint logo / image patches ───────────────────────────────────────
+  for(const patch of pagePatches){
+    const cX = patch.xPct * canvas.width;
+    const cY = patch.yPct * canvas.height;
+    const cW = patch.wPct * canvas.width;
+    const cH = patch.hPct * canvas.height;
+
+    ctx.fillStyle = patch.boxColor;
+    ctx.fillRect(cX, cY, cW, cH);
+
+    if(patch.text){
+      const fontPx = Math.max(8, patch.fontSize * scaleY);
+      ctx.fillStyle = patch.textColor;
+      ctx.font = `${patch.bold === false ? '' : 'bold '}${fontPx}px Arial, sans-serif`;
+      ctx.textBaseline = 'middle';
+      ctx.textAlign    = 'center';
+      ctx.fillText(patch.text, cX + cW / 2, cY + cH / 2);
+      ctx.textAlign    = 'left';
+      ctx.textBaseline = 'alphabetic';
+    }
+  }
+
+  return canvas;
+}
+
 function focusPage(uid){
   const p = pages.find(x => x.uid === uid);
   if(!p) return;
   focusActiveUid = uid;
-  focusImg.src = p.thumb;
-  const fileName = fileStore[p.fileId] ? fileStore[p.fileId].name : '';
-  const idx = pages.findIndex(x => x.uid === uid);
-  focusCaption.textContent = 'Page ' + (idx+1) + ' · ' + fileName + ' · original p.' + p.pageIndex;
+  applyZoom(1.0);
+
+  // Show a loading indicator while rendering
+  focusImg.style.opacity = '0.4';
+  focusImg.src = p.thumb; // show low-res thumb immediately
   focusViewer.style.display = 'block';
+
+  const hasEdits = matches.some(m => m.uidPage === uid && m.enabled) || (p.patches||[]).length > 0;
+
+  // Render high-res canvas with edits painted on
+  renderFocusWithEdits(p).then(canvas => {
+    focusImg.src     = canvas.toDataURL('image/png');
+    focusImg.style.opacity = '1';
+  }).catch(() => {
+    focusImg.src = p.thumb;
+    focusImg.style.opacity = '1';
+  });
+
+  const fileName = fileStore[p.fileId] ? fileStore[p.fileId].name : '';
+  const idx      = pages.findIndex(x => x.uid === uid);
+  focusCaption.textContent =
+    'Page ' + (idx+1) + ' · ' + fileName + ' · p.' + p.pageIndex
+    + (hasEdits ? '  ✎ Showing with edits applied' : '');
+
   focusViewer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   renderNavHighlight();
-  // Flash the grid card
   const card = grid.querySelector('[data-uid="'+uid+'"]');
   if(card){ card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash'); }
 }
@@ -1406,6 +2646,35 @@ function focusPage(uid){
 function renderNavHighlight(){
   navList.querySelectorAll('.nav-row').forEach(row => {
     row.classList.toggle('active', row.dataset.uid === focusActiveUid);
+  });
+}
+
+// Re-renders the focus viewer in place whenever edits change —
+// called after every scan, match toggle, or patch save so the
+// user always sees the latest version without navigating away.
+function refreshFocusIfActive(specificUid){
+  const uid = specificUid || focusActiveUid;
+  if(!uid) return;
+  if(uid !== focusActiveUid) return;
+  if(!focusViewer || focusViewer.style.display === 'none') return;
+  const p = pages.find(x => x.uid === uid);
+  if(!p) return;
+  focusImg.style.opacity = '0.45';
+  renderFocusWithEdits(p).then(canvas => {
+    // Only apply if focus hasn't changed while we were rendering
+    if(focusActiveUid === uid){
+      focusImg.src = canvas.toDataURL('image/png');
+    }
+    focusImg.style.opacity = '1';
+    // Update caption to reflect edit status
+    const hasEdits = matches.some(m => m.uidPage === uid && m.enabled) || (p.patches||[]).length > 0;
+    const fileName = fileStore[p.fileId] ? fileStore[p.fileId].name : '';
+    const idx = pages.findIndex(x => x.uid === uid);
+    focusCaption.textContent =
+      'Page ' + (idx+1) + ' · ' + fileName + ' · p.' + p.pageIndex
+      + (hasEdits ? '  ✎ Showing with edits applied' : '');
+  }).catch(() => {
+    focusImg.style.opacity = '1';
   });
 }
 
@@ -1534,7 +2803,7 @@ function renderAll(){
     });
     card.querySelector('.edit-btn').addEventListener('click', e => {
       e.stopPropagation();
-      openPageEditor(p);
+      openPageEditor(p);  // Free — gate is at export, not here
     });
     card.querySelector('.checkbox-btn').addEventListener('click', e => {
       e.stopPropagation();
@@ -2023,6 +3292,7 @@ function openPatchForm(p, patch, onSaved, isNew){
     readFormIntoPatch();
     formBackdrop.remove();
     onSaved();
+    refreshFocusIfActive(p.uid); // ← live update focus view with new patch
   });
 
   formBackdrop.querySelector('#pfApplyAll').addEventListener('click', () => {
@@ -2031,6 +3301,7 @@ function openPatchForm(p, patch, onSaved, isNew){
     if(pages.length <= 1){
       formBackdrop.remove();
       onSaved();
+      refreshFocusIfActive(p.uid);
       showToast('Saved. There\'s only one page loaded, so there are no other pages to apply it to.');
       return;
     }
@@ -2044,6 +3315,7 @@ function openPatchForm(p, patch, onSaved, isNew){
     formBackdrop.remove();
     onSaved();
     renderAll();
+    refreshFocusIfActive(p.uid); // ← refresh after applying to all
     showToast('Applied to ' + copiedCount + ' other page' + (copiedCount===1?'':'s') + '.');
   });
 
@@ -2052,6 +3324,7 @@ function openPatchForm(p, patch, onSaved, isNew){
       p.patches = p.patches.filter(x => x.id !== patch.id);
       formBackdrop.remove();
       onSaved();
+      refreshFocusIfActive(p.uid); // ← refresh after patch deleted
     });
   }
 }
@@ -2069,7 +3342,23 @@ deleteSelBtn.addEventListener('click', () => {
   showToast('Selected pages removed.');
 });
 
-splitBtn.addEventListener('click', () => openSplitModal());
+// ── hasPremiumEdits — checks if the current session has any premium work ──
+// Returns true only if the user has actually applied find & replace matches
+// OR logo/image patches. Vanilla merge, split, delete = always free.
+function hasPremiumEdits(){
+  const hasMatches = matches.some(m => m.enabled);
+  const hasPatches = pages.some(p => (p.patches || []).length > 0);
+  return hasMatches || hasPatches;
+}
+
+splitBtn.addEventListener('click', () => {
+  // Free if no premium edits applied; gated only if session has premium work
+  if(hasPremiumEdits()){
+    window._auth.premiumGate('export your edited PDF', openSplitModal);
+  } else {
+    openSplitModal();
+  }
+});
 
 function openSplitModal(){
   const selected = pages.filter(p => p.marked);
@@ -2176,6 +3465,7 @@ function openSplitModal(){
           if(wasEdited && watermarkToggle.checked){
             stampEditedWatermark(copied, helvBold);
           }
+          if(shouldStampTrial()) stampTrialWatermark(copied, helvBold);
         }
       }
 
@@ -2207,7 +3497,7 @@ function openSplitModal(){
 }
 
 // ---------- find & replace ----------
-scanBtn.addEventListener('click', scanDocument);
+scanBtn.addEventListener('click', () => scanDocument());  // Free — gate is at export, not here
 findInput.addEventListener('keydown', e => { if(e.key === 'Enter') scanDocument(); });
 
 async function getTextContentCached(fileId, pageIndex){
@@ -2274,6 +3564,7 @@ async function scanDocument(){
   scanBtn.textContent = 'Scan document';
   renderMatches();
   renderAll();
+  refreshFocusIfActive(); // ← update focus view with new replacements
 
   const ruleCount = new Set(matches.map(m => m.findTerm)).size;
   showToast(
@@ -2333,6 +3624,7 @@ function renderMatches(){
       matches = matches.filter(m => (m.findTerm || '') !== ft);
       renderMatches();
       renderAll();
+      refreshFocusIfActive(); // ← live update when rule is removed
       showToast('Replacement rule "' + ft + '" removed.');
     });
     matchesList.appendChild(header);
@@ -2356,6 +3648,7 @@ function renderMatches(){
         m.enabled = e.target.checked;
         renderMatches();
         renderAll();
+        refreshFocusIfActive(m.uidPage); // ← live update if this page is in focus
       });
       matchesList.appendChild(row);
     });
@@ -2363,7 +3656,16 @@ function renderMatches(){
 }
 
 // ---------- export ----------
-downloadBtn.addEventListener('click', mergeAndDownload);
+downloadBtn.addEventListener('click', () => {
+  // Plain merge/download = completely free, no login needed.
+  // Gate only triggers if the user has applied premium edits
+  // (find & replace replacements or logo/image patches).
+  if(hasPremiumEdits()){
+    window._auth.premiumGate('download your edited PDF', mergeAndDownload);
+  } else {
+    mergeAndDownload();
+  }
+});
 
 // Stamps a visible "EDITED" watermark plus a small dated footer note onto a
 // page that has had its content altered (text replaced or a logo/image
@@ -2372,26 +3674,35 @@ downloadBtn.addEventListener('click', mergeAndDownload);
 function stampEditedWatermark(pdfPage, font){
   const w = pdfPage.getWidth(), h = pdfPage.getHeight();
   pdfPage.drawText('EDITED', {
-    x: w / 2 - 150,
-    y: h / 2 - 30,
-    size: 72,
-    font,
-    color: rgb(0.78, 0.14, 0.1),
-    rotate: degrees(35),
-    opacity: 0.16
+    x: w / 2 - 150, y: h / 2 - 30, size: 72, font,
+    color: rgb(0.78, 0.14, 0.1), rotate: degrees(35), opacity: 0.16
   });
   pdfPage.drawText('Edited using PDF Workbench — ' + new Date().toLocaleDateString(), {
-    x: 14,
-    y: 12,
-    size: 7,
-    font,
-    color: rgb(0.4, 0.4, 0.4),
-    opacity: 0.85
+    x: 14, y: 12, size: 7, font, color: rgb(0.4, 0.4, 0.4), opacity: 0.85
   });
+}
+
+// Stamps every page of a trial-expired export so the output is honestly
+// branded until the user purchases a license.
+function stampTrialWatermark(pdfPage, font){
+  const w = pdfPage.getWidth(), h = pdfPage.getHeight();
+  pdfPage.drawText('TRIAL VERSION', {
+    x: w / 2 - 180, y: h / 2 - 30, size: 64, font,
+    color: rgb(0.18, 0.44, 0.46), rotate: degrees(35), opacity: 0.13
+  });
+  pdfPage.drawText('Generated with PDF Workbench Trial · pradeepparmar.gumroad.com/l/pdf-workbench', {
+    x: 14, y: 8, size: 6.5, font, color: rgb(0.4, 0.4, 0.4), opacity: 0.80
+  });
+}
+
+function shouldStampTrial(){
+  if(!window._licenseEngine) return false;
+  return !window._licenseEngine.isLicensed() && window._licenseEngine.getTrialDaysLeft() <= 0;
 }
 
 async function mergeAndDownload(){
   if(pages.length === 0) return;
+  // No gate here — user has already done their work. Gate is on the download button itself.
   downloadBtn.disabled = true;
   downloadBtn.textContent = 'Building PDF…';
   // Clear the per-page canvas cache so we re-render fresh if files changed
@@ -2448,6 +3759,7 @@ async function mergeAndDownload(){
       if(wasEdited && watermarkToggle.checked){
         stampEditedWatermark(copied, helvBold);
       }
+      if(shouldStampTrial()) stampTrialWatermark(copied, helvBold);
     }
 
     const outBytes = await outDoc.save();
@@ -2499,19 +3811,29 @@ function extractLines(textContent){
   const items = (textContent.items || []).filter(it => it.str && it.str.trim().length > 0);
   if(items.length === 0) return [];
   const withSize = items.map(it => {
-    const fontSize = Math.hypot(it.transform[2], it.transform[3]) || Math.abs(it.transform[3]) || 10;
+    // Use the scale components of the transform matrix for accurate font size
+    const fontSize = Math.round(
+      (Math.hypot(it.transform[0], it.transform[1]) +
+       Math.hypot(it.transform[2], it.transform[3])) / 2
+    ) || Math.abs(it.transform[3]) || 10;
     return { ...it, fontSize };
   });
+  // Sort top-to-bottom (descending Y), then left-to-right
   const sorted = withSize.slice().sort((a,b) => b.transform[5] - a.transform[5] || a.transform[4] - b.transform[4]);
   const lines = [];
   let cur = null, lastY = null;
   sorted.forEach(it => {
     const y = it.transform[5];
-    if(cur === null || Math.abs(lastY - y) > it.fontSize * 0.5){
-      cur = { y, fontSize: it.fontSize, items: [] };
+    // Tighter threshold — items on the same visual line differ by < 30% of font size
+    if(cur === null || Math.abs(lastY - y) > it.fontSize * 0.38){
+      cur = { y, fontSize: it.fontSize, items: [], fontNames: new Set() };
       lines.push(cur);
       lastY = y;
+    } else {
+      // Keep line's fontSize as the most common/largest on that line
+      if(it.fontSize > cur.fontSize) cur.fontSize = it.fontSize;
     }
+    if(it.fontName) cur.fontNames.add(it.fontName);
     cur.items.push(it);
   });
   lines.forEach(l => l.items.sort((a,b) => a.transform[4] - b.transform[4]));
@@ -2524,7 +3846,7 @@ function itemsToText(items){
   items.forEach(it => {
     const x = it.transform[4];
     const fs = it.fontSize || Math.hypot(it.transform[2], it.transform[3]) || 10;
-    if(prevEndX !== null && (x - prevEndX) > fs * 0.3 && !text.endsWith(' ')){
+    if(prevEndX !== null && (x - prevEndX) > fs * 0.25 && !text.endsWith(' ')){
       text += ' ';
     }
     text += it.str;
@@ -2532,25 +3854,42 @@ function itemsToText(items){
   });
   return text.replace(/\s+/g, ' ').trim();
 }
-function lineText(line){ return itemsToText(line.items); }
-function lineBold(line){ return line.items.some(it => /bold/i.test(it.fontName || '')); }
-function lineItalic(line){ return line.items.some(it => /italic|oblique/i.test(it.fontName || '')); }
 
-// Groups consecutive lines into paragraphs based on vertical gap relative to
-// font size — a big gap (or sudden font-size jump) starts a new paragraph.
+function lineText(line){ return itemsToText(line.items); }
+
+function lineBold(line){
+  return line.items.some(it => /bold/i.test(it.fontName || ''));
+}
+function lineItalic(line){
+  return line.items.some(it => /italic|oblique/i.test(it.fontName || ''));
+}
+
+// Smarter paragraph grouping:
+// - A new paragraph starts when the vertical gap exceeds 1.2x normal line spacing
+// - Normal line spacing ≈ fontSize * 1.2 (tight leading)
+// - A gap > fontSize * 2.0 = extra spacing → also start new paragraph with added space
+// - Font size jump > 20% = new paragraph
 function groupParagraphs(lines){
   const paras = [];
-  let cur = null, prevY = null;
+  let cur = null, prevY = null, prevFontSize = null;
   lines.forEach(line => {
     const gap = prevY === null ? 0 : (prevY - line.y);
-    const startNew = cur === null || gap > line.fontSize * 1.7 || gap < -2;
-    if(startNew){
-      cur = { lines: [line], fontSize: line.fontSize };
+    const normalLeading = (prevFontSize || line.fontSize) * 1.2;
+    const isNewParagraph = cur === null
+      || gap > normalLeading * 1.5   // bigger than 1.5× normal leading
+      || gap < -2                     // backwards (new text block higher on page)
+      || Math.abs(line.fontSize - (prevFontSize||line.fontSize)) > prevFontSize * 0.18; // font size jump
+    const hasExtraSpace = gap > normalLeading * 2.5; // significant blank line before this
+
+    if(isNewParagraph){
+      cur = { lines: [line], fontSize: line.fontSize, spaceBefore: hasExtraSpace };
       paras.push(cur);
     } else {
       cur.lines.push(line);
+      if(line.fontSize > cur.fontSize) cur.fontSize = line.fontSize;
     }
     prevY = line.y;
+    prevFontSize = line.fontSize;
   });
   return paras;
 }
@@ -2630,7 +3969,7 @@ function buildPageElements(lines, pageWidthPts){
   return elements;
 }
 
-ewExtractBtn.addEventListener('click', extractToWord);
+ewExtractBtn.addEventListener('click', () => window._auth.premiumGate('extract your PDF to a Word document', extractToWord));
 
 async function extractToWord(){
   if(pages.length === 0){ showToast('Add a PDF first.'); return; }
@@ -2671,17 +4010,49 @@ async function extractToWord(){
           }
           const canvas = await renderEditorCanvas(p.fileId, p.pageIndex, 1500);
           const { data } = await ocrWorker.recognize(canvas);
-          pageData.push({ p, globalIdx, mode: 'ocr', text: data.text || '' });
-          ewLog('Page ' + globalIdx + ': OCR complete.', 'done');
+          if(data && data.lines && data.lines.length > 0){
+            const items = data.lines.map(line => {
+              const bbox = line.bbox || { x0: 0, y0: 0, x1: 0, y1: 0 };
+              const fontSize = bbox.y1 - bbox.y0;
+              return {
+                str: (line.text || '').trim(),
+                transform: [
+                  fontSize,
+                  0,
+                  0,
+                  fontSize,
+                  bbox.x0,
+                  canvas.height - bbox.y1
+                ],
+                width: bbox.x1 - bbox.x0,
+                fontName: null
+              };
+            }).filter(it => it.str.length > 0);
+            const mockContent = { items };
+            const lines = extractLines(mockContent);
+            const elements = buildPageElements(lines, canvas.width);
+            elements.forEach(el => {
+              if(el.type === 'para') allFontSizes.push(el.par.fontSize);
+              else { el.left.forEach(par => allFontSizes.push(par.fontSize)); el.right.forEach(par => allFontSizes.push(par.fontSize)); }
+            });
+            const colBlockCount = elements.filter(el => el.type === 'columns').length;
+            pageData.push({ p, globalIdx, mode: 'text', elements, isOcr: true });
+            ewLog('Page ' + globalIdx + ': OCR complete. Extracted ' + elements.length + ' block' + (elements.length===1?'':'s') + (colBlockCount ? ' (' + colBlockCount + ' multi-column region' + (colBlockCount===1?'':'s') + ' detected)' : '') + '.', 'done');
+          } else {
+            pageData.push({ p, globalIdx, mode: 'ocr', text: data.text || '' });
+            ewLog('Page ' + globalIdx + ': OCR complete.', 'done');
+          }
         }catch(ocrErr){
           console.error(ocrErr);
           ocrUnavailable = true;
           ocrWorker = null;
-          const blocked = /worker|blob/i.test(ocrErr.message || '');
+          // Safely extract message — iOS Safari can pass undefined as the caught value
+          const errMsg = ocrErr && ocrErr.message ? ocrErr.message : (ocrErr ? String(ocrErr) : 'Unknown error');
+          const blocked = /worker|blob|security/i.test(errMsg);
           ewLog(
             blocked
-              ? 'OCR can\'t start in this preview window (it blocks background workers for security). This is a limitation of viewing the app here — download the file and open it directly in a browser tab and OCR will work normally there. Continuing without OCR for now.'
-              : ('OCR failed to start: ' + ocrErr.message + ' — continuing without OCR.'),
+              ? 'OCR can\'t start in this environment (background workers are blocked). Open the file directly in a browser tab (Chrome or Safari) for OCR to work. Continuing without OCR for now.'
+              : ('OCR failed to start: ' + errMsg + ' — continuing without OCR.'),
             'warn'
           );
           pageData.push({ p, globalIdx, mode: 'skip' });
@@ -2710,29 +4081,62 @@ async function extractToWord(){
     const bodySize = median(allFontSizes) || 11;
     const docParagraphs = [];
 
-    function buildRunParagraph(par){
-      const text = par.lines.map(lineText).join(' ').replace(/\s+/g, ' ').trim();
+    // Builds a Word paragraph from a paragraph object, preserving:
+    //  • Per-line bold/italic (mixed runs within a paragraph)
+    //  • Heading levels based on font-size ratio to body text
+    //  • Space-before (blank line gap detected above this paragraph)
+    //  • Consistent font size proportional to original
+    function buildRunParagraph(par, forceBodySize){
+      const textLines = par.lines.map(lineText).filter(Boolean);
+      const text = textLines.join(' ').replace(/\s+/g, ' ').trim();
       if(!text) return null;
-      const bold = par.lines.some(lineBold);
-      const italic = par.lines.some(lineItalic);
+
+      const fsRatio  = par.fontSize / bodySize;
+      const isBold   = par.lines.some(lineBold);
+      const isItalic = par.lines.some(lineItalic);
+
+      // Heading thresholds: H1 ≥ 1.5× body, H2 ≥ 1.25×, H3 ≥ 1.1×
       let heading = undefined;
-      if(par.fontSize >= bodySize * 1.45) heading = HeadingLevel.HEADING_1;
-      else if(par.fontSize >= bodySize * 1.18) heading = HeadingLevel.HEADING_2;
+      if     (fsRatio >= 1.5)  heading = HeadingLevel.HEADING_1;
+      else if(fsRatio >= 1.25) heading = HeadingLevel.HEADING_2;
+      else if(fsRatio >= 1.1 && isBold) heading = HeadingLevel.HEADING_3;
+
+      // Font size in half-points (docx unit) — clamp to readable range
+      const halfPts = forceBodySize
+        ? Math.round(bodySize * 2)
+        : Math.max(16, Math.min(72, Math.round(par.fontSize * 2)));
+
+      // Space before: if a visible blank line gap was detected above this para
+      const spaceBefore = par.spaceBefore ? 200 : 0;
+
+      // After-spacing: headings get more breathing room than body text
+      const spaceAfter = heading === HeadingLevel.HEADING_1 ? 240
+                       : heading === HeadingLevel.HEADING_2 ? 200
+                       : heading === HeadingLevel.HEADING_3 ? 160
+                       : 120;
+
       return new Paragraph({
         heading,
-        spacing: { after: 160 },
-        children: [ new TextRun({ text, bold: heading ? undefined : bold, italics: italic, size: Math.max(16, Math.round(par.fontSize * 2)) }) ]
+        spacing: { before: spaceBefore, after: spaceAfter, line: 276, lineRule: 'auto' },
+        children: [
+          new TextRun({
+            text,
+            bold:    heading ? true : isBold,
+            italics: isItalic,
+            size:    heading ? undefined : halfPts,
+          })
+        ]
       });
     }
 
     const noBorder = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
 
     function buildColumnCell(paras){
-      const children = paras.map(buildRunParagraph).filter(Boolean);
+      const children = paras.map(p => buildRunParagraph(p)).filter(Boolean);
       if(children.length === 0) children.push(new Paragraph({ children: [] }));
       return new TableCell({
         width: { size: 50, type: WidthType.PERCENTAGE },
-        margins: { top: 80, bottom: 80, left: 0, right: 160 },
+        margins: { top: 60, bottom: 60, left: 0, right: 120 },
         borders: { top: noBorder, bottom: noBorder, left: noBorder, right: noBorder },
         children
       });
@@ -2744,6 +4148,12 @@ async function extractToWord(){
       }
 
       if(pd.mode === 'text'){
+        if(pd.isOcr){
+          docParagraphs.push(new Paragraph({
+            spacing: { after: 100 },
+            children: [ new TextRun({ text: '[Page ' + pd.globalIdx + ' — text extracted via OCR; layout is approximate]', italics: true, size: 16, color: '8A8270' }) ]
+          }));
+        }
         if(pd.elements.length === 0){
           docParagraphs.push(new Paragraph({ children: [ new TextRun({ text: '[Page ' + pd.globalIdx + ' had no readable text.]', italics: true, color: '8A8270' }) ] }));
         }
@@ -2910,7 +4320,7 @@ function autoSizeColumns(rows){
   return widths.map(w => ({ wch: w }));
 }
 
-xlExtractBtn.addEventListener('click', extractToExcel);
+xlExtractBtn.addEventListener('click', () => window._auth.premiumGate('extract your PDF to an Excel spreadsheet', extractToExcel));
 
 async function extractToExcel(){
   if(pages.length === 0){ showToast('Add a PDF first.'); return; }
@@ -2960,18 +4370,43 @@ async function extractToExcel(){
           }
           const canvas = await renderEditorCanvas(p.fileId, p.pageIndex, 1500);
           const { data } = await ocrWorker.recognize(canvas);
-          const lines = (data.text || '').split('\n').map(l => l.trim()).filter(Boolean);
-          rows = [ [ 'OCR extracted — page ' + globalIdx + ', text approximate' ], ...lines.map(l => [l]) ];
+          if(data && data.lines && data.lines.length > 0){
+            const items = data.lines.map(line => {
+              const bbox = line.bbox || { x0: 0, y0: 0, x1: 0, y1: 0 };
+              const fontSize = bbox.y1 - bbox.y0;
+              return {
+                str: (line.text || '').trim(),
+                transform: [
+                  fontSize,
+                  0,
+                  0,
+                  fontSize,
+                  bbox.x0,
+                  canvas.height - bbox.y1
+                ],
+                width: bbox.x1 - bbox.x0,
+                fontName: null
+              };
+            }).filter(it => it.str.length > 0);
+            const mockContent = { items };
+            const linesList = extractLines(mockContent);
+            const result = buildTableFromLines(linesList);
+            rows = [ [ 'OCR extracted — page ' + globalIdx + ', text approximate' ], ...result.rows ];
+          } else {
+            const rawLines = (data.text || '').split('\n').map(l => l.trim()).filter(Boolean);
+            rows = [ [ 'OCR extracted — page ' + globalIdx + ', text approximate' ], ...rawLines.map(l => [l]) ];
+          }
           xlLog('Page ' + globalIdx + ': OCR complete.', 'done');
         }catch(ocrErr){
           console.error(ocrErr);
           ocrUnavailable = true;
           ocrWorker = null;
-          const blocked = /worker|blob/i.test(ocrErr.message || '');
+          const errMsg = ocrErr && ocrErr.message ? ocrErr.message : (ocrErr ? String(ocrErr) : 'Unknown error');
+          const blocked = /worker|blob|security/i.test(errMsg);
           xlLog(
             blocked
-              ? 'OCR can\'t start in this preview window (it blocks background workers for security). Download the file and open it directly in a browser tab and OCR will work normally there. Continuing without OCR.'
-              : ('OCR failed to start: ' + ocrErr.message + ' — continuing without OCR.'),
+              ? 'OCR can\'t start in this environment (background workers are blocked). Open the file directly in a browser tab (Chrome or Safari) for OCR to work. Continuing without OCR.'
+              : ('OCR failed to start: ' + errMsg + ' — continuing without OCR.'),
             'warn'
           );
           rows = [ [ 'Page ' + globalIdx + ' appears to be a scanned image — OCR was unavailable.' ] ];
@@ -3029,6 +4464,1620 @@ async function extractToExcel(){
     xlExtractBtn.textContent = '📊 Extract & download Excel file';
   }
 }
+
+
+
+// ═══════════════════════════════════════════════════════════════════
+//  AUTH ENGINE — PDF Workbench
+//  Handles: signup, login, OTP verify, session, subscription status
+//
+//  🔥 FIREBASE REPLACEMENT POINTS are clearly marked.
+//  Every localStorage call → Firebase Auth + Firestore equivalent.
+//  Swapping takes ~30 minutes once your Firebase project is ready.
+// ═══════════════════════════════════════════════════════════════════
+
+const AUTH_USER_KEY  = 'pdfwb_user';
+const AUTH_SUB_KEY   = 'pdfwb_subscription';
+const TRIAL_DAYS_MAX = 7;
+
+const PLAN_URLS = {
+  '1D': 'https://pradeepparmar.gumroad.com/l/pdf-workbench-day',
+  '1M': 'https://pradeepparmar.gumroad.com/l/pdf-workbench-month',
+  '1Y': 'https://pradeepparmar.gumroad.com/l/pdf-workbench-year',
+};
+const PLAN_LABELS  = { '1D':'1 Day',  '1M':'1 Month',  '1Y':'1 Year'  };
+const PLAN_PRICES  = { '1D':'₹100',   '1M':'₹500',     '1Y':'₹1,500'  };
+const PLAN_SLASHED = { '1D':'₹200',   '1M':'₹1,000',   '1Y':'₹5,000'  };
+
+// ── Data helpers ─────────────────────────────────────────────────────
+// 🔥 FIREBASE: replace getUser()   → firebase.auth().currentUser
+// 🔥 FIREBASE: replace getSub()    → firestore.collection('users').doc(uid).collection('subscription').get()
+// 🔥 FIREBASE: replace saveUser()  → firebase.auth().createUserWithEmailAndPassword / updateProfile
+// 🔥 FIREBASE: replace saveSub()   → firestore.collection('users').doc(uid).collection('subscription').set()
+
+function getUser(){
+  try{ return JSON.parse(localStorage.getItem(AUTH_USER_KEY)); }catch(e){ return null; }
+}
+function getSub(){
+  try{ return JSON.parse(localStorage.getItem(AUTH_SUB_KEY)); }catch(e){ return null; }
+}
+function saveUser(u){ localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u)); }
+function saveSub(s){ localStorage.setItem(AUTH_SUB_KEY, JSON.stringify(s)); }
+function clearSession(){
+  localStorage.removeItem(AUTH_USER_KEY);
+  localStorage.removeItem(AUTH_SUB_KEY);
+}
+
+// ── Subscription status helpers ──────────────────────────────────────
+function isLoggedIn(){ return !!getUser(); }
+
+function getSubscriptionStatus(){
+  const sub = getSub();
+  const user = getUser();
+  if(!user) return { state:'guest' };
+
+  // Paid subscription
+  if(sub && sub.plan && sub.expiry){
+    const now = Date.now();
+    const expiry = new Date(sub.expiry).getTime();
+    const daysLeft = Math.max(0, Math.ceil((expiry - now) / 86400000));
+    const hoursLeft = Math.max(0, Math.ceil((expiry - now) / 3600000));
+    if(now <= expiry){
+      return { state:'active', plan:sub.plan, expiry:sub.expiry, daysLeft, hoursLeft };
+    } else {
+      return { state:'expired', plan:sub.plan, expiry:sub.expiry, daysLeft:0, hoursLeft:0 };
+    }
+  }
+
+  // Trial
+  if(user.trialStart){
+    const trialExpiry = user.trialStart + (TRIAL_DAYS_MAX * 86400000);
+    const now = Date.now();
+    const daysLeft = Math.max(0, Math.ceil((trialExpiry - now) / 86400000));
+    const hoursLeft = Math.max(0, Math.ceil((trialExpiry - now) / 3600000));
+    if(now <= trialExpiry){
+      return { state:'trial', daysLeft, hoursLeft, trialExpiry };
+    } else {
+      return { state:'trial_expired', daysLeft:0, hoursLeft:0 };
+    }
+  }
+
+  return { state:'registered' }; // logged in but no trial started yet
+}
+
+function isPremiumAllowed(){
+  const status = getSubscriptionStatus();
+  return ['active','trial'].includes(status.state);
+}
+
+// ── OTP mock (🔥 FIREBASE: replace with firebase.auth().signInWithPhoneNumber) ──
+const otpStore = {};
+function generateOTP(mobile){
+  const code = String(Math.floor(100000 + Math.random() * 900000));
+  otpStore[mobile] = { code, expires: Date.now() + 300000 }; // 5 min
+  console.log('📱 OTP for '+mobile+': '+code+' (dev mode — will be SMS in production)');
+  return code;
+}
+function verifyOTP(mobile, entered){
+  const stored = otpStore[mobile];
+  if(!stored) return false;
+  if(Date.now() > stored.expires) return false;
+  return stored.code === entered.trim();
+}
+
+// ── Auth modal builder ───────────────────────────────────────────────
+const authRoot = document.getElementById('authRoot');
+
+function closeAuthModal(){
+  authRoot.innerHTML = '';
+}
+
+function showAuthModal(html, onMounted){
+  authRoot.innerHTML = `
+    <div class="auth-backdrop" id="authBackdrop">
+      <div class="auth-card">
+        <button class="auth-close" onclick="window._auth.closeAuthModal()">✕</button>
+        ${html}
+      </div>
+    </div>
+  `;
+  // Click outside to close
+  document.getElementById('authBackdrop').addEventListener('click', function(e){
+    if(e.target === this) window._auth.closeAuthModal();
+  });
+  if(onMounted) onMounted();
+}
+
+// ── Step 1 — Mobile number entry ─────────────────────────────────────
+function openLoginModal(featureName, afterLoginCallback){
+  const featureMsg = featureName
+    ? `<p class="auth-sub">Your work is ready — sign in free to <strong>${featureName}</strong>.<br>Takes 30 seconds. 7-day full access, no card needed.</p>`
+    : `<p class="auth-sub">Sign in to your PDF Workbench account.</p>`;
+
+  showAuthModal(`
+    <div class="auth-logo"><span>📄</span><div><span>PDF Workbench</span><sub>Professional Edition</sub></div></div>
+    <div class="auth-trial-badge">
+      <strong>🚀 Your work is saved — sign in to download it free</strong>
+      7-day full access · No credit card · Cancel anytime
+    </div>
+    <h3 class="auth-title">Create account or sign in</h3>
+    ${featureMsg}
+    <div class="auth-error" id="authErr"></div>
+    <div class="auth-field">
+      <label>Mobile number</label>
+      <div style="display:flex;gap:8px;">
+        <select id="countryCode" style="padding:10px 8px;border:1.5px solid var(--kraft-line);border-radius:8px;background:#fff;font-size:14px;color:var(--ink);">
+          <option value="+91">🇮🇳 +91</option>
+          <option value="+1">🇺🇸 +1</option>
+          <option value="+44">🇬🇧 +44</option>
+          <option value="+971">🇦🇪 +971</option>
+        </select>
+        <input type="tel" id="mobileInput" placeholder="9876543210" maxlength="10"
+          style="flex:1;padding:10px 12px;border:1.5px solid var(--kraft-line);border-radius:8px;font-size:15px;font-family:'JetBrains Mono',monospace;background:#fff;color:var(--ink);">
+      </div>
+    </div>
+    <button class="auth-btn primary" id="sendOtpBtn">Send OTP →</button>
+    <div class="auth-divider">or</div>
+    <button class="auth-btn outline" id="googleBtn">
+      <img src="https://www.google.com/favicon.ico" width="14" style="vertical-align:middle;margin-right:6px;">
+      Continue with Google
+      <span style="font-size:10px;margin-left:4px;opacity:.7;">(coming soon)</span>
+    </button>
+    <div class="auth-switch">Already have a license key? <a onclick="window._auth.openKeyEntryModal()">Enter it here</a></div>
+  `, () => {
+    document.getElementById('sendOtpBtn').addEventListener('click', () => {
+      const mobile = document.getElementById('mobileInput').value.trim();
+      const code   = document.getElementById('countryCode').value;
+      const err    = document.getElementById('authErr');
+      if(mobile.length < 8){ err.textContent='Enter a valid mobile number.'; err.style.display='block'; return; }
+      const fullMobile = code + mobile;
+      generateOTP(fullMobile); // 🔥 FIREBASE: firebase.auth().signInWithPhoneNumber(fullMobile, recaptchaVerifier)
+      openOTPModal(fullMobile, featureName, afterLoginCallback);
+    });
+    document.getElementById('mobileInput').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('sendOtpBtn').click(); });
+    document.getElementById('googleBtn').addEventListener('click', () => {
+      showToast('Google login coming soon — use mobile OTP for now.');
+      // 🔥 FIREBASE: firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    });
+  });
+}
+
+// ── Step 2 — OTP verification ────────────────────────────────────────
+function openOTPModal(mobile, featureName, afterLoginCallback){
+  showAuthModal(`
+    <div class="auth-logo"><span>📄</span><div><span>PDF Workbench</span></div></div>
+    <h3 class="auth-title">Enter OTP</h3>
+    <p class="auth-sub">We sent a 6-digit code to <strong>${mobile}</strong>.<br>
+      <em style="font-size:11px;color:var(--gold);">Dev mode: check the browser console for the OTP code.</em>
+    </p>
+    <div class="auth-error" id="otpErr"></div>
+    <div class="auth-success" id="otpSuccess"></div>
+    <div class="auth-field">
+      <label>6-digit OTP</label>
+      <input type="number" id="otpInput" placeholder="123456" maxlength="6"
+        style="font-family:'JetBrains Mono',monospace;font-size:22px;letter-spacing:.2em;text-align:center;padding:12px;">
+    </div>
+    <button class="auth-btn primary" id="verifyOtpBtn">Verify & Continue →</button>
+    <div class="auth-switch">Wrong number? <a onclick="window._auth.openLoginModal('${featureName||''}')">Go back</a></div>
+  `, () => {
+    document.getElementById('otpInput').focus();
+    document.getElementById('verifyOtpBtn').addEventListener('click', () => {
+      const entered = document.getElementById('otpInput').value.trim();
+      const err = document.getElementById('otpErr');
+      const suc = document.getElementById('otpSuccess');
+      // 🔥 FIREBASE: confirmationResult.confirm(entered).then(result => { const user = result.user; ... })
+      if(verifyOTP(mobile, entered)){
+        suc.textContent = '✓ Verified! Setting up your account…';
+        suc.style.display = 'block';
+        // Create or fetch user
+        const existingUser = getUser();
+        if(!existingUser || existingUser.mobile !== mobile){
+          const newUser = {
+            uid: 'local_' + Date.now(),
+            mobile,
+            name: '',
+            profession: '',
+            company: '',
+            trialStart: Date.now(),
+            created: Date.now()
+          };
+          saveUser(newUser);
+        }
+        setTimeout(() => {
+          updateAccountButton();
+          updateLicenseBanner();
+          closeAuthModal();
+          // Show profile completion prompt after a short delay
+          setTimeout(() => openProfilePrompt(), 800);
+          if(afterLoginCallback) afterLoginCallback();
+          showToast('Welcome to PDF Workbench! Your 7-day free trial has started.');
+        }, 900);
+      } else {
+        err.textContent = 'Incorrect OTP. Please try again.';
+        err.style.display = 'block';
+      }
+    });
+    document.getElementById('otpInput').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('verifyOtpBtn').click(); });
+  });
+}
+
+// ── Step 3 — Profile completion (optional, post-login) ───────────────
+function openProfilePrompt(){
+  if(!isLoggedIn()) return;
+  const user = getUser();
+  if(user.name) return; // already filled
+  showAuthModal(`
+    <h3 class="auth-title">One quick thing 👋</h3>
+    <p class="auth-sub">Help us personalise your experience. You can skip this — it takes 20 seconds.</p>
+    <div class="auth-field">
+      <label>Your name</label>
+      <input type="text" id="profileName" placeholder="Pradeep Parmar" value="${user.name||''}">
+    </div>
+    <div class="auth-field">
+      <label>Profession</label>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;" id="profBtns">
+        ${['CA','Lawyer','Finance','Banker','Trader','Business','Student','Other'].map(p=>
+          `<button onclick="window._auth.selectProf(this,'${p}')" style="padding:6px 12px;border:1.5px solid var(--kraft-line);border-radius:20px;background:#fff;font-size:12px;cursor:pointer;">${p}</button>`
+        ).join('')}
+      </div>
+      <input type="hidden" id="profileProf" value="${user.profession||''}">
+    </div>
+    <div class="auth-field">
+      <label>Company / Firm (optional)</label>
+      <input type="text" id="profileCompany" placeholder="e.g. Parmar & Associates" value="${user.company||''}">
+    </div>
+    <button class="auth-btn primary" id="saveProfileBtn">Save & continue</button>
+    <div class="auth-switch"><a onclick="window._auth.closeAuthModal()">Skip for now</a></div>
+  `, () => {
+    document.getElementById('saveProfileBtn').addEventListener('click', ()=>{
+      const u = getUser();
+      u.name      = document.getElementById('profileName').value.trim();
+      u.profession= document.getElementById('profileProf').value;
+      u.company   = document.getElementById('profileCompany').value.trim();
+      saveUser(u); // 🔥 FIREBASE: firestore.collection('users').doc(uid).update({name, profession, company})
+      closeAuthModal();
+      updateAccountButton();
+      showToast('Profile saved!');
+    });
+  });
+}
+
+function selectProf(btn, prof){
+  document.querySelectorAll('#profBtns button').forEach(b=>{ b.style.background='#fff'; b.style.borderColor='var(--kraft-line)'; b.style.color='var(--ink)'; });
+  btn.style.background='var(--teal)'; btn.style.borderColor='var(--teal-deep)'; btn.style.color='#fff';
+  document.getElementById('profileProf').value = prof;
+}
+
+// ── Account modal — status, plan, device, renewal ────────────────────
+function openAccountModal(){
+  if(!isLoggedIn()){ openLoginModal(); return; }
+  const user   = getUser();
+  const status = getSubscriptionStatus();
+  const now    = Date.now();
+
+  let statusHTML = '';
+  let pct = 0;
+
+  if(status.state === 'active'){
+    const total = new Date(status.expiry).getTime() - (getSub().startDate || now);
+    const used  = now - (getSub().startDate || now);
+    pct = Math.min(100, Math.round((used/total)*100));
+    const col = status.daysLeft <= 3 ? '#BD3B22' : status.daysLeft <= 7 ? '#A9780B' : '#2B6F73';
+    statusHTML = `
+      <div class="countdown-ring" style="--pct:${pct}%;">
+        <div class="countdown-inner">
+          <span class="countdown-num">${status.daysLeft <= 1 ? status.hoursLeft+'h' : status.daysLeft+'d'}</span>
+          <span class="countdown-label">remaining</span>
+        </div>
+      </div>
+      <div style="text-align:center;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:${col};">${PLAN_LABELS[status.plan]||status.plan} License — Active</div>
+        <div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">Expires: ${new Date(status.expiry).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}</div>
+      </div>`;
+  } else if(status.state === 'trial'){
+    pct = Math.round(((TRIAL_DAYS_MAX - status.daysLeft)/TRIAL_DAYS_MAX)*100);
+    statusHTML = `
+      <div class="countdown-ring" style="--pct:${pct}%;">
+        <div class="countdown-inner">
+          <span class="countdown-num">${status.daysLeft <= 1 ? status.hoursLeft+'h' : status.daysLeft+'d'}</span>
+          <span class="countdown-label">trial left</span>
+        </div>
+      </div>
+      <div style="text-align:center;margin-bottom:14px;">
+        <div style="font-size:12px;font-weight:700;color:#A9780B;">Free Trial — ${status.daysLeft} day${status.daysLeft===1?'':'s'} remaining</div>
+        <div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px;">Upgrade to keep full professional access</div>
+      </div>`;
+  } else {
+    pct = 100;
+    statusHTML = `
+      <div style="background:#FDE8E8;border-radius:8px;padding:12px;text-align:center;margin-bottom:14px;">
+        <div style="font-size:13px;font-weight:700;color:#BD3B22;">⚠️ ${status.state==='trial_expired'?'Trial expired':'License expired'}</div>
+        <div style="font-size:12px;color:#BD3B22;margin-top:2px;">Upgrade to continue with full professional access</div>
+      </div>`;
+  }
+
+  showAuthModal(`
+    <div class="auth-logo"><span>📄</span><div><span>PDF Workbench</span><sub>${user.name||user.mobile||'My Account'}</sub></div></div>
+    ${statusHTML}
+    ${!['active'].includes(status.state) ? `
+    <div class="plan-grid">
+      ${Object.entries(PLAN_LABELS).map(([k,v])=>`
+        <a href="${PLAN_URLS[k]}" target="_blank" class="plan-card ${k==='1Y'?'featured':''}">
+          ${k==='1Y'?'<div class="plan-badge">⭐ BEST</div>':''}
+          <div class="plan-tier">${v}</div>
+          <div class="plan-was">${PLAN_SLASHED[k]}</div>
+          <div class="plan-price">${PLAN_PRICES[k]}</div>
+          <div class="plan-note">${k==='1D'?'One-time task':k==='1M'?'Regular user':'₹125/month'}</div>
+        </a>`).join('')}
+    </div>
+    <div style="font-size:11px;color:var(--ink-soft);text-align:center;margin-bottom:12px;">After payment, enter the license key you receive by email below:</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input id="acctKeyInput" type="text" placeholder="PPWB-1Y-YYYYMMDD-XXXX"
+        style="flex:1;padding:9px 11px;border:1.5px solid var(--kraft-line);border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;background:#fff;color:var(--ink);">
+      <button class="auth-btn primary" style="width:auto;padding:9px 14px;margin:0;" id="acctActivateBtn">Activate</button>
+    </div>
+    <div id="acctKeyErr" class="auth-error"></div>
+    <div id="acctKeyOk"  class="auth-success"></div>
+    ` : `
+    <div style="margin-bottom:12px;">
+      <div style="font-size:12px;color:var(--ink-soft);margin-bottom:4px;font-weight:600;">Add another year when ready:</div>
+      <a href="${PLAN_URLS['1Y']}" target="_blank" class="plan-card featured" style="display:block;">
+        <div class="plan-badge">⭐ BEST VALUE</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:4px 0;">
+          <div><div class="plan-tier">1 Year</div><div class="plan-was">${PLAN_SLASHED['1Y']}</div><div class="plan-price">${PLAN_PRICES['1Y']}</div></div>
+          <div style="font-size:11px;color:var(--teal-deep);">Renew before expiry → 1 extra month free</div>
+        </div>
+      </a>
+    </div>
+    `}
+    <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--kraft-line);padding-top:10px;margin-top:4px;">
+      <div style="font-size:11.5px;color:var(--ink-soft);">📱 ${user.mobile||'—'} &nbsp;·&nbsp; ${user.profession||'Professional'}</div>
+      <button onclick="window._auth.logout()" style="background:transparent;border:none;color:var(--red);font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline;">Sign out</button>
+    </div>
+  `, () => {
+    const activateBtn = document.getElementById('acctActivateBtn');
+    if(activateBtn){
+      activateBtn.addEventListener('click', ()=>{
+        const val  = (document.getElementById('acctKeyInput').value||'').trim();
+        const err  = document.getElementById('acctKeyErr');
+        const ok   = document.getElementById('acctKeyOk');
+        // 🔥 FIREBASE: validate key against Firestore, update subscription
+        const engine = window._licenseEngine;
+        if(!engine){ showToast('Key system loading…'); return; }
+        const info = engine.parseKey(val);
+        if(info && info.isActive){
+          const sub = {
+            plan: info.tier,
+            startDate: Date.now(),
+            expiry: info.expiry.toISOString(),
+            key: val.toUpperCase(),
+            activatedAt: Date.now()
+          };
+          saveSub(sub);
+          ok.textContent = '✓ '+PLAN_LABELS[info.tier]+' license activated! Valid until '+new Date(info.expiry).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+          ok.style.display = 'block';
+          setTimeout(()=>{ closeAuthModal(); updateAccountButton(); updateLicenseBanner(); showToast('License activated successfully!'); }, 1500);
+        } else if(info && !info.isActive){
+          err.textContent = 'This key expired on '+new Date(info.expiry).toLocaleDateString()+'. Please purchase a new license.';
+          err.style.display = 'block';
+        } else {
+          err.textContent = 'Invalid key. Format: PPWB-1Y-YYYYMMDD-XXXX. Check for typos.';
+          err.style.display = 'block';
+        }
+      });
+    }
+  });
+}
+
+// ── Upgrade prompt (shown when premium feature clicked, user logged in but expired) ──
+function openUpgradeModal(featureName){
+  showAuthModal(`
+    <h3 class="auth-title">Upgrade to continue</h3>
+    <p class="auth-sub">Your trial has ended. Purchase a plan to use <strong>${featureName||'premium features'}</strong> without watermarks.</p>
+    <div class="plan-grid">
+      ${Object.entries(PLAN_LABELS).map(([k,v])=>`
+        <a href="${PLAN_URLS[k]}" target="_blank" class="plan-card ${k==='1Y'?'featured':''}">
+          ${k==='1Y'?'<div class="plan-badge">⭐ BEST</div>':''}
+          <div class="plan-tier">${v}</div>
+          <div class="plan-was">${PLAN_SLASHED[k]}</div>
+          <div class="plan-price">${PLAN_PRICES[k]}</div>
+          <div class="plan-note">${k==='1D'?'One task':k==='1M'?'Regular':'₹125/mo'}</div>
+        </a>`).join('')}
+    </div>
+    <p style="font-size:11px;color:var(--ink-soft);text-align:center;margin:4px 0 10px;">After payment, enter your license key in <strong>My Account</strong>.</p>
+    <button class="auth-btn outline" onclick="window._auth.openAccountModal()">I have a key → Activate</button>
+  `);
+}
+
+// ── Key entry modal (standalone) ─────────────────────────────────────
+function openKeyEntryModal(){
+  showAuthModal(`
+    <h3 class="auth-title">🔑 Enter license key</h3>
+    <p class="auth-sub">Enter the key you received by email after purchase.</p>
+    <div class="auth-error" id="keyEntryErr"></div>
+    <div class="auth-success" id="keyEntryOk"></div>
+    <div class="auth-field">
+      <input id="keyEntryInput" type="text" placeholder="PPWB-1Y-20260702-XXXX"
+        style="font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.06em;">
+    </div>
+    <button class="auth-btn primary" id="keyEntrySubmit">Activate</button>
+    <div class="auth-switch">Don't have a key? <a onclick="window._auth.openLoginModal()">Sign up free</a></div>
+  `, () => {
+    document.getElementById('keyEntryInput').focus();
+    document.getElementById('keyEntrySubmit').addEventListener('click', ()=>{
+      const val = (document.getElementById('keyEntryInput').value||'').trim();
+      const err = document.getElementById('keyEntryErr');
+      const ok  = document.getElementById('keyEntryOk');
+      const engine = window._licenseEngine;
+      const info = engine ? engine.parseKey(val) : null;
+      if(info && info.isActive){
+        // Ensure user account exists
+        if(!getUser()){
+          saveUser({ uid:'key_'+Date.now(), mobile:'', name:'', trialStart:Date.now(), created:Date.now() });
+        }
+        saveSub({ plan:info.tier, startDate:Date.now(), expiry:info.expiry.toISOString(), key:val.toUpperCase(), activatedAt:Date.now() });
+        ok.textContent = '✓ '+PLAN_LABELS[info.tier]+' license active until '+new Date(info.expiry).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+        ok.style.display = 'block';
+        setTimeout(()=>{ closeAuthModal(); updateAccountButton(); updateLicenseBanner(); showToast('License activated!'); }, 1400);
+      } else if(info && !info.isActive){
+        err.textContent = 'This key expired on '+new Date(info.expiry).toLocaleDateString()+'.';
+        err.style.display = 'block';
+      } else {
+        err.textContent = 'Invalid key — check for typos. Keys start with PPWB-.';
+        err.style.display = 'block';
+      }
+    });
+  });
+}
+
+// ── Logout ───────────────────────────────────────────────────────────
+function logout(){
+  // 🔥 FIREBASE: firebase.auth().signOut()
+  clearSession();
+  closeAuthModal();
+  updateAccountButton();
+  updateLicenseBanner();
+  showToast('Signed out.');
+}
+
+// ── Account button updater ────────────────────────────────────────────
+function updateAccountButton(){
+  const btn    = document.getElementById('accountBtn');
+  const badge  = document.getElementById('licenseBadge');
+  if(!btn) return;
+  if(!isLoggedIn()){
+    btn.textContent = 'Sign in';
+    btn.className   = 'outline';
+    btn.setAttribute('style','font-size:12px;font-weight:600;background:transparent;border:1.5px solid var(--teal);color:var(--teal-deep);border-radius:20px;padding:5px 12px;cursor:pointer;white-space:nowrap;');
+    if(badge) badge.textContent = '';
+    return;
+  }
+  const user   = getUser();
+  const status = getSubscriptionStatus();
+  const name   = user.name ? user.name.split(' ')[0] : user.mobile ? user.mobile.slice(-4) : 'Account';
+  if(status.state === 'active'){
+    btn.textContent = '✓ '+name;
+    btn.setAttribute('style','font-size:12px;font-weight:600;background:var(--teal);color:#fff;border:1.5px solid var(--teal-deep);border-radius:20px;padding:5px 12px;cursor:pointer;white-space:nowrap;');
+    if(badge) badge.textContent = PLAN_LABELS[status.plan]+' — '+status.daysLeft+'d left';
+  } else if(status.state === 'trial'){
+    btn.textContent = '⏳ '+name+' (Trial)';
+    btn.setAttribute('style','font-size:12px;font-weight:600;background:#FBF3E2;border:1.5px solid #E5CE9B;color:#6B5526;border-radius:20px;padding:5px 12px;cursor:pointer;white-space:nowrap;');
+    if(badge) badge.textContent = 'Trial: '+status.daysLeft+'d left';
+  } else {
+    btn.textContent = '⚠️ '+name;
+    btn.setAttribute('style','font-size:12px;font-weight:600;background:#FDE8E8;border:1.5px solid #F5C0C0;color:#BD3B22;border-radius:20px;padding:5px 12px;cursor:pointer;white-space:nowrap;');
+    if(badge) badge.textContent = 'Expired — upgrade needed';
+  }
+}
+
+// ── Premium gate — called before every premium action ────────────────
+// ── Pricing modal — shown before login when a premium gate triggers ───
+// Sequence: premium action → pricing screen → login → action executes
+function openPricingModal(featureName, afterLoginCallback){
+  const existing = document.getElementById('pricingBackdrop');
+  if(existing) existing.remove();
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'pricing-backdrop';
+  backdrop.id = 'pricingBackdrop';
+
+  const plans = [
+    {
+      key:'1D', name:'1 Day', was:'₹200', price:'₹100', sub:'One-time task',
+      feats:['All premium features','Unlimited pages','Find & replace text','OCR — Hindi, Gujarati, English','Export to Word & Excel'],
+      cta:'Start with 1 Day', style:'outline'
+    },
+    {
+      key:'1M', name:'1 Month', was:'₹1,000', price:'₹500', sub:'Regular professional',
+      feats:['All premium features','Unlimited pages','Find & replace text','OCR — Hindi, Gujarati, English','Export to Word & Excel'],
+      cta:'Start with 1 Month', style:'outline'
+    },
+    {
+      key:'1Y', name:'1 Year', was:'₹5,000', price:'₹1,500', sub:'₹125/month — best value',
+      feats:['All premium features','Unlimited pages','Find & replace text','OCR — Hindi, Gujarati, English','Export to Word & Excel','Priority support'],
+      best:true, cta:'Start with 1 Year', style:'primary'
+    }
+  ];
+
+  const plansHTML = plans.map(p => `
+    <div class="pp ${p.best?'best':''}" data-plan="${p.key}">
+      ${p.best ? '<div class="pp-badge">⭐ BEST VALUE</div>' : ''}
+      <div class="pp-name">${p.name}</div>
+      <div class="pp-was">${p.was}</div>
+      <div class="pp-price">${p.price}</div>
+      <div class="pp-mo">${p.sub}</div>
+      <ul class="pp-feats">${p.feats.map(f=>`<li>${f}</li>`).join('')}</ul>
+      <button class="pp-cta ${p.style}" data-plan="${p.key}" data-url="${PLAN_URLS[p.key]}">${p.cta}</button>
+    </div>
+  `).join('');
+
+  backdrop.innerHTML = `
+    <div class="pricing-card">
+      <button class="pricing-close" id="pricingClose">✕</button>
+      <div class="pricing-header">
+        <div class="pp-offer">🎉 50% Introductory offer — limited time</div><br>
+        ${featureName ? `<div class="pricing-feature-pill">Unlocking: ${featureName}</div>` : ''}
+        <h2>Choose your PDF Workbench plan</h2>
+        <p>All features · Unlimited use · 7-day free trial starts after sign up · No card needed today</p>
+      </div>
+      <div class="pricing-plans">${plansHTML}</div>
+      <div class="pricing-footer">
+        <span id="pricingSignIn">Already have an account? Sign in</span>
+        <span id="pricingHaveKey">Have a license key? Enter it</span>
+        <span id="pricingSkip">Continue without account</span>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(backdrop);
+
+  // Close
+  backdrop.querySelector('#pricingClose').addEventListener('click', ()=>backdrop.remove());
+  backdrop.addEventListener('click', e=>{ if(e.target===backdrop) backdrop.remove(); });
+
+  // Plan CTA buttons — open login then redirect to Gumroad after login
+  backdrop.querySelectorAll('.pp-cta').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const planKey = btn.dataset.plan;
+      const gumUrl  = btn.dataset.url;
+      backdrop.remove();
+      // Open login with an afterLogin callback that:
+      // 1. Executes the premium action (download/export)
+      // 2. Opens Gumroad in a new tab to complete payment
+      openLoginModal(featureName, () => {
+        if(afterLoginCallback) afterLoginCallback();
+        setTimeout(() => {
+          showToast('Opening payment page for '+PLAN_LABELS[planKey]+' plan — complete your purchase to keep full access.');
+          window.open(gumUrl, '_blank');
+        }, 800);
+      });
+    });
+  });
+
+  // Already have account
+  backdrop.querySelector('#pricingSignIn').addEventListener('click', () => {
+    backdrop.remove();
+    openLoginModal(featureName, afterLoginCallback);
+  });
+
+  // Have a key
+  backdrop.querySelector('#pricingHaveKey').addEventListener('click', () => {
+    backdrop.remove();
+    openKeyEntryModal();
+  });
+
+  // Skip — allow free use (vanilla actions only)
+  backdrop.querySelector('#pricingSkip').addEventListener('click', () => {
+    backdrop.remove();
+    if(afterLoginCallback) afterLoginCallback();
+  });
+}
+
+function premiumGate(featureName, callback){
+  if(!isLoggedIn()){
+    // Not logged in — show pricing first, then login
+    openPricingModal(featureName, callback);
+    return false;
+  }
+  const status = getSubscriptionStatus();
+  if(status.state === 'active' || status.state === 'trial'){
+    callback();
+    return true;
+  }
+  // Logged in but trial/license expired — show upgrade pricing
+  openPricingModal(featureName, callback);
+  return false;
+}
+
+// ── Update trial banner using auth state ─────────────────────────────
+function updateLicenseBanner(){
+  const status = getSubscriptionStatus();
+  const banner = document.getElementById('trialBanner');
+  const msg    = document.getElementById('trialBannerMsg');
+  const action = document.getElementById('trialBannerAction');
+  if(!banner) return;
+
+  if(!isLoggedIn() || status.state === 'registered'){
+    banner.style.display = 'none';
+    return;
+  }
+  if(status.state === 'active'){
+    if(status.daysLeft <= 7){
+      banner.setAttribute('style','display:block;padding:6px 16px;text-align:center;font-size:12px;font-weight:600;color:#fff;position:sticky;top:0;z-index:40;background:#2B6F73;');
+      msg.textContent = '✓ Licensed ('+PLAN_LABELS[status.plan||'1Y']+') — '+status.daysLeft+' day'+(status.daysLeft===1?'':'s')+' remaining.';
+      action.innerHTML = '<span style="color:#fff;opacity:.8;margin-left:10px;">Renew early for 1 free month →</span>';
+    } else {
+      banner.style.display = 'none';
+    }
+    return;
+  }
+  if(status.state === 'trial'){
+    const col = status.daysLeft<=2?'#BD3B22':status.daysLeft<=4?'#A9780B':'#2B6F73';
+    banner.setAttribute('style','display:block;padding:6px 16px;text-align:center;font-size:12px;font-weight:600;color:#fff;position:sticky;top:0;z-index:40;background:'+col);
+    msg.textContent = '⏳ Free trial — '+status.daysLeft+' day'+(status.daysLeft===1?'':'s')+' remaining. Upgrade anytime.';
+    action.innerHTML = '<span onclick="window._auth.openAccountModal()" style="color:#fff;text-decoration:underline;cursor:pointer;margin-left:10px;">Upgrade now →</span>';
+    return;
+  }
+  // expired
+  banner.setAttribute('style','display:block;padding:7px 16px;text-align:center;font-size:12.5px;font-weight:600;color:#fff;position:sticky;top:0;z-index:40;background:#BD3B22;');
+  msg.textContent = '⚠️ Trial ended — upgrade to continue with full access.';
+  action.innerHTML = '<span onclick="window._auth.openAccountModal()" style="color:#fff;text-decoration:underline;cursor:pointer;margin-left:10px;">Buy license →</span>';
+}
+
+// ── Initialise on load ────────────────────────────────────────────────
+updateAccountButton();
+updateLicenseBanner();
+
+// Expose public API
+window._auth = {
+  openLoginModal, openOTPModal, openAccountModal, openUpgradeModal,
+  openKeyEntryModal, openProfilePrompt, closeAuthModal,
+  selectProf, logout, premiumGate, isPremiumAllowed,
+  getSubscriptionStatus, isLoggedIn, updateAccountButton, updateLicenseBanner
+};
+
+// Live countdown — refreshes banner and button every minute
+setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
+
+// ── Premium Tools / Back-to-Pages Navigation ─────────────────────────
+(function(){
+  const premSec       = document.getElementById('premiumSection');
+  const premNavBtn    = document.getElementById('premNavBtn');
+  const backToPagesBtn= document.getElementById('backToPagesBtn');
+  const floatBtn      = document.getElementById('quickNavBtn');
+  const floatIcon     = document.getElementById('quickNavIcon');
+  const floatLabel    = document.getElementById('quickNavLabel');
+  const floatArrow    = document.getElementById('quickNavArrow');
+  if(!premSec) return;
+
+  // Toolbar "📷 PDF Scanner ↓" → scroll to scanner section
+  const scannerNavBtn = document.getElementById('scannerNavBtn');
+  const scannerSec = document.getElementById('scannerSection');
+  if(scannerNavBtn && scannerSec){
+    scannerNavBtn.addEventListener('click', () => {
+      scannerSec.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  }
+
+  // Toolbar "⭐ Premium Tools ↓" → scroll to premium section
+  if(premNavBtn){
+    premNavBtn.addEventListener('click', () => {
+      premSec.scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  }
+
+  // Premium section "↑ Back to pages" → scroll to top
+  if(backToPagesBtn){
+    backToPagesBtn.addEventListener('click', () => {
+      window.scrollTo({ top:0, behavior:'smooth' });
+    });
+  }
+
+  // Floating button: hidden at top, shows as "↑ Back to pages" only when
+  // the user has scrolled past the premium section (reinforces the back-to-top action)
+  if(floatBtn){
+    floatBtn.style.display = 'none'; // hidden initially
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        const pastPremium = !e.isIntersecting && e.boundingClientRect.top < 0;
+        floatBtn.style.display   = pastPremium ? 'flex' : 'none';
+        floatBtn.classList.toggle('at-bottom', true);
+        if(floatIcon)  floatIcon.textContent  = '↑';
+        if(floatLabel) floatLabel.textContent = 'Back to pages';
+        if(floatArrow) floatArrow.textContent = '';
+      });
+    }, { threshold: 0.05 });
+    observer.observe(premSec);
+
+    floatBtn.addEventListener('click', () => {
+      window.scrollTo({ top:0, behavior:'smooth' });
+    });
+  }
+})();
+
+// ═══════════════════════════════════════════════════════════════════
+//  PDF DOCUMENT SCANNER & ENHANCER ENGINE
+//  Supports: Live Camera Capture, Multi-Image Upload, Per-Page Crop,
+//  Page Size Presets (A4/Letter/Fit), Light/Dark, Contrast, Magic Color,
+//  Crisp B&W Threshold, Deblur/Sharpen (Unsharp Mask), and Save/Send to Workbench
+// ═══════════════════════════════════════════════════════════════════
+(function(){
+  let scannedDocs = []; // { id, name, origImg, rotation, crop:{x,y,w,h}, pageSize, margin, scalePct, colorMode, brightness, contrast, sharpen, bwThreshold, thumbUrl }
+  let activeScanId = null;
+  let cropModeActive = false;
+  let tempCrop = { x: 0.05, y: 0.05, w: 0.90, h: 0.90 };
+
+  const scanOpenCamBtn    = document.getElementById('scanOpenCamBtn');
+  const scanUploadImgBtn  = document.getElementById('scanUploadImgBtn');
+  const scanImgInput      = document.getElementById('scanImgInput');
+  const scanApplyAllBtn   = document.getElementById('scanApplyAllBtn');
+  const scanClearAllBtn   = document.getElementById('scanClearAllBtn');
+  const scanCountBadge    = document.getElementById('scanCountBadge');
+  const scannerEmpty      = document.getElementById('scannerEmpty');
+  const scannerWorkspace  = document.getElementById('scannerWorkspace');
+  const scanThumbList     = document.getElementById('scanThumbList');
+  const scanStageTitle    = document.getElementById('scanStageTitle');
+  const scanPreviewCanvas = document.getElementById('scanPreviewCanvas');
+  const scanDimInfo       = document.getElementById('scanDimInfo');
+
+  const scanRotateLeftBtn = document.getElementById('scanRotateLeftBtn');
+  const scanRotateRightBtn= document.getElementById('scanRotateRightBtn');
+  const scanToggleCropBtn = document.getElementById('scanToggleCropBtn');
+  const scanApplyCropBtn  = document.getElementById('scanApplyCropBtn');
+  const scanResetCropBtn  = document.getElementById('scanResetCropBtn');
+  const scanCropOverlay   = document.getElementById('scanCropOverlay');
+
+  const scanPageSize      = document.getElementById('scanPageSize');
+  const scanMargin        = document.getElementById('scanMargin');
+  const scanScaleSlider   = document.getElementById('scanScaleSlider');
+  const scanScaleVal      = document.getElementById('scanScaleVal');
+  const scanColorModes    = document.getElementById('scanColorModes');
+  const scanResetFilters  = document.getElementById('scanResetFilters');
+  const scanBrightSlider  = document.getElementById('scanBrightSlider');
+  const scanBrightVal     = document.getElementById('scanBrightVal');
+  const scanContrastSlider= document.getElementById('scanContrastSlider');
+  const scanContrastVal   = document.getElementById('scanContrastVal');
+  const scanSharpenSlider = document.getElementById('scanSharpenSlider');
+  const scanSharpenVal    = document.getElementById('scanSharpenVal');
+  const scanThresholdRow  = document.getElementById('scanThresholdRow');
+  const scanThreshSlider  = document.getElementById('scanThreshSlider');
+  const scanThreshVal     = document.getElementById('scanThreshVal');
+
+  const scanFileNameInput = document.getElementById('scanFileNameInput');
+  const scanSendToWbBtn   = document.getElementById('scanSendToWbBtn');
+  const scanSavePdfBtn    = document.getElementById('scanSavePdfBtn');
+
+  function getActiveScan(){
+    return scannedDocs.find(s => s.id === activeScanId) || null;
+  }
+
+  // ── Add image to scanner ──────────────────────────────────────────
+  function addImageToScanner(imgElement, name){
+    const id = genId();
+    const docItem = {
+      id,
+      name: name || ('Scan ' + (scannedDocs.length + 1)),
+      origImg: imgElement,
+      rotation: 0, // 0, 90, 180, 270
+      crop: { x: 0, y: 0, w: 1, h: 1 },
+      pageSize: 'a4-p',
+      margin: 18,
+      scalePct: 100,
+      colorMode: 'original', // 'original' | 'magic' | 'grayscale' | 'bw'
+      brightness: 0,
+      contrast: 0,
+      sharpen: 0,
+      bwThreshold: 145,
+      thumbUrl: ''
+    };
+    scannedDocs.push(docItem);
+    activeScanId = id;
+    exitCropMode();
+    // Generate initial processed preview and thumbnail
+    renderProcessedScanToCanvas(docItem, scanPreviewCanvas, 650);
+    docItem.thumbUrl = createThumbFromCanvas(scanPreviewCanvas);
+    syncControlsFromActive();
+    renderScannerUI();
+  }
+
+  function createThumbFromCanvas(srcCanvas){
+    const tc = document.createElement('canvas');
+    const ratio = srcCanvas.height / (srcCanvas.width || 1);
+    tc.width = 120;
+    tc.height = Math.max(80, Math.round(120 * ratio));
+    tc.getContext('2d').drawImage(srcCanvas, 0, 0, tc.width, tc.height);
+    return tc.toDataURL('image/jpeg', 0.8);
+  }
+
+  // ── Upload image files ────────────────────────────────────────────
+  scanUploadImgBtn.addEventListener('click', () => scanImgInput.click());
+  scannerEmpty.addEventListener('click', () => scanImgInput.click());
+  ['dragenter','dragover'].forEach(ev => scannerEmpty.addEventListener(ev, e => { e.preventDefault(); scannerEmpty.style.borderColor = 'var(--teal)'; }));
+  ['dragleave','drop'].forEach(ev => scannerEmpty.addEventListener(ev, e => { e.preventDefault(); scannerEmpty.style.borderColor = ''; }));
+  scannerEmpty.addEventListener('drop', e => handleScanFiles(e.dataTransfer.files));
+  scanImgInput.addEventListener('change', e => { handleScanFiles(e.target.files); scanImgInput.value = ''; });
+
+  function handleScanFiles(fileList){
+    const files = Array.from(fileList || []);
+    if(!files.length) return;
+    let loaded = 0;
+    files.forEach(file => {
+      if(!file.type.startsWith('image/')){
+        showToast('Skipped "' + file.name + '" — please select an image or use Camera.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const img = new Image();
+        img.onload = () => {
+          addImageToScanner(img, file.name.replace(/\.[^.]+$/, ''));
+          loaded++;
+          if(loaded === files.length) showToast('Added ' + loaded + ' scanned page' + (loaded===1?'':'s') + '.');
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ── Live Camera Modal ─────────────────────────────────────────────
+  scanOpenCamBtn.addEventListener('click', openCameraModal);
+
+  async function openCameraModal(){
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      showToast('Camera API not available in this browser — use "Upload Scanned Images" instead.');
+      scanImgInput.click();
+      return;
+    }
+    let stream = null;
+    let facingMode = 'environment';
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop';
+    backdrop.innerHTML = `
+      <div class="modal-card" style="max-width:680px;">
+        <div class="modal-head">
+          <h3>📸 Camera Document Scanner</h3>
+          <button class="modal-close" id="camCloseTop">✕</button>
+        </div>
+        <p class="modal-hint">Hold your document flat in good lighting. Click <strong>"Snap Page"</strong> for each page you want to add to your scanned file.</p>
+        <div style="position:relative;background:#000;border-radius:8px;overflow:hidden;">
+          <video id="camVideo" class="scan-camera-video" autoplay playsinline muted></video>
+          <div id="camFlash" style="position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;transition:opacity .15s;"></div>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:14px;flex-wrap:wrap;gap:10px;">
+          <span id="camSnapCounter" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--teal-deep);font-weight:700;">
+            ${scannedDocs.length} page${scannedDocs.length===1?'':'s'} in scanner
+          </span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="outline-teal" id="camSwitchBtn">🔄 Switch Camera</button>
+            <button class="primary" id="camSnapBtn" style="padding:10px 20px;font-size:14px;">📸 Snap Page</button>
+            <button class="ghost" id="camDoneBtn">Done</button>
+          </div>
+        </div>
+      </div>
+    `;
+    modalRoot.appendChild(backdrop);
+
+    const videoEl = backdrop.querySelector('#camVideo');
+    const flashEl = backdrop.querySelector('#camFlash');
+    const counterEl = backdrop.querySelector('#camSnapCounter');
+
+    async function startStream(){
+      if(stream){ stream.getTracks().forEach(t => t.stop()); }
+      try{
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: facingMode }, width: { ideal: 1920 }, height: { ideal: 1080 } },
+          audio: false
+        });
+        videoEl.srcObject = stream;
+      }catch(err){
+        try{
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+          videoEl.srcObject = stream;
+        }catch(err2){
+          showToast('Could not access camera: ' + (err2.message || 'Permission denied'));
+          closeCam();
+        }
+      }
+    }
+
+    function closeCam(){
+      if(stream){ stream.getTracks().forEach(t => t.stop()); stream = null; }
+      backdrop.remove();
+    }
+
+    backdrop.querySelector('#camCloseTop').addEventListener('click', closeCam);
+    backdrop.querySelector('#camDoneBtn').addEventListener('click', closeCam);
+    backdrop.querySelector('#camSwitchBtn').addEventListener('click', () => {
+      facingMode = facingMode === 'environment' ? 'user' : 'environment';
+      startStream();
+    });
+
+    backdrop.querySelector('#camSnapBtn').addEventListener('click', () => {
+      if(!videoEl.videoWidth) return;
+      flashEl.style.opacity = '0.85';
+      setTimeout(() => flashEl.style.opacity = '0', 160);
+
+      const c = document.createElement('canvas');
+      c.width = videoEl.videoWidth;
+      c.height = videoEl.videoHeight;
+      c.getContext('2d').drawImage(videoEl, 0, 0);
+      const img = new Image();
+      img.onload = () => {
+        // Default camera snaps to Magic Color for crisp document look
+        addImageToScanner(img, 'Camera-Scan-' + (scannedDocs.length + 1));
+        counterEl.textContent = scannedDocs.length + ' page' + (scannedDocs.length===1?'':'s') + ' in scanner';
+        showToast('Snapped Page ' + scannedDocs.length + '!');
+      };
+      img.src = c.toDataURL('image/jpeg', 0.95);
+    });
+
+    await startStream();
+  }
+
+  // ── Image Processing Pipeline (Rotation, Crop, Scale, Color, Light/Dark, Deblur) ──
+  function renderProcessedScanToCanvas(scanItem, targetCanvas, maxPreviewDim){
+    if(!scanItem || !scanItem.origImg) return;
+    const img = scanItem.origImg;
+    const rot = ((scanItem.rotation % 360) + 360) % 360;
+
+    // 1. Draw rotated original onto an intermediate canvas
+    const rotW = (rot === 90 || rot === 270) ? img.naturalHeight || img.height : img.naturalWidth || img.width;
+    const rotH = (rot === 90 || rot === 270) ? img.naturalWidth || img.width : img.naturalHeight || img.height;
+
+    const rotCanvas = document.createElement('canvas');
+    rotCanvas.width = rotW;
+    rotCanvas.height = rotH;
+    const rCtx = rotCanvas.getContext('2d');
+    rCtx.save();
+    rCtx.translate(rotW / 2, rotH / 2);
+    rCtx.rotate((rot * Math.PI) / 180);
+    const iw = img.naturalWidth || img.width;
+    const ih = img.naturalHeight || img.height;
+    rCtx.drawImage(img, -iw / 2, -ih / 2);
+    rCtx.restore();
+
+    // 2. Apply crop (unless currently in interactive crop mode where we show full rotated image)
+    const c = cropModeActive ? { x: 0, y: 0, w: 1, h: 1 } : (scanItem.crop || { x: 0, y: 0, w: 1, h: 1 });
+    const sx = Math.round(c.x * rotW);
+    const sy = Math.round(c.y * rotH);
+    const sw = Math.max(16, Math.round(c.w * rotW));
+    const sh = Math.max(16, Math.round(c.h * rotH));
+
+    // 3. Apply resolution scale (or preview cap)
+    let scale = (scanItem.scalePct || 100) / 100;
+    if(maxPreviewDim){
+      const maxDim = Math.max(sw * scale, sh * scale);
+      if(maxDim > maxPreviewDim){
+        scale = scale * (maxPreviewDim / maxDim);
+      }
+    }
+    const outW = Math.max(16, Math.round(sw * scale));
+    const outH = Math.max(16, Math.round(sh * scale));
+
+    targetCanvas.width = outW;
+    targetCanvas.height = outH;
+    const ctx = targetCanvas.getContext('2d');
+    ctx.drawImage(rotCanvas, sx, sy, sw, sh, 0, 0, outW, outH);
+
+    // 4. Pixel manipulation: Brightness, Contrast, Color Mode, & Unsharp Mask (Deblur)
+    const needPixels =
+      scanItem.colorMode !== 'original' ||
+      scanItem.brightness !== 0 ||
+      scanItem.contrast !== 0 ||
+      scanItem.sharpen > 0;
+
+    if(!needPixels) return;
+
+    const imgData = ctx.getImageData(0, 0, outW, outH);
+    const d = imgData.data;
+
+    const bright = scanItem.brightness || 0; // -80..80
+    let contrast = scanItem.contrast || 0;   // -60..90
+    const mode   = scanItem.colorMode || 'original';
+    const thresh = scanItem.bwThreshold || 145;
+
+    // Magic color boosts contrast and brightness slightly to whiten paper background
+    const effBright   = mode === 'magic' ? bright + 18 : bright;
+    const effContrast = mode === 'magic' ? Math.min(110, contrast + 38) : contrast;
+    const factor = (259 * (effContrast + 255)) / (255 * (259 - effContrast));
+
+    for(let i = 0; i < d.length; i += 4){
+      let r = d[i];
+      let g = d[i+1];
+      let b = d[i+2];
+
+      // Brightness + Contrast
+      r = factor * (r + effBright - 128) + 128;
+      g = factor * (g + effBright - 128) + 128;
+      b = factor * (b + effBright - 128) + 128;
+
+      if(mode === 'magic'){
+        // Whiten near-white paper pixels so shadows disappear
+        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        if(lum > 195){
+          const boost = (lum - 195) * 0.85;
+          r += boost; g += boost; b += boost;
+        }
+      } else if(mode === 'grayscale'){
+        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        r = g = b = lum;
+      } else if(mode === 'bw'){
+        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+        const v = lum >= thresh ? 255 : 0;
+        r = g = b = v;
+      }
+
+      d[i]   = r < 0 ? 0 : r > 255 ? 255 : r;
+      d[i+1] = g < 0 ? 0 : g > 255 ? 255 : g;
+      d[i+2] = b < 0 ? 0 : b > 255 ? 255 : b;
+    }
+
+    // 5. Deblur / Sharpen convolution (3x3 Unsharp Laplacians)
+    const sharpAmt = (scanItem.sharpen || 0) / 100; // 0.0 to 1.0
+    if(sharpAmt > 0){
+      const src = new Uint8ClampedArray(d);
+      const strength = sharpAmt * 1.35;
+      for(let y = 1; y < outH - 1; y++){
+        for(let x = 1; x < outW - 1; x++){
+          const idx = (y * outW + x) * 4;
+          const up  = ((y - 1) * outW + x) * 4;
+          const dn  = ((y + 1) * outW + x) * 4;
+          const lf  = (y * outW + (x - 1)) * 4;
+          const rt  = (y * outW + (x + 1)) * 4;
+          for(let cIdx = 0; cIdx < 3; cIdx++){
+            const center = src[idx + cIdx];
+            const lap = 4 * center - src[up + cIdx] - src[dn + cIdx] - src[lf + cIdx] - src[rt + cIdx];
+            const val = center + strength * lap;
+            d[idx + cIdx] = val < 0 ? 0 : val > 255 ? 255 : val;
+          }
+        }
+      }
+    }
+
+    ctx.putImageData(imgData, 0, 0);
+  }
+
+  // ── UI Rendering & Sync ───────────────────────────────────────────
+  function syncControlsFromActive(){
+    const s = getActiveScan();
+    if(!s) return;
+    scanPageSize.value       = s.pageSize || 'a4-p';
+    scanMargin.value         = String(s.margin != null ? s.margin : 18);
+    scanScaleSlider.value    = s.scalePct || 100;
+    scanScaleVal.textContent = (s.scalePct || 100) + '%';
+
+    scanBrightSlider.value     = s.brightness || 0;
+    scanBrightVal.textContent  = (s.brightness > 0 ? '+' : '') + (s.brightness || 0);
+    scanContrastSlider.value   = s.contrast || 0;
+    scanContrastVal.textContent= (s.contrast > 0 ? '+' : '') + (s.contrast || 0);
+    scanSharpenSlider.value    = s.sharpen || 0;
+    scanSharpenVal.textContent = (s.sharpen || 0) + '%';
+    scanThreshSlider.value     = s.bwThreshold || 145;
+    scanThreshVal.textContent  = s.bwThreshold || 145;
+
+    scanThresholdRow.style.display = s.colorMode === 'bw' ? 'flex' : 'none';
+
+    scanColorModes.querySelectorAll('.scan-pill').forEach(pill => {
+      pill.classList.toggle('active', pill.dataset.mode === s.colorMode);
+    });
+  }
+
+  function updateActivePreviewAndThumb(){
+    const s = getActiveScan();
+    if(!s) return;
+    renderProcessedScanToCanvas(s, scanPreviewCanvas, 700);
+    if(!cropModeActive){
+      s.thumbUrl = createThumbFromCanvas(scanPreviewCanvas);
+    }
+    const idx = scannedDocs.findIndex(x => x.id === s.id);
+    scanStageTitle.textContent = 'Page ' + (idx + 1) + ' of ' + scannedDocs.length + ' · ' + s.name;
+
+    // Show output resolution info
+    const img = s.origImg;
+    const rot = ((s.rotation % 360) + 360) % 360;
+    const rw = (rot === 90 || rot === 270) ? (img.naturalHeight||img.height) : (img.naturalWidth||img.width);
+    const rh = (rot === 90 || rot === 270) ? (img.naturalWidth||img.width) : (img.naturalHeight||img.height);
+    const cw = Math.round(rw * s.crop.w * (s.scalePct / 100));
+    const ch = Math.round(rh * s.crop.h * (s.scalePct / 100));
+    const sizeLabels = { 'a4-p':'A4 Portrait', 'a4-l':'A4 Landscape', 'letter-p':'US Letter', 'fit':'Fit Image' };
+    scanDimInfo.textContent = `${cw} × ${ch} px  ·  Output: ${sizeLabels[s.pageSize] || 'A4'}  ·  Mode: ${s.colorMode.toUpperCase()}`;
+
+    renderThumbSidebar();
+  }
+
+  function renderThumbSidebar(){
+    scanThumbList.innerHTML = '';
+    scannedDocs.forEach((s, idx) => {
+      const row = document.createElement('div');
+      row.className = 'scan-thumb-item' + (s.id === activeScanId ? ' active' : '');
+      row.innerHTML = `
+        <img src="${s.thumbUrl}" alt="Scan ${idx+1}">
+        <div class="scan-thumb-meta">
+          <strong>${idx+1}. ${escapeHtml(s.name)}</strong>
+          <span>${s.colorMode} · ${s.scalePct}%</span>
+        </div>
+        <div class="scan-thumb-actions">
+          <button class="scan-mini-btn" data-act="up" title="Move up" ${idx===0?'disabled':''}>↑</button>
+          <button class="scan-mini-btn" data-act="dn" title="Move down" ${idx===scannedDocs.length-1?'disabled':''}>↓</button>
+          <button class="scan-mini-btn del" data-act="del" title="Remove scan">✕</button>
+        </div>
+      `;
+      row.addEventListener('click', e => {
+        if(e.target.closest('button')) return;
+        activeScanId = s.id;
+        exitCropMode();
+        syncControlsFromActive();
+        updateActivePreviewAndThumb();
+      });
+      row.querySelector('[data-act="up"]').addEventListener('click', e => {
+        e.stopPropagation();
+        if(idx > 0){
+          const [moved] = scannedDocs.splice(idx, 1);
+          scannedDocs.splice(idx - 1, 0, moved);
+          renderScannerUI();
+        }
+      });
+      row.querySelector('[data-act="dn"]').addEventListener('click', e => {
+        e.stopPropagation();
+        if(idx < scannedDocs.length - 1){
+          const [moved] = scannedDocs.splice(idx, 1);
+          scannedDocs.splice(idx + 1, 0, moved);
+          renderScannerUI();
+        }
+      });
+      row.querySelector('[data-act="del"]').addEventListener('click', e => {
+        e.stopPropagation();
+        scannedDocs = scannedDocs.filter(x => x.id !== s.id);
+        if(activeScanId === s.id){
+          activeScanId = scannedDocs.length ? scannedDocs[Math.min(idx, scannedDocs.length - 1)].id : null;
+        }
+        exitCropMode();
+        syncControlsFromActive();
+        renderScannerUI();
+      });
+      scanThumbList.appendChild(row);
+    });
+  }
+
+  function renderScannerUI(){
+    scanCountBadge.textContent = scannedDocs.length + ' scanned page' + (scannedDocs.length === 1 ? '' : 's');
+    const hasScans = scannedDocs.length > 0;
+    scannerEmpty.style.display     = hasScans ? 'none' : 'block';
+    scannerWorkspace.style.display = hasScans ? 'block' : 'none';
+    scanApplyAllBtn.style.display  = scannedDocs.length > 1 ? 'inline-block' : 'none';
+    scanClearAllBtn.style.display  = hasScans ? 'inline-block' : 'none';
+
+    if(hasScans){
+      if(!getActiveScan()) activeScanId = scannedDocs[0].id;
+      syncControlsFromActive();
+      updateActivePreviewAndThumb();
+    }
+  }
+
+  // ── Filter & Size Event Listeners ─────────────────────────────────
+  scanPageSize.addEventListener('change', () => {
+    const s = getActiveScan(); if(!s) return;
+    s.pageSize = scanPageSize.value;
+    updateActivePreviewAndThumb();
+  });
+  scanMargin.addEventListener('change', () => {
+    const s = getActiveScan(); if(!s) return;
+    s.margin = parseInt(scanMargin.value) || 0;
+    updateActivePreviewAndThumb();
+  });
+  scanScaleSlider.addEventListener('input', () => {
+    const s = getActiveScan(); if(!s) return;
+    s.scalePct = parseInt(scanScaleSlider.value) || 100;
+    scanScaleVal.textContent = s.scalePct + '%';
+    updateActivePreviewAndThumb();
+  });
+  scanColorModes.querySelectorAll('.scan-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      const s = getActiveScan(); if(!s) return;
+      s.colorMode = pill.dataset.mode;
+      syncControlsFromActive();
+      updateActivePreviewAndThumb();
+    });
+  });
+  scanBrightSlider.addEventListener('input', () => {
+    const s = getActiveScan(); if(!s) return;
+    s.brightness = parseInt(scanBrightSlider.value) || 0;
+    scanBrightVal.textContent = (s.brightness > 0 ? '+' : '') + s.brightness;
+    updateActivePreviewAndThumb();
+  });
+  scanContrastSlider.addEventListener('input', () => {
+    const s = getActiveScan(); if(!s) return;
+    s.contrast = parseInt(scanContrastSlider.value) || 0;
+    scanContrastVal.textContent = (s.contrast > 0 ? '+' : '') + s.contrast;
+    updateActivePreviewAndThumb();
+  });
+  scanSharpenSlider.addEventListener('input', () => {
+    const s = getActiveScan(); if(!s) return;
+    s.sharpen = parseInt(scanSharpenSlider.value) || 0;
+    scanSharpenVal.textContent = s.sharpen + '%';
+    updateActivePreviewAndThumb();
+  });
+  scanThreshSlider.addEventListener('input', () => {
+    const s = getActiveScan(); if(!s) return;
+    s.bwThreshold = parseInt(scanThreshSlider.value) || 145;
+    scanThreshVal.textContent = s.bwThreshold;
+    updateActivePreviewAndThumb();
+  });
+
+  scanResetFilters.addEventListener('click', () => {
+    const s = getActiveScan(); if(!s) return;
+    s.colorMode   = 'original';
+    s.brightness  = 0;
+    s.contrast    = 0;
+    s.sharpen     = 0;
+    s.bwThreshold = 145;
+    s.scalePct    = 100;
+    syncControlsFromActive();
+    updateActivePreviewAndThumb();
+    showToast('Reset filters for this page.');
+  });
+
+  scanRotateLeftBtn.addEventListener('click', () => {
+    const s = getActiveScan(); if(!s) return;
+    s.rotation = (s.rotation - 90 + 360) % 360;
+    updateActivePreviewAndThumb();
+  });
+  scanRotateRightBtn.addEventListener('click', () => {
+    const s = getActiveScan(); if(!s) return;
+    s.rotation = (s.rotation + 90) % 360;
+    updateActivePreviewAndThumb();
+  });
+
+  scanApplyAllBtn.addEventListener('click', () => {
+    const cur = getActiveScan();
+    if(!cur || scannedDocs.length <= 1) return;
+    scannedDocs.forEach(s => {
+      if(s.id === cur.id) return;
+      s.pageSize    = cur.pageSize;
+      s.margin      = cur.margin;
+      s.scalePct    = cur.scalePct;
+      s.colorMode   = cur.colorMode;
+      s.brightness  = cur.brightness;
+      s.contrast    = cur.contrast;
+      s.sharpen     = cur.sharpen;
+      s.bwThreshold = cur.bwThreshold;
+      const tmpC = document.createElement('canvas');
+      renderProcessedScanToCanvas(s, tmpC, 200);
+      s.thumbUrl = createThumbFromCanvas(tmpC);
+    });
+    renderThumbSidebar();
+    showToast('Applied current settings to all ' + scannedDocs.length + ' scanned pages.');
+  });
+
+  scanClearAllBtn.addEventListener('click', () => {
+    openConfirmModal(
+      'Clear all scanned pages?',
+      'This removes all ' + scannedDocs.length + ' scanned page(s) from the scanner studio.',
+      'Clear all',
+      () => {
+        scannedDocs = [];
+        activeScanId = null;
+        exitCropMode();
+        renderScannerUI();
+        showToast('Scanner cleared.');
+      }
+    );
+  });
+
+  // ── Interactive Crop Overlay ──────────────────────────────────────
+  function updateCropOverlayDOM(){
+    scanCropOverlay.style.left   = (tempCrop.x * 100) + '%';
+    scanCropOverlay.style.top    = (tempCrop.y * 100) + '%';
+    scanCropOverlay.style.width  = (tempCrop.w * 100) + '%';
+    scanCropOverlay.style.height = (tempCrop.h * 100) + '%';
+  }
+
+  function exitCropMode(){
+    cropModeActive = false;
+    scanCropOverlay.style.display  = 'none';
+    scanApplyCropBtn.style.display = 'none';
+    scanResetCropBtn.style.display = 'none';
+    scanToggleCropBtn.textContent  = '✂️ Crop Area';
+  }
+
+  scanToggleCropBtn.addEventListener('click', () => {
+    const s = getActiveScan(); if(!s) return;
+    if(cropModeActive){
+      exitCropMode();
+      updateActivePreviewAndThumb();
+    } else {
+      cropModeActive = true;
+      tempCrop = { ...s.crop };
+      if(tempCrop.w > 0.98 && tempCrop.h > 0.98){
+        tempCrop = { x: 0.05, y: 0.05, w: 0.90, h: 0.90 };
+      }
+      updateActivePreviewAndThumb(); // renders uncropped image so user can position crop box
+      updateCropOverlayDOM();
+      scanCropOverlay.style.display  = 'block';
+      scanApplyCropBtn.style.display = 'inline-block';
+      scanResetCropBtn.style.display = 'inline-block';
+      scanToggleCropBtn.textContent  = 'Cancel Crop';
+    }
+  });
+
+  scanApplyCropBtn.addEventListener('click', () => {
+    const s = getActiveScan(); if(!s) return;
+    s.crop = { ...tempCrop };
+    exitCropMode();
+    updateActivePreviewAndThumb();
+    showToast('Crop applied.');
+  });
+
+  scanResetCropBtn.addEventListener('click', () => {
+    const s = getActiveScan(); if(!s) return;
+    s.crop = { x: 0, y: 0, w: 1, h: 1 };
+    exitCropMode();
+    updateActivePreviewAndThumb();
+    showToast('Crop reset to full image.');
+  });
+
+  // Dragging crop box & handles
+  scanCropOverlay.addEventListener('mousedown', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    const containerRect = document.getElementById('scanCanvasContainer').getBoundingClientRect();
+    const handle = e.target.closest('.scan-crop-handle');
+    const mode = handle ? handle.dataset.corner : 'move';
+    const startX = e.clientX, startY = e.clientY;
+    const orig = { ...tempCrop };
+
+    function onMove(ev){
+      const dx = (ev.clientX - startX) / containerRect.width;
+      const dy = (ev.clientY - startY) / containerRect.height;
+      if(mode === 'move'){
+        tempCrop.x = clamp(orig.x + dx, 0, 1 - orig.w);
+        tempCrop.y = clamp(orig.y + dy, 0, 1 - orig.h);
+      } else {
+        let { x, y, w, h } = orig;
+        if(mode.includes('w')){ x = clamp(orig.x + dx, 0, orig.x + orig.w - 0.1); w = orig.w - (x - orig.x); }
+        if(mode.includes('e')){ w = clamp(orig.w + dx, 0.1, 1 - orig.x); }
+        if(mode.includes('n')){ y = clamp(orig.y + dy, 0, orig.y + orig.h - 0.1); h = orig.h - (y - orig.y); }
+        if(mode.includes('s')){ h = clamp(orig.h + dy, 0.1, 1 - orig.y); }
+        tempCrop = { x, y, w, h };
+      }
+      updateCropOverlayDOM();
+    }
+    function onUp(){
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+
+  // ── Build Combined PDF from All Scanned Pages ─────────────────────
+  async function buildScannedPdfBytes(){
+    const pdfDoc = await PDFDocument.create();
+    const workCanvas = document.createElement('canvas');
+    const wasCrop = cropModeActive;
+    cropModeActive = false;
+
+    for(const s of scannedDocs){
+      renderProcessedScanToCanvas(s, workCanvas, null); // full chosen resolution
+      const dataUrl = workCanvas.toDataURL('image/jpeg', 0.90);
+      const jpgBytes = await fetch(dataUrl).then(r => r.arrayBuffer());
+      const jpgImg = await pdfDoc.embedJpg(jpgBytes);
+
+      const iw = jpgImg.width;
+      const ih = jpgImg.height;
+      const pad = s.margin != null ? s.margin : 18;
+
+      let pw = 595.28, ph = 841.89; // A4 Portrait
+      if(s.pageSize === 'a4-l'){ pw = 841.89; ph = 595.28; }
+      else if(s.pageSize === 'letter-p'){ pw = 612; ph = 792; }
+      else if(s.pageSize === 'fit'){ pw = iw + pad * 2; ph = ih + pad * 2; }
+
+      const page = pdfDoc.addPage([pw, ph]);
+      const availW = Math.max(20, pw - pad * 2);
+      const availH = Math.max(20, ph - pad * 2);
+      const scale = Math.min(availW / iw, availH / ih);
+      const drawW = iw * scale;
+      const drawH = ih * scale;
+      const drawX = (pw - drawW) / 2;
+      const drawY = (ph - drawH) / 2;
+
+      page.drawImage(jpgImg, { x: drawX, y: drawY, width: drawW, height: drawH });
+    }
+
+    cropModeActive = wasCrop;
+    return await pdfDoc.save();
+  }
+
+  function getCleanScanFileName(){
+    const raw = (scanFileNameInput.value || 'Scanned-Document').trim().replace(/\.pdf$/i, '');
+    const safe = raw.replace(/[<>:"/\\|?*]+/g, '-') || 'Scanned-Document';
+    return safe + '.pdf';
+  }
+
+  // 1. Save & Download PDF directly (supports native Save As File Picker when available)
+  scanSavePdfBtn.addEventListener('click', async () => {
+    if(scannedDocs.length === 0){ showToast('Scan or upload at least one page first.'); return; }
+    const fileName = getCleanScanFileName();
+    scanSavePdfBtn.disabled = true;
+    scanSavePdfBtn.textContent = 'Building PDF…';
+    try{
+      const pdfBytes = await buildScannedPdfBytes();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+
+      if(window.showSaveFilePicker){
+        try{
+          const handle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            types: [{ description: 'PDF Document', accept: { 'application/pdf': ['.pdf'] } }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          showToast('Saved "' + handle.name + '" to your device!');
+          return;
+        }catch(pickerErr){
+          if(pickerErr.name === 'AbortError') return;
+          // Fall back to standard download if picker blocked
+        }
+      }
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+      showToast('Downloaded "' + fileName + '" (' + scannedDocs.length + ' page' + (scannedDocs.length===1?'':'s') + ').');
+    }catch(err){
+      console.error(err);
+      showToast('Failed to build PDF: ' + err.message);
+    }finally{
+      scanSavePdfBtn.disabled = false;
+      scanSavePdfBtn.textContent = '💾 Save & Download PDF';
+    }
+  });
+
+  // 2. Connect / Send combined PDF directly into the main PDF Workbench
+  scanSendToWbBtn.addEventListener('click', async () => {
+    if(scannedDocs.length === 0){ showToast('Scan or upload at least one page first.'); return; }
+    const fileName = getCleanScanFileName();
+    scanSendToWbBtn.disabled = true;
+    scanSendToWbBtn.textContent = 'Adding to Workbench…';
+    try{
+      const pdfBytes = await buildScannedPdfBytes();
+      const file = new File([pdfBytes], fileName, { type: 'application/pdf' });
+      await handleFiles([file]);
+      showToast('Added "' + fileName + '" (' + scannedDocs.length + ' page' + (scannedDocs.length===1?'':'s') + ') to Workbench!');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }catch(err){
+      console.error(err);
+      showToast('Could not add to Workbench: ' + err.message);
+    }finally{
+      scanSendToWbBtn.disabled = false;
+      scanSendToWbBtn.textContent = '➕ Send to Workbench';
+    }
+  });
+
+  // ── Pre-populate a sample scanned document so the full editor (Size, Light/Dark,
+  //    Remove Blur, File Name & Save) is immediately visible & testable on page load ──
+  function createSampleScanPage(){
+    const c = document.createElement('canvas');
+    c.width = 760;
+    c.height = 1040;
+    const ctx = c.getContext('2d');
+
+    // Slightly off-white paper texture so Light/Dark & Magic Color visibly demonstrate enhancement
+    ctx.fillStyle = '#EFECE4';
+    ctx.fillRect(0, 0, c.width, c.height);
+
+    // Subtle border
+    ctx.strokeStyle = '#C7B695';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(36, 36, c.width - 72, c.height - 72);
+
+    // Header
+    ctx.fillStyle = '#1D5256';
+    ctx.font = 'bold 28px Georgia, serif';
+    ctx.fillText('SAMPLE SCANNED DOCUMENT', 70, 105);
+
+    ctx.fillStyle = '#6B6452';
+    ctx.font = '16px Arial, sans-serif';
+    ctx.fillText('Try the controls on the right: Page Size, Light/Dark, Magic Color & Remove Blur!', 70, 140);
+
+    ctx.strokeStyle = '#B7A37D';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(70, 162);
+    ctx.lineTo(c.width - 70, 162);
+    ctx.stroke();
+
+    // Sample body paragraphs
+    ctx.fillStyle = '#25231E';
+    ctx.font = 'bold 19px Arial, sans-serif';
+    ctx.fillText('1. Individual Page Editing & Enhancement', 70, 210);
+
+    ctx.font = '16px Arial, sans-serif';
+    const lines = [
+      '• Use "📸 Scan with Camera" or "🖼️ Upload Scanned Images" above to add your own',
+      '  scanned pages or photos.',
+      '• Each page you scan is connected into this single multi-page document.',
+      '• Adjust Light/Dark (Brightness) and Contrast to clean up dark camera shadows.',
+      '• Click "✨ Magic Color" or "Crisp B&W Doc" for instant scanner-grade clarity.',
+      '• Drag the "Remove Blur" slider to sharpen soft or out-of-focus text.',
+      '• Change Page Size (A4, US Letter, or Fit) and crop out desk edges.',
+      '• Type your custom File Name below and click "💾 Save & Download PDF" or',
+      '  "➕ Send to Workbench" to merge or run OCR!'
+    ];
+    lines.forEach((ln, i) => {
+      ctx.fillText(ln, 70, 248 + i * 32);
+    });
+
+    // Sample table / invoice box
+    ctx.strokeStyle = '#8A8270';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(70, 560, c.width - 140, 220);
+    ctx.fillStyle = '#E4DEC9';
+    ctx.fillRect(71, 561, c.width - 142, 42);
+
+    ctx.fillStyle = '#211F1A';
+    ctx.font = 'bold 16px monospace';
+    ctx.fillText('ITEM DESCRIPTION                     QTY          STATUS', 90, 588);
+
+    ctx.font = '15px monospace';
+    ctx.fillText('01. Multi-Page Document Scan          1           Connected', 90, 635);
+    ctx.fillText('02. Light / Dark & Color Balance      1           Active', 90, 675);
+    ctx.fillText('03. Deblur / Text Sharpening          1           Ready', 90, 715);
+    ctx.fillText('04. Custom PDF Filename & Storage     1           Ready', 90, 755);
+
+    ctx.fillStyle = '#6B6452';
+    ctx.font = 'italic 14px Georgia, serif';
+    ctx.fillText('Tip: Click the ✕ button on this sample thumbnail on the left whenever you want to remove it.', 70, 940);
+
+    const img = new Image();
+    img.onload = () => {
+      const id = genId();
+      const sampleItem = {
+        id,
+        name: 'Sample-Scan (Demo)',
+        origImg: img,
+        rotation: 0,
+        crop: { x: 0, y: 0, w: 1, h: 1 },
+        pageSize: 'a4-p',
+        margin: 18,
+        scalePct: 100,
+        colorMode: 'original',
+        brightness: 0,
+        contrast: 0,
+        sharpen: 0,
+        bwThreshold: 145,
+        thumbUrl: '',
+        isDemo: true
+      };
+      scannedDocs.push(sampleItem);
+      activeScanId = id;
+      renderProcessedScanToCanvas(sampleItem, scanPreviewCanvas, 650);
+      sampleItem.thumbUrl = createThumbFromCanvas(scanPreviewCanvas);
+      renderScannerUI();
+    };
+    img.src = c.toDataURL('image/jpeg', 0.92);
+  }
+
+  // Auto-remove the demo page as soon as the user adds their first real scan
+  const origAddImageToScanner = addImageToScanner;
+  addImageToScanner = function(imgElement, name){
+    if(scannedDocs.length === 1 && scannedDocs[0].isDemo){
+      scannedDocs = [];
+    }
+    origAddImageToScanner(imgElement, name);
+  };
+
+  createSampleScanPage();
+})();
 
 renderAll();
 </script>
