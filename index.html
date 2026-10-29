@@ -1227,6 +1227,7 @@
     <button class="danger" id="deleteSelBtn" disabled>Delete selected (0)</button>
     <button id="splitBtn" disabled style="background:#A9780B;border-color:#7A5608;color:#fff;font-size:13px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;border-width:1px;border-style:solid;">✂ Split selected</button>
     <button class="primary" id="downloadBtn" disabled>⬇ Download merged PDF</button>
+    <button class="outline-teal" id="shareWbPdfBtn" disabled title="Share merged PDF via WhatsApp, Email, or native device share">📤 Share PDF</button>
     <button id="newProjectBtn" disabled title="Remove every file and page and start fresh" style="background:transparent;border-color:var(--red);color:var(--red);font-size:13px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;border-width:1px;border-style:solid;">🗑 New project</button>
     <button id="scannerNavBtn" title="Scan documents with camera or photos, enhance, deblur & save as PDF"
       style="background:var(--teal-deep);border:1px solid var(--teal);color:#fff;font-size:13px;font-weight:700;border-radius:7px;padding:8px 13px;cursor:pointer;white-space:nowrap;">
@@ -1297,6 +1298,7 @@
       <div class="scanner-drive-card-row">
         <input type="text" id="scanDrivePathTopInput" placeholder="Paste your Google Drive Folder URL or type folder name (e.g. My Scans/2026)">
         <button type="button" class="primary" id="scanSavePathTopBtn" style="padding:9px 14px;font-size:12.5px;white-space:nowrap;background:var(--teal-deep);">☁️ Save My Path</button>
+        <button type="button" class="outline-teal" id="scanOpenDriveTopBtn" style="padding:9px 14px;font-size:12.5px;white-space:nowrap;" title="Open your saved Google Drive folder in a new tab">📂 Go to Google Drive ↗</button>
       </div>
       <div id="scanDriveTopStatus" style="font-size:11.5px;color:var(--ink-soft);line-height:1.4;">
         Each logged-in email/mobile user stores their own personal Google Drive folder path across mobile &amp; desktop.
@@ -1436,18 +1438,16 @@
         </div>
       </div>
 
-      <!-- Bottom Bar: File Name + Google Drive Path + Save / Send to Workbench -->
+      <!-- Bottom Bar: File Name + Navigate to Google Drive + Save / Send to Workbench -->
       <div class="scan-export-bar" style="flex-direction:column;align-items:stretch;gap:12px;">
         <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;">
           <div class="scan-filename-wrap" style="flex:1;min-width:240px;">
             <label for="scanFileNameInput" style="font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;">📄 File Name (.pdf):</label>
             <input type="text" id="scanFileNameInput" value="Scanned-Document" placeholder="Enter file name (e.g. Invoice-Oct-2026)">
           </div>
-          <div class="scan-filename-wrap" style="flex:1.4;min-width:260px;">
-            <label for="scanDrivePathInput" style="font-size:12.5px;font-weight:700;color:var(--teal-deep);white-space:nowrap;" title="Stored individually for your login">📁 My Google Drive Path:</label>
-            <input type="text" id="scanDrivePathInput" value="" placeholder="Paste your Google Drive Folder URL or folder name">
-            <button type="button" class="ghost" id="scanSavePathCloudBtn" style="padding:7px 11px;font-size:12px;white-space:nowrap;border:1px solid var(--teal);color:var(--teal-deep);" title="Save this Google Drive Path to your logged-in account">☁️ Save My Path</button>
-          </div>
+          <button type="button" class="outline-teal" id="scanOpenDriveBottomBtn" style="padding:9px 15px;font-size:12.5px;white-space:nowrap;font-weight:700;" title="Open your saved Google Drive folder in a new tab">
+            📂 Go to Google Drive ↗
+          </button>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
           <div id="scanDriveStatus" style="font-size:12px;color:var(--ink-soft);">
@@ -1459,6 +1459,9 @@
             </button>
             <button class="ghost" id="scanSavePdfBtn" title="Download combined PDF file locally to your device">
               💾 Save to Device
+            </button>
+            <button class="outline-teal" id="scanSharePdfBtn" title="Share combined scanned PDF via WhatsApp, Email, or native device share">
+              📤 Share PDF
             </button>
             <button class="primary" id="scanSaveDriveBtn" style="background:var(--teal-deep);" title="Save combined PDF directly to your personal Google Drive path">
               ☁️ Save to Google Drive
@@ -1877,6 +1880,7 @@ const countLabel = document.getElementById('countLabel');
 const deleteSelBtn = document.getElementById('deleteSelBtn');
 const splitBtn = document.getElementById('splitBtn');
 const downloadBtn = document.getElementById('downloadBtn');
+const shareWbPdfBtn = document.getElementById('shareWbPdfBtn');
 const undoBtn = document.getElementById('undoBtn');
 const newProjectBtn = document.getElementById('newProjectBtn');
 const watermarkToggle = document.getElementById('watermarkToggle');
@@ -3253,6 +3257,7 @@ function renderAll(){
   splitBtn.disabled = markedCount === 0;
   splitBtn.textContent = markedCount > 0 ? '✂ Split selected (' + markedCount + ')' : '✂ Split selected';
   downloadBtn.disabled = pages.length === 0;
+  if(shareWbPdfBtn) shareWbPdfBtn.disabled = pages.length === 0;
   newProjectBtn.disabled = pages.length === 0 && fileOrder.length === 0;
 
   // ---- files list ----
@@ -4236,7 +4241,7 @@ function renderMatches(){
   });
 }
 
-// ---------- export ----------
+// ---------- export & share ----------
 downloadBtn.addEventListener('click', () => {
   // Plain merge/download = completely free, no login needed.
   // Gate only triggers if the user has applied premium edits
@@ -4247,6 +4252,16 @@ downloadBtn.addEventListener('click', () => {
     mergeAndDownload();
   }
 });
+
+if(shareWbPdfBtn){
+  shareWbPdfBtn.addEventListener('click', () => {
+    if(hasPremiumEdits()){
+      window._auth.premiumGate('share your edited PDF', shareWorkbenchPdf);
+    } else {
+      shareWorkbenchPdf();
+    }
+  });
+}
 
 // Stamps a visible "EDITED" watermark plus a small dated footer note onto a
 // page that has had its content altered (text replaced or a logo/image
@@ -4281,69 +4296,230 @@ function shouldStampTrial(){
   return !window._licenseEngine.isLicensed() && window._licenseEngine.getTrialDaysLeft() <= 0;
 }
 
+async function buildMergedWorkbenchPdfBytes(){
+  // Clear the per-page canvas cache so we re-render fresh if files changed
+  Object.keys(pageCanvasCache).forEach(k => delete pageCanvasCache[k]);
+  const outDoc = await PDFDocument.create();
+  const helv = await outDoc.embedFont(StandardFonts.Helvetica);
+  const helvBold = await outDoc.embedFont(StandardFonts.HelveticaBold);
+
+  for(const p of pages){
+    const fs = fileStore[p.fileId];
+    if(!fs.pdfLibDoc){ fs.pdfLibDoc = await PDFDocument.load(fs.bytes); }
+  }
+
+  for(const p of pages){
+    const fs = fileStore[p.fileId];
+    const [copied] = await outDoc.copyPages(fs.pdfLibDoc, [p.pageIndex - 1]);
+    outDoc.addPage(copied);
+
+    // text find-replace (colour-matched, auto-fitting)
+    const pageMatches = matches.filter(m => m.uidPage === p.uid && m.enabled);
+    for(const m of pageMatches){
+      await applyTextReplacement(copied, m, helv, p.fileId, p.pageIndex);
+    }
+
+    const pageWidthPts = copied.getWidth();
+    const pageHeightPts = copied.getHeight();
+    for(const patch of (p.patches || [])){
+      const rectX = patch.xPct * pageWidthPts;
+      const rectWidth = patch.wPct * pageWidthPts;
+      const rectHeight = patch.hPct * pageHeightPts;
+      const rectY = pageHeightPts - (patch.yPct + patch.hPct) * pageHeightPts; // PDF y is bottom-up
+      copied.drawRectangle({
+        x: rectX, y: rectY, width: rectWidth, height: rectHeight,
+        color: hexToRgb01(patch.boxColor)
+      });
+      if(patch.text){
+        const font = patch.bold === false ? helv : helvBold;
+        let fontSize = patch.fontSize;
+        const maxTextWidth = rectWidth * 0.92;
+        while(fontSize > 6 && font.widthOfTextAtSize(patch.text, fontSize) > maxTextWidth){
+          fontSize -= 1;
+        }
+        const textWidth = font.widthOfTextAtSize(patch.text, fontSize);
+        const tx = rectX + Math.max(2, (rectWidth - textWidth) / 2);
+        const ty = rectY + Math.max(2, (rectHeight - fontSize) / 2) + fontSize * 0.12;
+        copied.drawText(patch.text, {
+          x: tx, y: ty, size: fontSize, font, color: hexToRgb01(patch.textColor)
+        });
+      }
+    }
+
+    const wasEdited = pageMatches.length > 0 || (p.patches || []).length > 0;
+    if(wasEdited && watermarkToggle.checked){
+      stampEditedWatermark(copied, helvBold);
+    }
+    if(shouldStampTrial()) stampTrialWatermark(copied, helvBold);
+  }
+
+  return await outDoc.save();
+}
+
+function getWorkbenchExportFileName(){
+  if(fileOrder.length === 1 && fileStore[fileOrder[0]] && fileStore[fileOrder[0]].name){
+    const raw = fileStore[fileOrder[0]].name.replace(/\.pdf$/i, '');
+    return raw + '-edited.pdf';
+  }
+  return 'merged-document.pdf';
+}
+
+// Universal PDF Share helper used by both PDF Editor and PDF Scanner
+async function sharePdfFileOrModal(pdfBytes, fileName){
+  const cleanName = (fileName || 'document.pdf').endsWith('.pdf') ? fileName : (fileName + '.pdf');
+  const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+  const pdfFile = new File([blob], cleanName, { type: 'application/pdf' });
+
+  // 1. Try native OS / Mobile Share Sheet with actual PDF file attachment first
+  if(navigator.canShare && navigator.share){
+    try{
+      if(navigator.canShare({ files: [pdfFile] })){
+        await navigator.share({
+          files: [pdfFile],
+          title: cleanName,
+          text: 'Sharing PDF document: ' + cleanName
+        });
+        showToast('📤 Shared "' + cleanName + '"');
+        return;
+      }
+    }catch(err){
+      if(err && err.name === 'AbortError') return; // user closed share sheet
+      console.warn('Native file share fallback:', err);
+    }
+  }
+
+  // 2. Fallback / Desktop Share Modal (WhatsApp, Gmail, Default Email, Native Share, or Download)
+  openSharePdfModal(pdfFile, blob, cleanName);
+}
+window._sharePdfFileOrModal = sharePdfFileOrModal;
+
+function openSharePdfModal(pdfFile, blob, cleanName){
+  const existing = document.getElementById('pdfShareModalOverlay');
+  if(existing) existing.remove();
+
+  const sizeKb = Math.max(1, Math.round(blob.size / 1024));
+  const overlay = document.createElement('div');
+  overlay.id = 'pdfShareModalOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,0.65);backdrop-filter:blur(4px);z-index:10050;display:flex;align-items:center;justify-content:center;padding:16px;';
+
+  const triggerDownload = () => {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = cleanName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+  };
+
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:16px;max-width:440px;width:100%;padding:22px 24px;box-shadow:0 20px 50px rgba(0,0,0,0.3);border:1px solid #e2e8f0;font-family:inherit;color:#1e293b;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <h3 style="margin:0;font-size:17px;font-weight:800;color:#0f172a;display:flex;align-items:center;gap:8px;">📤 Share PDF Document</h3>
+        <button id="closeSharePdfModalBtn" style="background:none;border:none;font-size:20px;line-height:1;color:#64748b;cursor:pointer;padding:4px;">✕</button>
+      </div>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:10px 12px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div style="overflow:hidden;">
+          <div style="font-weight:700;font-size:13px;color:#0f766e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">📄 ${cleanName.replace(/</g,'&lt;')}</div>
+          <div style="font-size:11px;color:#64748b;margin-top:2px;">PDF Document · ${sizeKb} KB</div>
+        </div>
+        <button id="shareModalQuickSaveBtn" style="background:#0f766e;color:#fff;border:none;border-radius:7px;padding:6px 11px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap;">⬇ Save File</button>
+      </div>
+      <div style="font-size:12px;color:#475569;margin-bottom:12px;line-height:1.45;">
+        Choose how you want to share this PDF. On desktop apps (WhatsApp Web / Gmail), the PDF will automatically download so you can drop or attach it directly into your chat or email:
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px;">
+        <button id="shareViaSystemBtn" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 12px;border-radius:10px;border:1.5px solid #0d9488;background:#f0fdfa;color:#0f766e;font-weight:700;font-size:12.5px;cursor:pointer;">
+          📱 Device Share
+        </button>
+        <button id="shareViaWhatsAppBtn" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 12px;border-radius:10px;border:1.5px solid #16a34a;background:#f0fdf4;color:#15803d;font-weight:700;font-size:12.5px;cursor:pointer;">
+          💬 WhatsApp
+        </button>
+        <button id="shareViaGmailBtn" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 12px;border-radius:10px;border:1.5px solid #dc2626;background:#fef2f2;color:#b91c1c;font-weight:700;font-size:12.5px;cursor:pointer;">
+          📧 Gmail Compose
+        </button>
+        <button id="shareViaEmailBtn" style="display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 12px;border-radius:10px;border:1.5px solid #2563eb;background:#eff6ff;color:#1d4ed8;font-weight:700;font-size:12.5px;cursor:pointer;">
+          ✉️ Email App
+        </button>
+      </div>
+      <div id="shareModalHint" style="display:none;background:#fffbeb;border:1px solid #fde68a;color:#92400e;border-radius:8px;padding:8px 10px;font-size:11.5px;margin-top:8px;"></div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+  const closeModal = () => overlay.remove();
+  overlay.addEventListener('click', (e) => { if(e.target === overlay) closeModal(); });
+  overlay.querySelector('#closeSharePdfModalBtn').addEventListener('click', closeModal);
+
+  overlay.querySelector('#shareModalQuickSaveBtn').addEventListener('click', () => {
+    triggerDownload();
+    showToast('Downloaded "' + cleanName + '"');
+  });
+
+  overlay.querySelector('#shareViaSystemBtn').addEventListener('click', async () => {
+    if(navigator.share){
+      try{
+        if(navigator.canShare && navigator.canShare({ files: [pdfFile] })){
+          await navigator.share({ files: [pdfFile], title: cleanName, text: 'Sharing PDF: ' + cleanName });
+          closeModal();
+          return;
+        }
+        await navigator.share({ title: cleanName, text: 'Sharing PDF document: ' + cleanName });
+        closeModal();
+        return;
+      }catch(err){
+        if(err && err.name === 'AbortError') return;
+      }
+    }
+    triggerDownload();
+    const hint = overlay.querySelector('#shareModalHint');
+    hint.style.display = 'block';
+    hint.textContent = '✅ "' + cleanName + '" has been downloaded to your device so you can share it in any app.';
+  });
+
+  overlay.querySelector('#shareViaWhatsAppBtn').addEventListener('click', async () => {
+    if(navigator.canShare && navigator.canShare({ files: [pdfFile] })){
+      try{
+        await navigator.share({ files: [pdfFile], title: cleanName, text: 'Sharing PDF: ' + cleanName });
+        closeModal();
+        return;
+      }catch(e){ if(e && e.name === 'AbortError') return; }
+    }
+    triggerDownload();
+    const msg = encodeURIComponent('Please find the attached PDF document: ' + cleanName);
+    window.open('https://wa.me/?text=' + msg, '_blank', 'noopener');
+    showToast('Downloaded "' + cleanName + '" — attach it in WhatsApp!');
+    closeModal();
+  });
+
+  overlay.querySelector('#shareViaGmailBtn').addEventListener('click', () => {
+    triggerDownload();
+    const subj = encodeURIComponent('PDF Document: ' + cleanName);
+    const body = encodeURIComponent('Hi,\n\nPlease find the PDF document "' + cleanName + '" attached (downloaded to your computer — drag and drop it into this email).\n');
+    window.open('https://mail.google.com/mail/?view=cm&fs=1&su=' + subj + '&body=' + body, '_blank', 'noopener');
+    showToast('Downloaded "' + cleanName + '" — drag it into Gmail compose!');
+    closeModal();
+  });
+
+  overlay.querySelector('#shareViaEmailBtn').addEventListener('click', () => {
+    triggerDownload();
+    const subj = encodeURIComponent('PDF Document: ' + cleanName);
+    const body = encodeURIComponent('Hi,\n\nPlease find the PDF document "' + cleanName + '" attached.\n');
+    window.location.href = 'mailto:?subject=' + subj + '&body=' + body;
+    showToast('Downloaded "' + cleanName + '" — attach it to your email!');
+    closeModal();
+  });
+}
+
 async function mergeAndDownload(){
   if(pages.length === 0) return;
   // No gate here — user has already done their work. Gate is on the download button itself.
   downloadBtn.disabled = true;
   downloadBtn.textContent = 'Building PDF…';
-  // Clear the per-page canvas cache so we re-render fresh if files changed
-  Object.keys(pageCanvasCache).forEach(k => delete pageCanvasCache[k]);
   try{
-    const outDoc = await PDFDocument.create();
-    const helv = await outDoc.embedFont(StandardFonts.Helvetica);
-    const helvBold = await outDoc.embedFont(StandardFonts.HelveticaBold);
-
-    for(const p of pages){
-      const fs = fileStore[p.fileId];
-      if(!fs.pdfLibDoc){ fs.pdfLibDoc = await PDFDocument.load(fs.bytes); }
-    }
-
-    for(const p of pages){
-      const fs = fileStore[p.fileId];
-      const [copied] = await outDoc.copyPages(fs.pdfLibDoc, [p.pageIndex - 1]);
-      outDoc.addPage(copied);
-
-      // text find-replace (colour-matched, auto-fitting)
-      const pageMatches = matches.filter(m => m.uidPage === p.uid && m.enabled);
-      for(const m of pageMatches){
-        await applyTextReplacement(copied, m, helv, p.fileId, p.pageIndex);
-      }
-
-      const pageWidthPts = copied.getWidth();
-      const pageHeightPts = copied.getHeight();
-      for(const patch of (p.patches || [])){
-        const rectX = patch.xPct * pageWidthPts;
-        const rectWidth = patch.wPct * pageWidthPts;
-        const rectHeight = patch.hPct * pageHeightPts;
-        const rectY = pageHeightPts - (patch.yPct + patch.hPct) * pageHeightPts; // PDF y is bottom-up
-        copied.drawRectangle({
-          x: rectX, y: rectY, width: rectWidth, height: rectHeight,
-          color: hexToRgb01(patch.boxColor)
-        });
-        if(patch.text){
-          const font = patch.bold === false ? helv : helvBold;
-          let fontSize = patch.fontSize;
-          const maxTextWidth = rectWidth * 0.92;
-          while(fontSize > 6 && font.widthOfTextAtSize(patch.text, fontSize) > maxTextWidth){
-            fontSize -= 1;
-          }
-          const textWidth = font.widthOfTextAtSize(patch.text, fontSize);
-          const tx = rectX + Math.max(2, (rectWidth - textWidth) / 2);
-          const ty = rectY + Math.max(2, (rectHeight - fontSize) / 2) + fontSize * 0.12;
-          copied.drawText(patch.text, {
-            x: tx, y: ty, size: fontSize, font, color: hexToRgb01(patch.textColor)
-          });
-        }
-      }
-
-      const wasEdited = pageMatches.length > 0 || (p.patches || []).length > 0;
-      if(wasEdited && watermarkToggle.checked){
-        stampEditedWatermark(copied, helvBold);
-      }
-      if(shouldStampTrial()) stampTrialWatermark(copied, helvBold);
-    }
-
-    const outBytes = await outDoc.save();
+    const outBytes = await buildMergedWorkbenchPdfBytes();
     const blob = new Blob([outBytes], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -4360,6 +4536,30 @@ async function mergeAndDownload(){
   }finally{
     downloadBtn.disabled = pages.length === 0;
     downloadBtn.textContent = '⬇ Download merged PDF';
+  }
+}
+
+async function shareWorkbenchPdf(){
+  if(pages.length === 0){
+    showToast('Upload at least one PDF first to share.');
+    return;
+  }
+  if(shareWbPdfBtn){
+    shareWbPdfBtn.disabled = true;
+    shareWbPdfBtn.textContent = '⏳ Preparing…';
+  }
+  try{
+    const outBytes = await buildMergedWorkbenchPdfBytes();
+    const fileName = getWorkbenchExportFileName();
+    await sharePdfFileOrModal(outBytes, fileName);
+  }catch(err){
+    console.error(err);
+    showToast('Share failed: ' + err.message);
+  }finally{
+    if(shareWbPdfBtn){
+      shareWbPdfBtn.disabled = pages.length === 0;
+      shareWbPdfBtn.textContent = '📤 Share PDF';
+    }
   }
 }
 
@@ -7054,6 +7254,29 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
     }
   });
 
+  // 2b. Share Combined Scanned PDF (Mobile Share Sheet / WhatsApp / Email / Gmail)
+  const scanSharePdfBtn = document.getElementById('scanSharePdfBtn');
+  if(scanSharePdfBtn){
+    scanSharePdfBtn.addEventListener('click', async () => {
+      if(scannedDocs.length === 0){ showToast('Scan or upload at least one page first to share.'); return; }
+      const fileName = getCleanScanFileName();
+      scanSharePdfBtn.disabled = true;
+      scanSharePdfBtn.textContent = '⏳ Preparing…';
+      try{
+        const pdfBytes = await buildScannedPdfBytes();
+        if(window._sharePdfFileOrModal){
+          await window._sharePdfFileOrModal(pdfBytes, fileName);
+        }
+      }catch(err){
+        console.error(err);
+        showToast('Share failed: ' + err.message);
+      }finally{
+        scanSharePdfBtn.disabled = false;
+        scanSharePdfBtn.textContent = '📤 Share PDF';
+      }
+    });
+  }
+
   // 3. Save Combined PDF Directly to Google Drive & Per-Login Personal Path Sync
   const scanDrivePathTopInput = document.getElementById('scanDrivePathTopInput');
   const scanSavePathTopBtn    = document.getElementById('scanSavePathTopBtn');
@@ -7288,6 +7511,33 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
     await saveUserPersonalDrivePath(val, true);
     btnEl.disabled = false;
     btnEl.textContent = origText;
+  }
+
+  const scanOpenDriveTopBtn    = document.getElementById('scanOpenDriveTopBtn');
+  const scanOpenDriveBottomBtn = document.getElementById('scanOpenDriveBottomBtn');
+
+  function openUserGoogleDriveFolder(){
+    const raw = ((scanDrivePathTopInput && scanDrivePathTopInput.value) || getUserPersonalDrivePath() || '').trim();
+    let targetUrl = 'https://drive.google.com/drive/my-drive';
+    if(raw){
+      if(/^https?:\/\//i.test(raw)){
+        targetUrl = raw;
+      } else if(/^[a-zA-Z0-9_-]{20,}$/.test(raw) && !raw.includes('/') && !raw.includes(' ')){
+        targetUrl = 'https://drive.google.com/drive/folders/' + raw;
+      } else {
+        const parts = raw.split('/').map(p => p.trim()).filter(Boolean);
+        const leafFolder = parts[parts.length - 1] || raw;
+        targetUrl = 'https://drive.google.com/drive/search?q=' + encodeURIComponent('type:folder ' + leafFolder);
+      }
+    }
+    window.open(targetUrl, '_blank', 'noopener');
+  }
+
+  if(scanOpenDriveTopBtn){
+    scanOpenDriveTopBtn.addEventListener('click', openUserGoogleDriveFolder);
+  }
+  if(scanOpenDriveBottomBtn){
+    scanOpenDriveBottomBtn.addEventListener('click', openUserGoogleDriveFolder);
   }
 
   if(scanSavePathTopBtn){
