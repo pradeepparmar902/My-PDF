@@ -1208,15 +1208,20 @@
       </div>
 
       <div id="dropzone" class="dropzone">
-        <strong>Drop PDF files here, or click to browse</strong>
-        <span>You can add more than one file — every page lands in the same workbench below.</span>
+        <strong>Drop PDF files here, or choose from Local Device or Google Drive</strong>
+        <span>You can add more than one PDF file — every page lands in the same workbench below ready for editing.</span>
+        <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:12px;">
+          <button type="button" class="primary" id="browseLocalPdfBtn" style="padding:9px 16px;font-size:13.5px;">💻 Select Local PDF Files</button>
+          <button type="button" class="outline-teal" id="selectDrivePdfDropBtn" style="padding:9px 16px;font-size:13.5px;background:#fff;">☁️ Select PDF from Google Drive</button>
+        </div>
         <input id="fileInput" type="file" accept="application/pdf" multiple>
       </div>
     </div>
   </header>
 
   <div class="toolbar" id="toolbar">
-    <button class="ghost" id="addMoreBtn">+ Add PDFs</button>
+    <button class="ghost" id="addMoreBtn">+ Add PDFs (Local)</button>
+    <button class="outline-teal" id="addDrivePdfToolbarBtn" title="Select and load a stored PDF from your Google Drive folder">☁️ Select from Google Drive</button>
     <button class="ghost" id="selectAllBtn">Select all</button>
     <button class="ghost" id="clearSelBtn">Clear selection</button>
     <button class="ghost" id="undoBtn" disabled>↺ Undo last change</button>
@@ -1259,7 +1264,7 @@
         </div>
       </div>
       <div id="gridArea">
-        <div class="empty-state" id="emptyState">No pages yet — add a PDF above to start building your workbench.</div>
+        <div class="empty-state" id="emptyState">No pages yet — add a PDF above from your device or Google Drive to start building your workbench.</div>
         <div class="grid" id="grid" style="display:none;"></div>
       </div>
     </div>
@@ -1281,10 +1286,17 @@
   <div class="panel scanner-panel" id="scannerSection">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
       <span style="font-size:11.5px;font-family:'JetBrains Mono',monospace;color:var(--teal-deep);font-weight:700;letter-spacing:.05em;text-transform:uppercase;">📷 Document Scanner &amp; Enhancer Studio</span>
-      <button onclick="window.scrollTo({top:0,behavior:'smooth'})"
-        style="background:transparent;border:1.5px solid var(--kraft-line);color:var(--ink-soft);font-size:12px;font-weight:600;border-radius:7px;padding:5px 11px;cursor:pointer;">
-        ↑ Back to workbench
-      </button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button type="button" id="scannerToPremTopBtn"
+          style="background:linear-gradient(135deg,#A9780B,#C49A20);border:none;color:#fff;font-size:12px;font-weight:700;border-radius:7px;padding:6px 12px;cursor:pointer;white-space:nowrap;"
+          title="Use Find & Replace, OCR Languages, Extract to Word, or Extract to Excel on your scanned pages">
+          ⭐ Premium Tools (Find/Replace · OCR · Word · Excel) ↓
+        </button>
+        <button onclick="window.scrollTo({top:0,behavior:'smooth'})"
+          style="background:transparent;border:1.5px solid var(--kraft-line);color:var(--ink-soft);font-size:12px;font-weight:600;border-radius:7px;padding:5px 11px;cursor:pointer;">
+          ↑ Back to workbench
+        </button>
+      </div>
     </div>
     <h2>PDF Scanner — Capture, Enhance &amp; Combine into One File</h2>
     <p class="sub">Scan physical pages using your device camera or upload photos/scans. Edit each scanned page individually — adjust page size (A4, Letter, Fit), fix light/dark exposure, convert to crisp B&amp;W document mode, or remove blur (sharpen) — then save all pages together into a single named PDF file or send straight to the workbench above.</p>
@@ -1307,8 +1319,9 @@
 
     <div class="scanner-top-actions">
       <button class="primary" id="scanOpenCamBtn">📸 Scan with Camera</button>
-      <button class="outline-teal" id="scanUploadImgBtn">🖼️ Upload Scanned Images / Photos</button>
-      <input type="file" id="scanImgInput" accept="image/*" multiple style="display:none;">
+      <button class="outline-teal" id="scanUploadImgBtn">🖼️ Upload Images / PDF (Local)</button>
+      <button class="outline-teal" id="scanSelectDriveBtn" style="background:#fff;" title="Select a stored PDF from your Google Drive folder to re-edit or enhance">☁️ Select PDF from Google Drive</button>
+      <input type="file" id="scanImgInput" accept="image/*,application/pdf" multiple style="display:none;">
       <button class="ghost" id="scanApplyAllBtn" style="display:none;" title="Copy current page's lighting, color, size & sharpen settings to all scanned pages">✨ Apply current filters to all scans</button>
       <button class="ghost" id="scanClearAllBtn" style="display:none;color:var(--red);">🗑 Clear all scans</button>
       <span id="scanCountBadge" style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-soft);">0 scanned pages</span>
@@ -1468,20 +1481,68 @@
             </button>
           </div>
         </div>
+
+        <!-- Direct Link from 2. PDF Scanner to Options 3–6 (Find & Replace, OCR, Word, Excel) -->
+        <div style="border-top:1px dashed var(--kraft-line);padding-top:11px;margin-top:2px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
+          <div style="font-size:12px;font-weight:700;color:var(--gold);display:flex;align-items:center;gap:6px;">
+            <span>⭐ Use Premium Tools (3–6) on Scanned Pages:</span>
+            <span style="font-weight:500;color:var(--ink-soft);font-size:11.5px;">(Works directly on your scanned lot without leaving Scanner)</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <button type="button" class="outline-teal" id="scanQuickFindReplaceBtn" style="font-size:12px;padding:7px 12px;" title="Find and replace text across your scanned pages using OCR">
+              🔍 3. Find &amp; Replace Text ↓
+            </button>
+            <button type="button" class="ghost" id="scanQuickOcrLangBtn" style="font-size:12px;padding:7px 12px;" title="Choose OCR languages (English, Hindi, Gujarati, etc.) for scanned pages">
+              🌐 4. OCR Language ↓
+            </button>
+            <button type="button" class="primary" id="scanQuickWordBtn" style="font-size:12px;padding:7px 12px;background:#A9780B;border-color:#7A5608;" title="Extract text from your scanned pages directly into a Word (.docx) file">
+              📝 5. Extract Scans to Word
+            </button>
+            <button type="button" class="primary" id="scanQuickExcelBtn" style="font-size:12px;padding:7px 12px;background:#1E6F3D;border-color:#14522C;" title="Extract tables/text from your scanned pages directly into an Excel (.xlsx) spreadsheet">
+              📊 6. Extract Scans to Excel
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <div class="panel" id="premiumSection">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
-      <span style="font-size:11.5px;font-family:'JetBrains Mono',monospace;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase;">⭐ Premium Tools</span>
-      <button id="backToPagesBtn" title="Back to page grid"
-        style="background:transparent;border:1.5px solid var(--kraft-line);color:var(--ink-soft);font-size:12px;font-weight:600;border-radius:7px;padding:6px 12px;cursor:pointer;white-space:nowrap;">
-        ↑ Back to pages
-      </button>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+        <span style="font-size:11.5px;font-family:'JetBrains Mono',monospace;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase;">⭐ Premium Tools (Linked to 1. PDF Workbench &amp; 2. PDF Scanner)</span>
+        <span id="premSourceStatusBadge" style="font-size:11.5px;font-family:'JetBrains Mono',monospace;background:var(--paper-deep);border:1px solid var(--kraft-line);color:var(--teal-deep);padding:3px 9px;border-radius:99px;font-weight:600;">
+          Workbench: 0 pages · Scanner: 0 pages
+        </span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" id="backToScannerBtn" title="Back to 2. PDF Scanner"
+          onclick="document.getElementById('scannerSection').scrollIntoView({behavior:'smooth',block:'start'})"
+          style="background:transparent;border:1.5px solid var(--teal);color:var(--teal-deep);font-size:12px;font-weight:600;border-radius:7px;padding:6px 12px;cursor:pointer;white-space:nowrap;">
+          ↑ 2. Back to PDF Scanner
+        </button>
+        <button id="backToPagesBtn" title="Back to 1. PDF Workbench page grid"
+          style="background:transparent;border:1.5px solid var(--kraft-line);color:var(--ink-soft);font-size:12px;font-weight:600;border-radius:7px;padding:6px 12px;cursor:pointer;white-space:nowrap;">
+          ↑ 1. Back to Workbench
+        </button>
+      </div>
     </div>
     <h2>Find &amp; replace text</h2>
-    <p class="sub">Scans every page's real text for a match and swaps it during export. Best on clean, text-based PDFs with white backgrounds — scanned/image pages have no searchable text, and the replacement won't perfectly match the original font. For text baked into a logo or scanned image (like a name inside an image), use the ✎ pencil button on that page's card instead — it lets you paint over the exact spot by hand.</p>
+    <p class="sub">Works with both <strong>1. PDF Workbench</strong> and <strong>2. PDF Scanner</strong> pages. Scans every page's real PDF text — and can also run <strong>OCR</strong> on scanned/camera pages — to find matches and swap them during export. For logos or custom boxes, you can also use the ✎ pencil button on any page card in the workbench.</p>
+    <div class="ew-row" style="margin-bottom:10px;">
+      <label class="ew-field">
+        <span>Source pages to scan</span>
+        <select id="frScope">
+          <option value="all">All pages (1. PDF Workbench + 2. PDF Scanner)</option>
+          <option value="wb-all">1. PDF Workbench — All pages</option>
+          <option value="selected">1. PDF Workbench — Selected pages only</option>
+          <option value="scanner">2. PDF Scanner — All scanned pages</option>
+        </select>
+      </label>
+      <label class="ew-check" title="Automatically run OCR (using the languages selected in OCR Language below) to find & replace text inside scanned image pages">
+        <input type="checkbox" id="frUseOcr" checked> Use OCR for scanned / camera pages
+      </label>
+    </div>
     <div class="fr-row">
       <input type="text" id="findInput" placeholder="Find this text…">
       <span class="arrow-label">→</span>
@@ -1489,14 +1550,20 @@
       <button class="outline-teal" id="scanBtn">Scan document</button>
     </div>
     <div class="matches" id="matchesArea" style="display:none;">
-      <div class="matches-summary" id="matchesSummary"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:8px;">
+        <div class="matches-summary" id="matchesSummary" style="margin-bottom:0;"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="primary" id="frDownloadPdfBtn" style="font-size:12px;padding:7px 12px;">⬇ Download Replaced PDF</button>
+          <button type="button" class="outline-teal" id="frSharePdfBtn" style="font-size:12px;padding:7px 12px;">📤 Share Replaced PDF</button>
+        </div>
+      </div>
       <div id="matchesList"></div>
     </div>
   </div>
 
-  <div class="panel">
+  <div class="panel" id="ocrLangPanel">
     <h2>OCR language (for scanned or handwritten pages)</h2>
-    <p class="sub">Tell the OCR engine which language(s) might appear on a scanned page before extracting to Word or Excel — it's used by both tools below. Reading printed/typed text is reasonably reliable. Handwriting is much harder: neat, clearly separated lettering reads best, while cursive or naturally varied handwriting — especially in Hindi or Gujarati script, where there's far less public training data — will often come back partial or rough. Treat OCR'd handwriting as a rough first draft to proofread, not a final transcript.</p>
+    <p class="sub">Tell the OCR engine which language(s) might appear on a scanned page (from <strong>1. PDF Workbench</strong> or <strong>2. PDF Scanner</strong>) before running Find &amp; Replace, Word extraction, or Excel extraction. Reading printed/typed text is reasonably reliable. Treat OCR'd handwriting as a rough first draft to proofread.</p>
     <div class="ew-row">
       <label class="ew-check"><input type="checkbox" id="ocrLangEn" checked> English</label>
       <label class="ew-check"><input type="checkbox" id="ocrLangHi"> Hindi (हिन्दी)</label>
@@ -1508,15 +1575,17 @@
     </div>
   </div>
 
-  <div class="panel">
+  <div class="panel" id="wordExtractPanel">
     <h2>Extract text to a Word document</h2>
-    <p class="sub">Pulls real text out of normal PDF pages — keeping paragraphs, bold, rough heading sizes, and side-by-side columns where it detects them — and runs OCR automatically on any page that's actually a scanned image with no real text underneath, so even scanned PDFs convert. Everything happens in your browser; large or scanned documents take longer because OCR runs page by page. Column detection is best-effort and works well for clean two-column layouts (like address blocks or newsletter-style body text); very complex or irregular layouts may still need manual cleanup. <strong>Note:</strong> if you're trying this inside a chat preview window, OCR may be blocked by that preview's security sandbox — download the file and open it directly in a browser tab for OCR to work. Normal text extraction works fine either way.</p>
+    <p class="sub">Works directly with <strong>1. PDF Workbench</strong> or <strong>2. PDF Scanner</strong> pages. Pulls real text out of normal PDF pages — keeping paragraphs, bold, rough heading sizes, and side-by-side columns where it detects them — and runs OCR automatically on any scanned/camera page so even scanned documents convert into an editable Word (<code>.docx</code>) file.</p>
     <div class="ew-row">
       <label class="ew-field">
-        <span>Pages to convert</span>
+        <span>Pages to convert (Workbench or Scanner)</span>
         <select id="ewScope">
-          <option value="all">All pages</option>
-          <option value="selected">Selected pages only</option>
+          <option value="all">All pages (1. PDF Workbench + 2. PDF Scanner)</option>
+          <option value="wb-all">1. PDF Workbench — All pages</option>
+          <option value="selected">1. PDF Workbench — Selected pages only</option>
+          <option value="scanner">2. PDF Scanner — All scanned pages</option>
         </select>
       </label>
       <label class="ew-check"><input type="checkbox" id="ewUseOcr" checked> Use OCR for scanned/image pages</label>
@@ -1526,15 +1595,17 @@
     <div class="ew-progress" id="ewProgress" style="display:none;"></div>
   </div>
 
-  <div class="panel">
+  <div class="panel" id="excelExtractPanel">
     <h2>Extract text to an Excel spreadsheet</h2>
-    <p class="sub">Looks for table-like rows of data — figures lined up in columns, like financial statements or schedules — and lays them out as real spreadsheet columns. Pages without a clear table structure still export, just as one row of text per PDF line. OCR runs automatically on scanned/image pages, same as the Word export. Column detection is best-effort: very clean tables come out cleanly, dense or irregular ones may need a little tidying afterward.</p>
+    <p class="sub">Works directly with <strong>1. PDF Workbench</strong> or <strong>2. PDF Scanner</strong> pages. Looks for table-like rows of data — figures lined up in columns, like financial statements, invoices, or schedules — and lays them out as real spreadsheet columns. OCR runs automatically on scanned/camera pages.</p>
     <div class="ew-row">
       <label class="ew-field">
-        <span>Pages to convert</span>
+        <span>Pages to convert (Workbench or Scanner)</span>
         <select id="xlScope">
-          <option value="all">All pages</option>
-          <option value="selected">Selected pages only</option>
+          <option value="all">All pages (1. PDF Workbench + 2. PDF Scanner)</option>
+          <option value="wb-all">1. PDF Workbench — All pages</option>
+          <option value="selected">1. PDF Workbench — Selected pages only</option>
+          <option value="scanner">2. PDF Scanner — All scanned pages</option>
         </select>
       </label>
       <label class="ew-field">
@@ -1961,12 +2032,57 @@ function showToast(msg){
 }
 
 // ---------- upload handling ----------
-dropzone.addEventListener('click', () => fileInput.click());
+const browseLocalPdfBtn = document.getElementById('browseLocalPdfBtn');
+const selectDrivePdfDropBtn = document.getElementById('selectDrivePdfDropBtn');
+const addDrivePdfToolbarBtn = document.getElementById('addDrivePdfToolbarBtn');
+
+dropzone.addEventListener('click', (e) => {
+  if(e.target.closest('#selectDrivePdfDropBtn')) return;
+  fileInput.click();
+});
+if(browseLocalPdfBtn){
+  browseLocalPdfBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    fileInput.click();
+  });
+}
+if(selectDrivePdfDropBtn){
+  selectDrivePdfDropBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if(typeof window._openDrivePdfSelectorModal === 'function'){
+      window._openDrivePdfSelectorModal('workbench');
+    }
+  });
+}
+if(addDrivePdfToolbarBtn){
+  addDrivePdfToolbarBtn.addEventListener('click', () => {
+    if(typeof window._openDrivePdfSelectorModal === 'function'){
+      window._openDrivePdfSelectorModal('workbench');
+    }
+  });
+}
 addMoreBtn.addEventListener('click', () => fileInput.click());
 ['dragenter','dragover'].forEach(ev => dropzone.addEventListener(ev, e=>{e.preventDefault(); dropzone.classList.add('drag');}));
 ['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e=>{e.preventDefault(); dropzone.classList.remove('drag');}));
 dropzone.addEventListener('drop', e => handleFiles(e.dataTransfer.files));
 fileInput.addEventListener('change', e => { handleFiles(e.target.files); fileInput.value=''; });
+
+async function loadPdfBytesIntoWorkbench(rawBytes, fileName){
+  await workerReady;
+  const bytes = rawBytes instanceof Uint8Array ? rawBytes : new Uint8Array(rawBytes);
+  const pdfjsDoc = await pdfjsLib.getDocument({ data: bytes.slice() }).promise;
+  const fileId = genId();
+  fileStore[fileId] = { name: fileName || 'Document.pdf', bytes, pdfjsDoc, pdfLibDoc: null, textCache: {} };
+  fileOrder.push(fileId);
+  const numPages = pdfjsDoc.numPages;
+  for(let i = 1; i <= numPages; i++){
+    const thumb = await renderThumb(pdfjsDoc, i);
+    pages.push({ uid: genId(), fileId, pageIndex: i, thumb, marked: false, patches: [] });
+    renderAll(); // progressive render so big files feel responsive
+  }
+  return numPages;
+}
+window._loadPdfBytesIntoWorkbench = loadPdfBytesIntoWorkbench;
 
 async function handleFiles(fileList){
   const files = Array.from(fileList || []);
@@ -1978,17 +2094,7 @@ async function handleFiles(fileList){
     showToast('Reading ' + file.name + '…');
     try{
       const buf = await file.arrayBuffer();
-      const bytes = new Uint8Array(buf);
-      const pdfjsDoc = await pdfjsLib.getDocument({ data: bytes.slice() }).promise;
-      const fileId = genId();
-      fileStore[fileId] = { name: file.name, bytes, pdfjsDoc, pdfLibDoc: null, textCache: {} };
-      fileOrder.push(fileId);
-      const numPages = pdfjsDoc.numPages;
-      for(let i = 1; i <= numPages; i++){
-        const thumb = await renderThumb(pdfjsDoc, i);
-        pages.push({ uid: genId(), fileId, pageIndex: i, thumb, marked: false, patches: [] });
-        renderAll(); // progressive render so big files feel responsive
-      }
+      await loadPdfBytesIntoWorkbench(new Uint8Array(buf), file.name);
     }catch(err){
       console.error(err);
       showToast('Could not read "' + file.name + '" — it may be corrupted or password-protected.');
@@ -2496,8 +2602,51 @@ function openAdminSettingsModal(){
     "  return current;",
     "}",
     "",
+    "function listFilesInDriveFolder(drivePath) {",
+    "  var folder = resolveTargetFolder(drivePath);",
+    "  var iter = folder.getFiles();",
+    "  var out = [];",
+    "  while (iter.hasNext() && out.length < 60) {",
+    "    var f = iter.next();",
+    "    var name = f.getName() || '';",
+    "    var mime = f.getMimeType() || '';",
+    "    if (mime === 'application/pdf' || /\\.pdf$/i.test(name)) {",
+    "      out.push({",
+    "        fileId: f.getId(),",
+    "        fileName: name,",
+    "        fileUrl: f.getUrl(),",
+    "        sizeBytes: f.getSize(),",
+    "        updatedAt: f.getLastUpdated().toISOString()",
+    "      });",
+    "    }",
+    "  }",
+    "  out.sort(function(a, b) { return b.updatedAt.localeCompare(a.updatedAt); });",
+    "  return { status: 'ok', folderName: folder.getName(), folderUrl: folder.getUrl(), files: out };",
+    "}",
+    "",
+    "function getDriveFileBase64(fileId) {",
+    "  var f = DriveApp.getFileById(fileId);",
+    "  var blob = f.getBlob();",
+    "  return {",
+    "    status: 'ok',",
+    "    fileId: f.getId(),",
+    "    fileName: f.getName(),",
+    "    mimeType: blob.getContentType() || 'application/pdf',",
+    "    base64: Utilities.base64Encode(blob.getBytes())",
+    "  };",
+    "}",
+    "",
     "function doGet(e) {",
     "  try {",
+    "    var act = (e && e.parameter && e.parameter.action) ? e.parameter.action : '';",
+    "    if (act === 'listFiles') {",
+    "      var cloudCfg = readCloudSettings();",
+    "      var dp = (e.parameter.drivePath || cloudCfg.drivePath || cloudCfg.defaultDrivePath || '').trim();",
+    "      return ContentService.createTextOutput(JSON.stringify(listFilesInDriveFolder(dp))).setMimeType(ContentService.MimeType.JSON);",
+    "    }",
+    "    if (act === 'getFile' && e.parameter.fileId) {",
+    "      return ContentService.createTextOutput(JSON.stringify(getDriveFileBase64(e.parameter.fileId))).setMimeType(ContentService.MimeType.JSON);",
+    "    }",
     "    var settings = readCloudSettings();",
     "    return ContentService.createTextOutput(JSON.stringify({",
     "      status: 'ok',",
@@ -2527,6 +2676,14 @@ function openAdminSettingsModal(){
     "      var resSettings = JSON.stringify({ status: 'ok', settings: updated });",
     "      if (data.requestId) { try { cache.put(data.requestId, resSettings, 300); } catch (ce) {} }",
     "      return ContentService.createTextOutput(resSettings).setMimeType(ContentService.MimeType.JSON);",
+    "    }",
+    "    if (data.action === 'listFiles') {",
+    "      var cfgList = readCloudSettings();",
+    "      var listDp = (data.drivePath || cfgList.drivePath || cfgList.defaultDrivePath || '').trim();",
+    "      return ContentService.createTextOutput(JSON.stringify(listFilesInDriveFolder(listDp))).setMimeType(ContentService.MimeType.JSON);",
+    "    }",
+    "    if (data.action === 'getFile' && data.fileId) {",
+    "      return ContentService.createTextOutput(JSON.stringify(getDriveFileBase64(data.fileId))).setMimeType(ContentService.MimeType.JSON);",
     "    }",
     "",
     "    /* Action 2: Upload Scanned PDF & Persist Active Path in Settings Folder */",
@@ -2847,44 +3004,88 @@ function openUserGuide(){
       <div id="guidePrintArea">
         <div class="guide-toc">
           <a href="#g-upload">1. Adding PDFs</a>
-          <a href="#g-merge">2. Merging files</a>
-          <a href="#g-reorder">3. Reordering pages</a>
-          <a href="#g-delete">4. Deleting pages</a>
-          <a href="#g-files">5. Files list</a>
-          <a href="#g-nav">6. Page navigator &amp; preview</a>
-          <a href="#g-split">7. Splitting out pages</a>
-          <a href="#g-findreplace">8. Find &amp; replace text</a>
-          <a href="#g-patch">9. Fixing text inside logos/images</a>
-          <a href="#g-ocr">10. ⭐ Reading scanned &amp; multi-language text (OCR)</a>
-          <a href="#g-word">11. Converting to a Word file</a>
-          <a href="#g-excel">12. Converting to an Excel file</a>
-          <a href="#g-undo">13. Undo &amp; starting over</a>
-          <a href="#g-tips">14. General tips</a>
+          <a href="#g-scanner">2. ⭐ PDF Scanner — Capture, Enhance &amp; Combine</a>
+          <a href="#g-merge">3. Merging &amp; sharing PDFs</a>
+          <a href="#g-reorder">4. Reordering pages</a>
+          <a href="#g-delete">5. Deleting pages</a>
+          <a href="#g-files">6. Files list</a>
+          <a href="#g-nav">7. Page navigator &amp; preview</a>
+          <a href="#g-split">8. Splitting out pages</a>
+          <a href="#g-findreplace">9. Find &amp; replace text (PDF &amp; Scanner)</a>
+          <a href="#g-patch">10. Fixing text inside logos/images</a>
+          <a href="#g-ocr">11. ⭐ Reading scanned &amp; multi-language text (OCR)</a>
+          <a href="#g-word">12. Converting to a Word file</a>
+          <a href="#g-excel">13. Converting to an Excel file</a>
+          <a href="#g-undo">14. Undo &amp; starting over</a>
+          <a href="#g-tips">15. General tips</a>
         </div>
 
         <div class="guide-section" id="g-upload">
-          <h4><span class="guide-icon">📁</span>1. Adding your PDF files</h4>
-          <p>At the very top of the page is a box that says "Drop PDF files here, or click to browse."</p>
+          <h4><span class="guide-icon">📁</span>1. Adding your PDF files (Local Device or Google Drive)</h4>
+          <p>At the very top of the page under <strong>1. PDF Workbench</strong> is the dropzone box where you can add PDFs from your computer/phone or directly from your Google Drive:</p>
           <ol>
-            <li>Either drag a PDF file from your computer straight onto that box, or click the box and choose a file the normal way.</li>
+            <li><strong>From Local Device:</strong> Drag a PDF file straight onto the box, or click <strong>"💻 Select Local PDF Files"</strong> (or <strong>"+ Add PDFs (Local)"</strong> in the toolbar).</li>
+            <li><strong>From Google Drive:</strong> Click <strong>"☁️ Select PDF from Google Drive"</strong> (in the dropzone, toolbar, or PDF Scanner) to see all scanned PDFs you've stored in Google Drive, or paste any Google Drive PDF link to open and edit it in either the <strong>PDF Workbench</strong> or <strong>PDF Scanner</strong>.</li>
             <li>You can select more than one file at a time — every page from every file you add lands together in the work area below, ready to be arranged.</li>
-            <li>To add more files later, use the <strong>"+ Add PDFs"</strong> button in the toolbar (the row of buttons just under the dropzone).</li>
           </ol>
           <div class="guide-note">Nothing you upload leaves your computer — all the work happens right inside your browser.</div>
         </div>
 
+        <div class="guide-section" id="g-scanner" style="background:#EFF6FF;border:1.5px solid #BFDBFE;border-radius:10px;padding:16px 16px 8px;">
+          <h4><span class="guide-icon">📸</span>2. PDF Scanner — Capture, Enhance &amp; Combine into One File</h4>
+          <p>Section <strong>2. PDF Scanner — Capture, Enhance &amp; Combine into One File</strong> lets you turn physical paper documents, receipts, invoices, IDs, or photos into a clean, multi-page PDF — and connects directly with tools <strong>3 to 6</strong> (Find &amp; Replace, OCR, Word, and Excel).</p>
+          
+          <p style="margin:10px 0 6px;"><strong>Step A — Save Your Personal Google Drive Path (Optional, Saved per Login):</strong></p>
+          <ol>
+            <li>Sign in using your <strong>Email</strong> or <strong>Mobile OTP</strong> (via the account button at the top).</li>
+            <li>In the <strong>📁 My Google Drive Storage Path</strong> bar at the top of the PDF Scanner section, paste your Google Drive folder link (<code>https://drive.google.com/drive/folders/...</code>) or folder name and click <strong>"☁️ Save My Path"</strong>.</li>
+            <li>Your folder path is stored privately for your login account, so it loads automatically whenever you sign in. Click <strong>"📂 Go to Google Drive ↗"</strong> (available both at the top and in the scanner export bar) to open your Drive folder in one click.</li>
+          </ol>
+
+          <p style="margin:10px 0 6px;"><strong>Step B — Capture, Upload, or Select from Google Drive into a Multi-Page Scanned Lot:</strong></p>
+          <ol>
+            <li>Click <strong>"📸 Scan with Camera"</strong> to open your phone or webcam. Use <strong>"🔄 Switch Camera"</strong> to toggle between front and back cameras, and click <strong>"📸 Capture Page"</strong> for each sheet. You can capture multiple pages in one go, then click <strong>"✅ Done"</strong>.</li>
+            <li>Or click <strong>"🖼️ Upload Images / PDF (Local)"</strong> to select document photos (JPG, PNG, WEBP) or local PDFs from your device.</li>
+            <li>Or click <strong>"☁️ Select PDF from Google Drive"</strong> to pick any previously stored scan from your Google Drive folder and re-open it in the Scanner (to crop, rotate, or adjust Magic Color/clarity) or in the Workbench!</li>
+            <li>All pages appear in the <strong>Scanned Lot</strong> panel on the left. Click any page thumbnail to select it, use <strong>↑ / ↓</strong> to reorder pages, <strong>✕</strong> to delete a page, or <strong>"+ Add Page"</strong> to add more pages to the same lot.</li>
+          </ol>
+
+          <p style="margin:10px 0 6px;"><strong>Step C — Crop, Rotate &amp; Enhance Your Scan:</strong></p>
+          <ol>
+            <li><strong>Rotate &amp; Crop:</strong> Use <strong>"↺ Rotate Left"</strong> or <strong>"↻ Rotate Right"</strong> to fix orientation. Click <strong>"✂️ Crop Area"</strong> to show the interactive 8-point crop frame — drag any corner or side handle inward to trim away desk edges, then click <strong>"✅ Apply Crop"</strong>.</li>
+            <li><strong>Page Size, Margin &amp; Quality:</strong> Choose your output <strong>Page Size</strong> (<code>A4</code>, <code>US Letter</code>, or <code>Fit to Scan Image</code>), <strong>Margin</strong> (Small, None, or Normal), and <strong>Quality / Resolution</strong> (Standard, High 2x, or Ultra Crisp 3x).</li>
+            <li><strong>Color Mode &amp; Clarity Sliders:</strong> Pick <strong>"✨ Magic Color"</strong> (whitens paper background and makes text pop), <strong>"Crisp B&amp;W Doc"</strong> (photocopy look), <strong>"Grayscale"</strong>, or <strong>"Original Color"</strong>. Fine-tune <strong>Light / Dark</strong>, <strong>Text Crispness (Contrast)</strong>, and <strong>Remove Blur (Sharpen)</strong> using the sliders.</li>
+            <li>Tick <strong>"Apply settings to all pages in lot"</strong> if you want your color mode, page size, and clarity adjustments applied across every scanned page automatically.</li>
+          </ol>
+
+          <p style="margin:10px 0 6px;"><strong>Step D — Save, Share, Upload to Drive, or Use Premium Tools (3 to 6):</strong></p>
+          <ol>
+            <li>Type your desired filename in <strong>"📄 File Name (.pdf)"</strong>.</li>
+            <li>Choose your output action:
+              <ul>
+                <li><strong>💾 Save to Device:</strong> Combines all pages in your Scanned Lot into one PDF and downloads it to your phone or computer.</li>
+                <li><strong>📤 Share PDF:</strong> Shares the combined PDF directly via <strong>WhatsApp, Gmail, Default Email</strong>, or your mobile share sheet.</li>
+                <li><strong>☁️ Save to Google Drive:</strong> Downloads the combined PDF and opens your personal saved Google Drive folder so you can drop the file straight in.</li>
+                <li><strong>➕ Send to Workbench:</strong> Sends all scanned pages directly into <strong>1. PDF Workbench</strong> above so you can merge them with other PDFs, split pages, or add patches.</li>
+              </ul>
+            </li>
+            <li><strong>Direct Premium Features (Options 3 to 6):</strong> Use the quick-action bar at the bottom of the scanner to run <strong>3. Find &amp; Replace Text</strong>, <strong>4. OCR Language</strong>, <strong>5. Extract Scans to Word (.docx)</strong>, or <strong>6. Extract Scans to Excel (.xlsx)</strong> directly on your scanned lot!</li>
+          </ol>
+          <div class="guide-note">All camera scanning, image enhancement, and PDF creation happen 100% locally in your browser — your personal documents are never uploaded to an external server.</div>
+        </div>
+
         <div class="guide-section" id="g-merge">
-          <h4><span class="guide-icon">🔗</span>2. Merging multiple PDFs into one</h4>
-          <p>You don't need a separate "merge" button — merging happens automatically. As soon as you add more than one PDF, all their pages sit together in the same work area, in the order they appear on screen.</p>
+          <h4><span class="guide-icon">🔗</span>3. Merging &amp; sharing multiple PDFs</h4>
+          <p>You don't need a separate "merge" button — merging happens automatically. As soon as you add more than one PDF (or send pages from the PDF Scanner), all their pages sit together in the same work area, in the order they appear on screen.</p>
           <ol>
             <li>Add your first PDF, then add your second (and third, and so on) using "+ Add PDFs."</li>
             <li>Arrange the pages into the order you want them in the final file (see "Reordering pages" below).</li>
-            <li>Click the green <strong>"⬇ Download merged PDF"</strong> button at the top right of the toolbar. This downloads one single PDF file containing every page, in the order shown on screen.</li>
+            <li>Click the green <strong>"⬇ Download merged PDF"</strong> button at the top right of the toolbar to save the combined PDF, or click <strong>"📤 Share PDF"</strong> next to it to share the merged file via WhatsApp, Gmail, Email, or your device's share menu.</li>
           </ol>
         </div>
 
         <div class="guide-section" id="g-reorder">
-          <h4><span class="guide-icon">↕️</span>3. Reordering pages</h4>
+          <h4><span class="guide-icon">↕️</span>4. Reordering pages</h4>
           <p>Each page appears as its own little card with a number badge in the corner showing its position.</p>
           <ol>
             <li>Click and hold on any page card, drag it to where you want it, and let go — the page moves there and every page number updates automatically.</li>
@@ -2894,7 +3095,7 @@ function openUserGuide(){
         </div>
 
         <div class="guide-section" id="g-delete">
-          <h4><span class="guide-icon">🗑️</span>4. Deleting pages</h4>
+          <h4><span class="guide-icon">🗑️</span>5. Deleting pages</h4>
           <p>There are two ways to remove pages you don't want:</p>
           <ol>
             <li><strong>One page at a time:</strong> click the small ✕ in the corner of any page card to remove just that page.</li>
@@ -2905,7 +3106,7 @@ function openUserGuide(){
         </div>
 
         <div class="guide-section" id="g-files">
-          <h4><span class="guide-icon">📋</span>5. The "Files in this project" list</h4>
+          <h4><span class="guide-icon">📋</span>6. The "Files in this project" list</h4>
           <p>On the right-hand side, above the page list, you'll see every PDF you've uploaded, numbered 1, 2, 3 and so on, with how many of its pages are currently in your workbench.</p>
           <ol>
             <li>If you realize you uploaded the wrong file, click the ✕ next to that file's name.</li>
@@ -2915,7 +3116,7 @@ function openUserGuide(){
         </div>
 
         <div class="guide-section" id="g-nav">
-          <h4><span class="guide-icon">🧭</span>6. Page navigator &amp; full-size preview</h4>
+          <h4><span class="guide-icon">🧭</span>7. Page navigator &amp; full-size preview</h4>
           <p>When you have a lot of pages, scrolling through a big grid to find one page can be slow. The panel on the right-hand side solves that.</p>
           <ol>
             <li>It lists every page as a small thumbnail with its page number and file name.</li>
@@ -2926,7 +3127,7 @@ function openUserGuide(){
         </div>
 
         <div class="guide-section" id="g-split">
-          <h4><span class="guide-icon">✂️</span>7. Splitting out specific pages into their own PDF</h4>
+          <h4><span class="guide-icon">✂️</span>8. Splitting out specific pages into their own PDF</h4>
           <p>Use this when you only want to save or share a few pages, rather than the whole document.</p>
           <ol>
             <li>Tick the pages you want (using the checkboxes on the page cards or in the navigator on the right).</li>
@@ -2938,23 +3139,23 @@ function openUserGuide(){
         </div>
 
         <div class="guide-section" id="g-findreplace">
-          <h4><span class="guide-icon">🔍</span>8. Finding and replacing text</h4>
-          <p>This works on real, selectable text in the PDF (the kind you could normally click and copy) — not text that's part of a picture or logo (for that, see the next section).</p>
+          <h4><span class="guide-icon">🔍</span>9. Finding and replacing text (Works on both PDF Workbench &amp; PDF Scanner)</h4>
+          <p>This tool works on both normal digital PDFs in <strong>1. PDF Workbench</strong> and scanned pages/photos in <strong>2. PDF Scanner</strong> (using automatic OCR when needed).</p>
           <ol>
-            <li>Scroll down to the <strong>"Find & replace text"</strong> section.</li>
+            <li>Scroll down to <strong>"3. Find &amp; replace text"</strong>.</li>
             <li>Type the word or phrase you want to find, and what you want to replace it with.</li>
-            <li>Click <strong>"Scan document"</strong>. Every match found across all your pages will be listed, showing the original text crossed out and the replacement next to it.</li>
-            <li>Untick any matches you don't actually want changed.</li>
-            <li>The changes are only applied when you click "Download merged PDF" — nothing is altered until then.</li>
+            <li>Click <strong>"Scan document"</strong>. If your pages are in the PDF Scanner or are scanned images, the tool automatically runs OCR to locate matching words on the page and lists every match found.</li>
+            <li>Tick or untick individual matches in the list. On <strong>2. PDF Scanner</strong>, active replacements appear immediately on the live scanner preview canvas and remain preserved even as you adjust crop, color mode, or brightness!</li>
+            <li>When you save or download your PDF (via <strong>"⬇ Download merged PDF"</strong> in the Workbench or <strong>"💾 Save to Device" / "📤 Share PDF"</strong> in the PDF Scanner), all ticked replacements are baked into the final PDF file.</li>
           </ol>
-          <div class="guide-note">This works best on clean PDFs with plain text and a white background. It won't find words inside a scanned page or a picture/logo.</div>
+          <div class="guide-note">Need to replace a word inside a complex graphical logo or stamp where OCR cannot isolate the text? Use the manual Patch tool (✎) described in the next section.</div>
         </div>
 
         <div class="guide-section" id="g-patch">
-          <h4><span class="guide-icon">✎</span>9. Changing text that's part of a logo, picture, or scanned page</h4>
-          <p>If a word you need to change is actually part of an image — like a company name baked into a logo — the Find &amp; Replace tool above can't reach it, because there's no real selectable text there, just a picture. This tool covers that case by hand.</p>
+          <h4><span class="guide-icon">✎</span>10. Changing text that's part of a logo, picture, or scanned page by hand</h4>
+          <p>If a word you need to change is part of a complex graphic — like a stylized company logo or seal — you can place a precision visual patch anywhere on a page by hand.</p>
           <ol>
-            <li>On any page card, click the small pencil (✎) button.</li>
+            <li>On any page card in the PDF Workbench, click the small pencil (✎) button.</li>
             <li>A larger view of that page opens. Click and drag a box over the exact spot you want to change (for example, directly over a company name in a logo).</li>
             <li>A small form appears — type the new text, and adjust the colors if needed (the cover color is automatically guessed from the page behind it, so it usually doesn't need changing).</li>
             <li>Click Save. You'll see a small purple badge appear on that page's card showing it now has a patch.</li>
@@ -2966,23 +3167,23 @@ function openUserGuide(){
         </div>
 
         <div class="guide-section" id="g-watermark" style="background:#FCEDEA;border:1px solid #E8B9AC;border-radius:10px;padding:16px 16px 4px;">
-          <h4><span class="guide-icon">🔒</span>9b. Document integrity — admin controlled</h4>
+          <h4><span class="guide-icon">🔒</span>10b. Document integrity — admin controlled</h4>
           <p>PDF Workbench includes built-in document integrity features that are configured by your administrator. These settings ensure edited documents are handled appropriately within your organisation. Contact your administrator for details about the document policy in your setup.</p>
           <div class="guide-note">If you are an administrator, see the <strong>"⚙ Admin settings"</strong> link at the bottom of the page to configure document integrity options for your team.</div>
         </div>
 
         <div class="guide-section" id="g-ocr" style="background:#FBF3E2;border:1px solid #E5CE9B;border-radius:10px;padding:16px 16px 4px;">
-          <h4><span class="guide-icon">⭐</span>10. Reading scanned &amp; handwritten text, in multiple languages (OCR)</h4>
-          <p>This is one of the things that sets PDF Workbench apart from most free PDF tools: it can read text out of <strong>scanned pages and pictures</strong> — not just normal typed PDF text — and it can do this in <strong>English, Hindi, and Gujarati</strong>, with other languages also supported if you need them. This "reading text from an image" process is called <strong>OCR</strong> (Optical Character Recognition).</p>
+          <h4><span class="guide-icon">⭐</span>11. Reading scanned &amp; handwritten text, in multiple languages (OCR)</h4>
+          <p>This is one of the things that sets PDF Workbench apart from most free PDF tools: it can read text out of <strong>scanned pages, camera captures, and pictures</strong> — in both <strong>1. PDF Workbench</strong> and <strong>2. PDF Scanner</strong> — across <strong>English, Hindi, and Gujarati</strong>, with other languages also supported. This "reading text from an image" process is called <strong>OCR</strong> (Optical Character Recognition).</p>
           <ol>
-            <li>Scroll to the <strong>"OCR language"</strong> section (just above the Word and Excel tools). Tick every language that might appear in your scanned pages — you can tick more than one at once if a document mixes languages.</li>
+            <li>Scroll to <strong>"4. OCR language"</strong> (just above the Word and Excel tools). Tick every language that might appear in your scanned pages — you can tick more than one at once if a document mixes languages.</li>
             <li>If you need a language other than English, Hindi, or Gujarati, type its short code into the "Other language" box (for example <code>mar</code> for Marathi, <code>ben</code> for Bengali).</li>
-            <li>Leave the <strong>"Use OCR for scanned/image pages"</strong> box ticked in either the Word or Excel section below — OCR then runs automatically, only on pages that actually need it (pages with normal typed text are read directly and don't need OCR at all, so they stay fast).</li>
-            <li>Run your Word or Excel extraction as normal — any scanned or image-based pages will come back as real, readable, editable text instead of staying as an untouchable picture.</li>
+            <li>Leave the <strong>"Use OCR for scanned/image pages"</strong> box ticked in either the Word or Excel section below — OCR then runs automatically on scanned pages or camera captures from the PDF Scanner.</li>
+            <li>Run your Find &amp; Replace, Word extraction, or Excel extraction as normal — any scanned or camera-captured pages will come back as real, readable, editable text.</li>
           </ol>
           <p><strong>What to expect, honestly:</strong></p>
           <ul>
-            <li><strong>Printed or typed text in a scanned page</strong> (like a photocopied or scanned document) — generally reads well, especially if the scan is clear and not skewed or blurry.</li>
+            <li><strong>Printed or typed text in a scanned page</strong> (like a photocopied or camera-scanned document) — generally reads well, especially when enhanced with <strong>Magic Color</strong> or <strong>Crisp B&amp;W</strong> in the PDF Scanner.</li>
             <li><strong>Neat, clearly separated handwriting</strong> — can often be read reasonably, though never perfectly. Treat it as a strong first draft.</li>
             <li><strong>Cursive or fast, joined-up handwriting</strong> — this is genuinely hard for any free OCR tool, and results will often be patchy. This is especially true for handwritten Hindi and Gujarati script, where there's simply less public training data available than for English. Always proofread OCR'd handwriting before relying on it.</li>
           </ul>
@@ -2990,45 +3191,45 @@ function openUserGuide(){
         </div>
 
         <div class="guide-section" id="g-word">
-          <h4><span class="guide-icon">📝</span>11. Turning a PDF into an editable Word document</h4>
-          <p>Use this when you want to open and edit the content in Microsoft Word, rather than just reading it as a PDF.</p>
+          <h4><span class="guide-icon">📝</span>12. Turning a PDF or Scanned Lot into an editable Word document</h4>
+          <p>Use this when you want to open and edit the content of your PDF Workbench pages or your <strong>2. PDF Scanner</strong> lot in Microsoft Word.</p>
           <ol>
-            <li>Scroll to the <strong>"Extract text to a Word document"</strong> section.</li>
+            <li>Scroll to <strong>"5. Extract text to a Word document"</strong> (or click <strong>"5. Extract Scans to Word"</strong> directly inside the PDF Scanner).</li>
             <li>Choose whether to convert all pages, or only the ones you've ticked.</li>
-            <li>Leave <strong>"Use OCR for scanned/image pages"</strong> ticked if some of your pages are scanned photos rather than typed text — this lets the tool "read" the words off the picture and turn them into real, editable text (see the OCR section above to choose which languages to read).</li>
-            <li>Click <strong>"📝 Extract & download Word file"</strong>. A progress list shows what's happening page by page (scanned pages take longer than typed ones).</li>
-            <li>A .docx file downloads automatically once it's done, ready to open in Word.</li>
+            <li>Leave <strong>"Use OCR for scanned/image pages"</strong> ticked if your pages are scanned photos or camera captures — this lets the tool read the words off the image and turn them into real, editable text.</li>
+            <li>Click <strong>"📝 Extract &amp; download Word file"</strong>. A progress list shows what's happening page by page.</li>
+            <li>A <code>.docx</code> file downloads automatically once it's done, ready to open in Word.</li>
           </ol>
           <div class="guide-note">This rebuilds the words and basic formatting (bold, headings, and side-by-side columns where they're detected) — it does not produce a pixel-for-pixel copy of the original PDF's exact design.</div>
         </div>
 
         <div class="guide-section" id="g-excel">
-          <h4><span class="guide-icon">📊</span>12. Turning a PDF into an Excel spreadsheet</h4>
-          <p>Use this for PDFs that contain tables of figures — like a financial statement, schedule, or list — that you'd like to work with in Excel.</p>
+          <h4><span class="guide-icon">📊</span>13. Turning a PDF or Scanned Lot into an Excel spreadsheet</h4>
+          <p>Use this for PDFs or scanned documents that contain tables of figures — like a financial statement, invoice, schedule, or list — that you'd like to work with in Excel.</p>
           <ol>
-            <li>Scroll to the <strong>"Extract text to an Excel spreadsheet"</strong> section.</li>
+            <li>Scroll to <strong>"6. Extract text to an Excel spreadsheet"</strong> (or click <strong>"6. Extract Scans to Excel"</strong> directly inside the PDF Scanner).</li>
             <li>Choose which pages to include, the same way as the Word tool.</li>
-            <li>Choose your <strong>Sheet layout</strong>: either a separate tab for every PDF page, or everything combined into one single tab.</li>
-            <li>Click <strong>"📊 Extract & download Excel file"</strong>. Pages that look like real tables get laid out into proper rows and columns automatically; pages that don't will still come through as plain text, one line per row.</li>
+            <li>Choose your <strong>Sheet layout</strong>: either a separate tab for every page, or everything combined into one single tab.</li>
+            <li>Click <strong>"📊 Extract &amp; download Excel file"</strong>. Pages that look like real tables get laid out into proper rows and columns automatically; pages that don't will still come through as plain text, one line per row.</li>
           </ol>
           <div class="guide-note">Very tightly packed or unusually shaped tables might not line up perfectly — a quick check and tidy-up in Excel afterward is always a good idea for anything important.</div>
         </div>
 
         <div class="guide-section" id="g-undo">
-          <h4><span class="guide-icon">↺</span>13. Undo, and starting a brand new project</h4>
+          <h4><span class="guide-icon">↺</span>14. Undo, and starting a brand new project</h4>
           <p><strong>Undo:</strong> the "↺ Undo last change" button in the toolbar reverses your most recent action — deleting a page, reordering, etc. It only remembers one step back, so use it right away if something looks wrong.</p>
-          <p><strong>Starting over completely:</strong> if you're finished with one document and want to begin a fresh project, click the red <strong>"🗑 New project"</strong> button in the toolbar. You'll be asked to confirm, since this clears everything — every file, every page, every edit — back to an empty workbench.</p>
+          <p><strong>Starting over completely:</strong> if you're finished with one document and want to begin a fresh project, click the red <strong>"🗑 New project"</strong> button in the toolbar (or <strong>"🗑️ Clear Lot"</strong> in the PDF Scanner). You'll be asked to confirm before clearing.</p>
           <div class="guide-note">Make sure you've already downloaded anything you want to keep before clicking "New project" — it cannot be undone.</div>
         </div>
 
         <div class="guide-section" id="g-tips">
-          <h4><span class="guide-icon">💡</span>14. A few general tips</h4>
+          <h4><span class="guide-icon">💡</span>15. A few general tips</h4>
           <ul>
-            <li>Nothing is saved or changed in your final PDF until you actually click a download button — feel free to experiment freely beforehand.</li>
+            <li>Nothing is saved or changed in your final PDF until you actually click a download or save button — feel free to experiment freely beforehand.</li>
             <li>Working with a very large PDF (many pages, or large scanned images) may take a little longer to load and process — this is normal.</li>
             <li>If you're trying the scanned-page (OCR) features and they don't seem to start, ensure you have a stable internet connection and are accessing the tool from a supported browser (Chrome or Edge recommended).</li>
             <li>Your documents are never uploaded anywhere — see the <strong>"🔒 Privacy"</strong> button at the top of the page for the full details.</li>
-            <li>You can come back to this guide any time by clicking "📖 How to use this" at the top of the page.</li>
+            <li>You can come back to this guide any time by clicking <strong>"📖 How to use this"</strong> at the top of the page, and even print or save this guide as a PDF using the button below.</li>
           </ul>
         </div>
       </div>
@@ -3118,29 +3319,57 @@ async function renderFocusWithEdits(p){
     const pdfX  = m.transform[4];
     const pdfY  = m.transform[5];
     const origW = m.width || fontSize * 0.58 * m.original.length;
-    const coverH = fontSize * 1.35;
-    const coverY = pdfY - fontSize * 0.32;
+    const isOcr = !!m.isOcrMatch;
+    const coverH = isOcr ? (fontSize + 4) : (fontSize * 1.35);
+    const coverY = isOcr ? (pdfY - 2)     : (pdfY - fontSize * 0.32);
 
     // Convert PDF coords (y from bottom) to canvas coords (y from top)
-    const cX = pdfX   * scaleX;
-    const cY = (dims.h - coverY - coverH) * scaleY;
-    const cW = (origW + 4) * scaleX;
+    const cX = Math.max(0, (pdfX - (isOcr ? 1.5 : 0)) * scaleX);
+    const cY = Math.max(0, (dims.h - coverY - coverH) * scaleY);
+    const cW = (origW + (isOcr ? 3 : 4)) * scaleX;
     const cH = coverH * scaleY;
 
-    // Sample real background color (reuse our histogram sampler)
-    const bgHex  = exactDominantColor(ctx, cX, cY, cW, cH);
+    // Sample real background color (for OCR tight boxes, sample perimeter ring outside ink)
+    const bgHex = isOcr
+      ? sampleBackgroundColor(canvas, cX / canvas.width, cY / canvas.height, cW / canvas.width, cH / canvas.height)
+      : exactDominantColor(ctx, cX, cY, cW, cH);
     const inkHex = exactDominantInkColor(ctx, cX, cY, cW, cH, bgHex);
+
+    // Measure replacement text and auto-fit if bounded by next word
+    let fontPx = Math.max(9, (isOcr ? fontSize * 0.90 : fontSize) * scaleY);
+    ctx.font = `bold ${fontPx}px Arial, sans-serif`;
+    const maxW = (m.maxAvailWidthPts ? m.maxAvailWidthPts : origW * 1.35) * scaleX;
+    let rawTextW = ctx.measureText(m.replaced).width;
+    let hScale = 1;
+    if(rawTextW > maxW){
+      const ratio = maxW / Math.max(1, rawTextW);
+      if(ratio >= 0.70){
+        hScale = ratio;
+      } else {
+        hScale = 0.72;
+        while(fontPx > 8 && ctx.measureText(m.replaced).width * hScale > maxW){
+          fontPx -= 1;
+          ctx.font = `bold ${fontPx}px Arial, sans-serif`;
+        }
+      }
+      rawTextW = ctx.measureText(m.replaced).width * hScale;
+    }
+    const finalCoverW = Math.min(maxW + 3, Math.max(cW, rawTextW + 4));
 
     // Cover original text
     ctx.fillStyle = bgHex;
-    ctx.fillRect(cX, cY, cW, cH);
+    ctx.fillRect(cX, cY, finalCoverW, cH);
 
     // Draw replacement text
-    const fontPx = Math.max(8, fontSize * scaleY);
+    ctx.save();
     ctx.fillStyle = inkHex;
     ctx.font = `bold ${fontPx}px Arial, sans-serif`;
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText(m.replaced, cX + 1, cY + fontPx * 0.88);
+    const textBaseY = isOcr ? (cY + cH * 0.80) : (cY + fontPx * 0.88);
+    ctx.translate(cX + 1, textBaseY);
+    if(hScale !== 1) ctx.scale(hScale, 1);
+    ctx.fillText(m.replaced, 0, 0);
+    ctx.restore();
   }
 
   // ── Paint logo / image patches ───────────────────────────────────────
@@ -3259,6 +3488,7 @@ function renderAll(){
   downloadBtn.disabled = pages.length === 0;
   if(shareWbPdfBtn) shareWbPdfBtn.disabled = pages.length === 0;
   newProjectBtn.disabled = pages.length === 0 && fileOrder.length === 0;
+  if(typeof updatePremiumSourceStatusBadge === 'function') updatePremiumSourceStatusBadge();
 
   // ---- files list ----
   filesList.innerHTML = '';
@@ -3592,11 +3822,11 @@ async function applyTextReplacement(pdfPage, match, font, fileId, pageIndex){
   const fontSize = Math.abs(m.transform[0]) || Math.abs(m.transform[3]) || 11;
   const x        = m.transform[4];
   const y        = m.transform[5];
+  const isOcr    = !!m.isOcrMatch;
 
   const origWidth = m.width || fontSize * 0.58 * m.original.length;
-  const coverH    = fontSize * 1.35;
-  const coverY    = y - fontSize * 0.32;
-  const replWidth = font.widthOfTextAtSize(m.replaced, fontSize);
+  const coverH    = isOcr ? (fontSize + 4) : (fontSize * 1.35);
+  const coverY    = isOcr ? (y - 2)        : (y - fontSize * 0.32);
 
   let bgColor   = rgb(1, 1, 1);
   let textColor = rgb(0, 0, 0);
@@ -3609,40 +3839,37 @@ async function applyTextReplacement(pdfPage, match, font, fileId, pageIndex){
     const scaleX = canvas.width  / pageW;
     const scaleY = canvas.height / pageH;
 
-    // Sample DIRECTLY from the text's own bounding box — no padding.
-    // Within any word's bounding box, background pixels always outnumber
-    // glyph ink pixels (80-90% background regardless of font weight), so the
-    // two-pass histogram reliably picks the background whether it's white,
-    // blue, or any other solid color. Extending the sample area vertically
-    // (padding) was pulling in out-of-band white page pixels and corrupting
-    // the result on thin colored header bands.
-    const sX = x           * scaleX;
-    const sY = (pageH - coverY - coverH) * scaleY;
-    const sW = Math.max(4, origWidth  * scaleX);
-    const sH = Math.max(4, coverH     * scaleY);
+    const sX = Math.max(0, (x - (isOcr ? 1.5 : 0)) * scaleX);
+    const sY = Math.max(0, (pageH - coverY - coverH) * scaleY);
+    const sW = Math.max(4, (origWidth + (isOcr ? 3 : 0)) * scaleX);
+    const sH = Math.max(4, coverH * scaleY);
 
-    const bgHex = exactDominantColor(ctx, sX, sY, sW, sH);
-    bgColor     = hexToRgb01(bgHex);
-
-    // Ink: same bounding box — the ink histogram ignores background pixels
-    textColor  = hexToRgb01(exactDominantInkColor(ctx, sX, sY, sW, sH, bgHex));
-
+    // For tight OCR word boxes on scanned pages, sample perimeter pixels outside the letters
+    // so bold glyphs don't bias the background color.
+    const bgHex = isOcr
+      ? sampleBackgroundColor(canvas, sX / canvas.width, sY / canvas.height, sW / canvas.width, sH / canvas.height)
+      : exactDominantColor(ctx, sX, sY, sW, sH);
+    bgColor   = hexToRgb01(bgHex);
+    textColor = hexToRgb01(exactDominantInkColor(ctx, sX, sY, sW, sH, bgHex));
   }catch(e){ /* canvas unavailable — keep white/black defaults */ }
 
-  // Auto-shrink font if replacement is wider than original bounding box
-  let drawFontSize = fontSize;
-  if(replWidth > origWidth + 2){
-    while(drawFontSize > 5 && font.widthOfTextAtSize(m.replaced, drawFontSize) > origWidth * 1.05){
-      drawFontSize -= 0.5;
-    }
+  // Auto-shrink font if replacement is wider than available space
+  let drawFontSize = isOcr ? Math.max(8, fontSize * 0.90) : fontSize;
+  const maxAllowedW = m.maxAvailWidthPts ? m.maxAvailWidthPts : (isOcr ? origWidth * 1.35 : origWidth * 1.05);
+  const minFontSize = isOcr ? Math.max(6.5, fontSize * 0.55) : 5;
+  while(drawFontSize > minFontSize && font.widthOfTextAtSize(m.replaced, drawFontSize) > maxAllowedW){
+    drawFontSize -= 0.5;
   }
 
-  // Cover original text with exact sampled background color
-  const coverW = Math.max(origWidth, font.widthOfTextAtSize(m.replaced, drawFontSize)) + 4;
-  pdfPage.drawRectangle({ x: x - 1, y: coverY, width: coverW, height: coverH, color: bgColor });
+  // Cover original text with exact sampled background color (clamped so it never covers next word)
+  const coverX = isOcr ? Math.max(0, x - 1.5) : (x - 1);
+  const rawCoverW = Math.max(origWidth + (isOcr ? 3 : 2), font.widthOfTextAtSize(m.replaced, drawFontSize) + 3);
+  const coverW = m.maxAvailWidthPts ? Math.min(maxAllowedW + 2, rawCoverW) : rawCoverW;
+  pdfPage.drawRectangle({ x: coverX, y: coverY, width: coverW, height: coverH, color: bgColor });
 
-  // Draw replacement text at the original baseline
-  pdfPage.drawText(m.replaced, { x, y, size: drawFontSize, font, color: textColor });
+  // Draw replacement text aligned with the box
+  const drawY = isOcr ? (y + fontSize * 0.14) : y;
+  pdfPage.drawText(m.replaced, { x, y: drawY, size: drawFontSize, font, color: textColor });
 }
 
 async function openPageEditor(p){
@@ -4082,9 +4309,89 @@ function openSplitModal(){
   });
 }
 
+// ---------- Shared Source Bridge for Premium Tools (Links 3–6 to both 1. Workbench & 2. Scanner) ----------
+const frScope = document.getElementById('frScope');
+const frUseOcr = document.getElementById('frUseOcr');
+const frDownloadPdfBtn = document.getElementById('frDownloadPdfBtn');
+const frSharePdfBtn = document.getElementById('frSharePdfBtn');
+
+function updatePremiumSourceStatusBadge(){
+  const badge = document.getElementById('premSourceStatusBadge');
+  if(!badge) return;
+  const wbCount = pages.filter(p => !(fileStore[p.fileId] && fileStore[p.fileId].isScannerSource)).length;
+  const scanCount = (window._scannerBridge && typeof window._scannerBridge.getCount === 'function')
+    ? window._scannerBridge.getCount()
+    : pages.filter(p => fileStore[p.fileId] && fileStore[p.fileId].isScannerSource).length;
+  badge.textContent = `1. Workbench: ${wbCount} page${wbCount===1?'':'s'} · 2. Scanner: ${scanCount} scanned page${scanCount===1?'':'s'}`;
+}
+window._updatePremiumSourceStatusBadge = updatePremiumSourceStatusBadge;
+
+// Resolves target pages for Options 3, 5, and 6 from either 1. PDF Workbench, 2. PDF Scanner, or both.
+async function resolveTargetPagesForTool(scopeVal){
+  const mode = scopeVal || 'all';
+  const hasScannerBridge = window._scannerBridge && typeof window._scannerBridge.getCount === 'function';
+  const scannerCount = hasScannerBridge ? window._scannerBridge.getCount() : 0;
+
+  if(mode === 'scanner'){
+    if(scannerCount > 0){
+      await window._scannerBridge.syncToWorkbench({ silent: true });
+    }
+    const scanPages = pages.filter(p => fileStore[p.fileId] && fileStore[p.fileId].isScannerSource);
+    if(scanPages.length === 0){
+      showToast('No scanned pages found in 2. PDF Scanner. Scan with camera or upload a photo first.');
+    }
+    return scanPages;
+  }
+
+  if(mode === 'selected'){
+    const sel = pages.filter(p => p.marked);
+    if(sel.length === 0){
+      showToast('No pages selected in 1. PDF Workbench. Tick some pages first, or choose "All pages".');
+    }
+    return sel;
+  }
+
+  if(mode === 'wb-all'){
+    const wbOnly = pages.filter(p => !(fileStore[p.fileId] && fileStore[p.fileId].isScannerSource));
+    if(wbOnly.length > 0) return wbOnly;
+    if(pages.length > 0) return pages.slice();
+    showToast('No pages in 1. PDF Workbench yet. Add a PDF above or switch source to "2. PDF Scanner".');
+    return [];
+  }
+
+  // Default: 'all' — combines 1. PDF Workbench + 2. PDF Scanner automatically
+  if(scannerCount > 0){
+    await window._scannerBridge.syncToWorkbench({ silent: true });
+  }
+  if(pages.length === 0){
+    showToast('Add a PDF in 1. PDF Workbench or scan pages in 2. PDF Scanner first.');
+    return [];
+  }
+  return pages.slice();
+}
+
 // ---------- find & replace ----------
 scanBtn.addEventListener('click', () => scanDocument());  // Free — gate is at export, not here
 findInput.addEventListener('keydown', e => { if(e.key === 'Enter') scanDocument(); });
+
+if(frDownloadPdfBtn){
+  frDownloadPdfBtn.addEventListener('click', () => {
+    if(hasPremiumEdits()){
+      window._auth.premiumGate('download your edited PDF', mergeAndDownload);
+    } else {
+      mergeAndDownload();
+    }
+  });
+}
+if(frSharePdfBtn){
+  frSharePdfBtn.addEventListener('click', () => {
+    if(hasPremiumEdits()){
+      window._auth.premiumGate('share your edited PDF', shareWorkbenchPdf);
+    } else {
+      shareWorkbenchPdf();
+    }
+  });
+}
 
 async function getTextContentCached(fileId, pageIndex){
   const fs = fileStore[fileId];
@@ -4101,64 +4408,467 @@ function replaceAllCI(str, find, repl){
   return str.replace(re, repl);
 }
 
+// Pre-processes a page canvas specifically for Tesseract OCR so colored headings,
+// cream/tinted paper, outer borders, and horizontal divider lines never cause Tesseract
+// to skip titles (such as "SAMPLE SCANNED DOCUMENT") or table cells.
+function prepareCanvasForOcr(srcCanvas){
+  const w = srcCanvas.width;
+  const h = srcCanvas.height;
+  const out = document.createElement('canvas');
+  out.width = w;
+  out.height = h;
+  const ctx = out.getContext('2d');
+  ctx.drawImage(srcCanvas, 0, 0);
+
+  let imgData;
+  try{ imgData = ctx.getImageData(0, 0, w, h); }catch(e){ return srcCanvas; }
+  const d = imgData.data;
+
+  // 1. Convert to high-contrast black ink on pure white background.
+  // Estimate paper background luminance from a grid sample.
+  const lumSamples = [];
+  const stepX = Math.max(4, Math.floor(w / 24));
+  const stepY = Math.max(4, Math.floor(h / 24));
+  for(let y = stepY; y < h - stepY; y += stepY){
+    for(let x = stepX; x < w - stepX; x += stepX){
+      const idx = (y * w + x) * 4;
+      lumSamples.push(0.299 * d[idx] + 0.587 * d[idx+1] + 0.114 * d[idx+2]);
+    }
+  }
+  lumSamples.sort((a,b) => b - a);
+  const bgLum = lumSamples.length ? lumSamples[Math.floor(lumSamples.length * 0.15)] : 235;
+  // Use a strict ink cutoff so light tan/kraft borders (#C7B695 lum~182), divider lines (#B7A37D lum~165),
+  // and table header fills (#E4DEC9 lum~221) turn pure white (0), while all real text (lum <= 115) turns crisp black (1).
+  const inkCutoff = Math.max(105, Math.min(142, bgLum - 85));
+
+  const isInk = new Uint8Array(w * h);
+  for(let i = 0, pIdx = 0; i < d.length; i += 4, pIdx++){
+    const r = d[i], g = d[i+1], b = d[i+2];
+    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+    // Ignore warm beige/tan decorative borders and table header shading
+    const isWarmDecoration = (r >= g && g >= b && (r - b) > 15 && lum > 118);
+    if(isWarmDecoration) continue;
+    // Detect dark text or saturated cool/dark colored headings (e.g. #1D5256 dark teal lum~67)
+    const isColoredText = (lum < bgLum - 55) && (b > r + 8 || g > r + 8);
+    if(lum < inkCutoff || isColoredText){
+      isInk[pIdx] = 1;
+    }
+  }
+
+  // 2. Strip long horizontal lines (allowing up to 3px JPEG gaps) so divider lines never hide headers
+  const minHRun = Math.round(w * 0.22);
+  for(let y = 2; y < h - 2; y++){
+    let run = 0, gap = 0;
+    for(let x = 2; x < w - 2; x++){
+      if(isInk[y * w + x]){
+        run++;
+        gap = 0;
+      } else {
+        gap++;
+        if(gap <= 3 && run > 0){
+          run++;
+        } else {
+          if(run >= minHRun){
+            for(let k = Math.max(0, x - run); k < x; k++){
+              let vCount = 0;
+              for(let dy = -6; dy <= 6; dy++){
+                const ny = y + dy;
+                if(ny >= 0 && ny < h && isInk[ny * w + k]) vCount++;
+              }
+              if(vCount <= 7) isInk[y * w + k] = 0;
+            }
+          }
+          run = 0;
+          gap = 0;
+        }
+      }
+    }
+  }
+
+  // 3. Strip long vertical border lines (allowing up to 3px JPEG gaps)
+  const minVRun = Math.round(h * 0.15);
+  for(let x = 2; x < w - 2; x++){
+    let run = 0, gap = 0;
+    for(let y = 2; y < h - 2; y++){
+      if(isInk[y * w + x]){
+        run++;
+        gap = 0;
+      } else {
+        gap++;
+        if(gap <= 3 && run > 0){
+          run++;
+        } else {
+          if(run >= minVRun){
+            for(let k = Math.max(0, y - run); k < y; k++){
+              let hCount = 0;
+              for(let dx = -6; dx <= 6; dx++){
+                const nx = x + dx;
+                if(nx >= 0 && nx < w && isInk[k * w + nx]) hCount++;
+              }
+              if(hCount <= 7) isInk[k * w + x] = 0;
+            }
+          }
+          run = 0;
+          gap = 0;
+        }
+      }
+    }
+  }
+
+  // Write crisp black-on-white pixels back
+  for(let i = 0, pIdx = 0; i < d.length; i += 4, pIdx++){
+    const v = isInk[pIdx] ? 0 : 255;
+    d[i] = v; d[i+1] = v; d[i+2] = v; d[i+3] = 255;
+  }
+  ctx.putImageData(imgData, 0, 0);
+  return out;
+}
+
+// Normalizes common OCR lookalike characters (e.g. 'SAMPIE' -> 'sample', '5AMPLE' -> 'sample')
+function normalizeOcrLookalikes(s){
+  return (s || '').toLowerCase()
+    .replace(/[|1i]/g, 'l')
+    .replace(/0/g, 'o')
+    .replace(/5/g, 's');
+}
+
+// Extracts all words and lines from Tesseract v5 data (checking words, lines, and blocks)
+function collectOcrWordsAndLines(ocrData){
+  const wordList = [];
+  const lineList = [];
+  const seenWordBoxes = new Set();
+
+  function addWord(wObj, parentLineWords){
+    if(!wObj || !wObj.text || !wObj.bbox) return;
+    const t = wObj.text.trim();
+    if(!t) return;
+    const b = wObj.bbox;
+    const sig = `${Math.round(b.x0/6)}_${Math.round(b.y0/6)}_${t.toLowerCase()}`;
+    if(seenWordBoxes.has(sig)) return;
+    seenWordBoxes.add(sig);
+    wordList.push({ text: t, bbox: b, lineWords: parentLineWords || null });
+  }
+
+  function ingestData(dataObj){
+    if(!dataObj) return;
+    if(Array.isArray(dataObj.lines)){
+      dataObj.lines.forEach(ln => {
+        if(ln && ln.text && ln.bbox){
+          lineList.push(ln);
+        }
+        if(ln && Array.isArray(ln.words)){
+          ln.words.forEach(w => addWord(w, ln.words));
+        }
+      });
+    }
+    if(Array.isArray(dataObj.words)){
+      dataObj.words.forEach(w => addWord(w, null));
+    }
+    if(Array.isArray(dataObj.blocks)){
+      dataObj.blocks.forEach(blk => {
+        (blk.paragraphs || []).forEach(par => {
+          (par.lines || []).forEach(ln => {
+            if(ln && ln.text && ln.bbox && !lineList.includes(ln)) lineList.push(ln);
+            (ln.words || []).forEach(w => addWord(w, ln.words));
+          });
+        });
+      });
+    }
+  }
+
+  ingestData(ocrData);
+  if(ocrData && ocrData.headerData){
+    ingestData(ocrData.headerData);
+  }
+  return { wordList, lineList };
+}
+
+// Live-update active matches when the user edits the "Replace with…" box
+replaceInput.addEventListener('input', () => {
+  const ft = findInput.value.trim().toLowerCase();
+  if(!ft || matches.length === 0) return;
+  const newRepl = replaceInput.value;
+  let updated = false;
+  matches.forEach(m => {
+    if(m.findTerm === ft){
+      m.replaceTerm = newRepl;
+      m.replaced = replaceAllCI(m.original, findInput.value.trim(), newRepl);
+      updated = true;
+    }
+  });
+  if(updated){
+    renderMatches();
+    refreshFocusIfActive();
+    if(window._scannerBridge && typeof window._scannerBridge.refreshPreview === 'function'){
+      window._scannerBridge.refreshPreview();
+    }
+  }
+});
+
 async function scanDocument(){
-  const findText   = findInput.value.trim();
+  const findText    = findInput.value.trim();
   const replaceText = replaceInput.value;
   if(!findText){ showToast('Type something to find first.'); return; }
-  if(pages.length === 0){ showToast('Add a PDF first.'); return; }
 
   scanBtn.disabled = true;
   scanBtn.textContent = 'Scanning…';
 
-  // Preserve enabled state across re-scans
-  const prevEnabled = {};
-  matches.forEach(m => prevEnabled[m.key] = m.enabled);
+  let ocrWorker = null;
+  try{
+    const scopeMode = frScope ? frScope.value : 'all';
+    const targetPages = await resolveTargetPagesForTool(scopeMode);
+    if(!targetPages || targetPages.length === 0){
+      return;
+    }
 
-  // Remove only existing matches for THIS search term (handles re-scan of same word).
-  // Matches for OTHER terms are left completely untouched — this is the fix.
-  const findLower = findText.toLowerCase();
-  matches = matches.filter(m => m.findTerm !== findLower);
+    // Preserve enabled state across re-scans
+    const prevEnabled = {};
+    matches.forEach(m => prevEnabled[m.key] = m.enabled);
 
-  let newCount = 0;
-  for(const p of pages){
-    try{
-      const content = await getTextContentCached(p.fileId, p.pageIndex);
-      content.items.forEach((item, itemIndex) => {
-        if(item.str && item.str.toLowerCase().includes(findLower)){
-          const key = p.fileId + '_' + p.pageIndex + '_' + itemIndex + '_' + findLower;
-          matches.push({
-            key,
-            findTerm:    findLower,
-            replaceTerm: replaceText,
-            uidPage:     p.uid,
-            fileId:      p.fileId,
-            pageIndex:   p.pageIndex,
-            itemIndex,
-            original:    item.str,
-            replaced:    replaceAllCI(item.str, findText, replaceText),
-            transform:   item.transform,
-            width:       item.width,
-            enabled:     key in prevEnabled ? prevEnabled[key] : true
+    // Remove only existing matches for THIS search term (handles re-scan of same word).
+    const findLower = findText.toLowerCase();
+    const findNorm  = normalizeOcrLookalikes(findText);
+    matches = matches.filter(m => m.findTerm !== findLower);
+
+    const useOcrForScans = !frUseOcr || frUseOcr.checked;
+    let newCount = 0;
+
+    for(let i = 0; i < targetPages.length; i++){
+      const p = targetPages[i];
+      try{
+        const content = await getTextContentCached(p.fileId, p.pageIndex);
+        const totalChars = (content.items || []).reduce((s, it) => s + (it.str || '').trim().length, 0);
+        const isLikelyImage = totalChars < 8;
+
+        if(!isLikelyImage){
+          content.items.forEach((item, itemIndex) => {
+            if(item.str && item.str.toLowerCase().includes(findLower)){
+              const key = p.fileId + '_' + p.pageIndex + '_' + itemIndex + '_' + findLower;
+              matches.push({
+                key,
+                findTerm:    findLower,
+                replaceTerm: replaceText,
+                uidPage:     p.uid,
+                fileId:      p.fileId,
+                pageIndex:   p.pageIndex,
+                itemIndex,
+                original:    item.str,
+                replaced:    replaceAllCI(item.str, findText, replaceText),
+                transform:   item.transform,
+                width:       item.width,
+                enabled:     key in prevEnabled ? prevEnabled[key] : true
+              });
+              newCount++;
+            }
           });
-          newCount++;
+        } else if(useOcrForScans){
+          // Scanned / Camera page (e.g. from 2. PDF Scanner): use OCR + known scan layout to locate text & coordinates
+          scanBtn.textContent = `OCR Scanning p.${i+1}/${targetPages.length}…`;
+          const canvas = await renderEditorCanvas(p.fileId, p.pageIndex, 1600);
+          const dims = await getPageDimsPts(p.fileId, p.pageIndex);
+          const scaleX = dims.w / (canvas.width || 1);
+          const scaleY = dims.h / (canvas.height || 1);
+
+          const fs = fileStore[p.fileId];
+          fs.ocrCache = fs.ocrCache || {};
+          const scanItem = (fs.isScannerSource && window._scannerBridge && typeof window._scannerBridge.getScanItemByPageIndex === 'function')
+            ? window._scannerBridge.getScanItemByPageIndex(p.pageIndex)
+            : null;
+
+          let ocrData = fs.ocrCache[p.pageIndex];
+          if(!ocrData){
+            // If this is the uncropped Demo Scan page with tracked word layout, build exact word/line boxes immediately
+            if(scanItem && scanItem.demoWords && scanItem.rotation === 0 && scanItem.crop.w > 0.95 && scanItem.crop.h > 0.95){
+              const pad = scanItem.margin != null ? scanItem.margin : 18;
+              const availW = Math.max(20, dims.w - pad * 2);
+              const availH = Math.max(20, dims.h - pad * 2);
+              const natW = (scanItem.origImg && (scanItem.origImg.naturalWidth || scanItem.origImg.width)) || 760;
+              const natH = (scanItem.origImg && (scanItem.origImg.naturalHeight || scanItem.origImg.height)) || 1040;
+              const pdfScale = Math.min(availW / natW, availH / natH);
+              const drawW = natW * pdfScale;
+              const drawH = natH * pdfScale;
+              const drawX = (dims.w - drawW) / 2;
+              const drawY = (dims.h - drawH) / 2;
+
+              const toCanvasBox = (it) => ({
+                x0: ((drawX + it.x0Pct * drawW) / dims.w) * canvas.width,
+                y0: ((drawY + it.y0Pct * drawH) / dims.h) * canvas.height,
+                x1: ((drawX + it.x1Pct * drawW) / dims.w) * canvas.width,
+                y1: ((drawY + it.y1Pct * drawH) / dims.h) * canvas.height
+              });
+
+              ocrData = {
+                words: (scanItem.demoWords || []).map(w => ({ text: w.text, bbox: toCanvasBox(w) })),
+                lines: (scanItem.demoLines || []).map(ln => ({ text: ln.text, bbox: toCanvasBox(ln) }))
+              };
+              fs.ocrCache[p.pageIndex] = ocrData;
+            } else if(typeof Tesseract !== 'undefined'){
+              if(!ocrWorker){
+                const langs = getSelectedOcrLangs();
+                ocrWorker = await Tesseract.createWorker(langs.join('+'));
+                try{
+                  // PSM 11 (sparse/variable-size text) finds both large 28px titles and small 14px body/footer text
+                  await ocrWorker.setParameters({ tessedit_pageseg_mode: '11' });
+                }catch(pe){}
+              }
+              const ocrCanvas = prepareCanvasForOcr(canvas);
+              const res = await ocrWorker.recognize(ocrCanvas);
+              ocrData = res ? res.data : null;
+
+              // Also run a dedicated pass on the top 24% header strip so large document titles
+              // (like "SAMPLE SCANNED DOCUMENT") are never missed due to body-text font size differences
+              try{
+                const headerH = Math.max(120, Math.round(ocrCanvas.height * 0.24));
+                const headerCanvas = document.createElement('canvas');
+                headerCanvas.width = ocrCanvas.width;
+                headerCanvas.height = headerH;
+                headerCanvas.getContext('2d').drawImage(ocrCanvas, 0, 0, ocrCanvas.width, headerH, 0, 0, ocrCanvas.width, headerH);
+                const hRes = await ocrWorker.recognize(headerCanvas);
+                if(ocrData && hRes && hRes.data){
+                  ocrData.headerData = hRes.data;
+                }
+              }catch(he){}
+
+              if(ocrData) fs.ocrCache[p.pageIndex] = ocrData;
+            }
+          }
+
+          if(ocrData){
+            const { wordList, lineList } = collectOcrWordsAndLines(ocrData);
+            const isMultiWord = /\s/.test(findText);
+            const matchedRegions = [];
+
+            if(!isMultiWord && wordList.length > 0){
+              wordList.forEach((wObj, uIdx) => {
+                const rawText = (wObj.text || '').trim();
+                const stripped = rawText.replace(/^[^a-zA-Z0-9\u0900-\u097F\u0A80-\u0AFF]+|[^a-zA-Z0-9\u0900-\u097F\u0A80-\u0AFF]+$/g, '');
+                const exactHit = rawText.toLowerCase().includes(findLower);
+                const fuzzyHit = !exactHit && findText.length >= 4 && stripped.length === findText.length && normalizeOcrLookalikes(stripped) === findNorm;
+
+                if(exactHit || fuzzyHit){
+                  const bbox = wObj.bbox || { x0: 0, y0: 0, x1: 40, y1: 16 };
+                  const pdfX = bbox.x0 * scaleX;
+                  const pdfY = dims.h - (bbox.y1 * scaleY);
+                  const pdfW = Math.max(12, (bbox.x1 - bbox.x0) * scaleX);
+                  const pdfH = Math.max(8, (bbox.y1 - bbox.y0) * scaleY);
+
+                  // Compute available width before the next word on the same line so longer
+                  // replacements (e.g. "sample" -> "New Demo") fit cleanly without overlapping the next word
+                  let maxAvailWidthPts = pdfW * 1.45;
+                  const sameLineNext = wordList
+                    .filter(other => other !== wObj && other.bbox && Math.abs(other.bbox.y0 - bbox.y0) < (bbox.y1 - bbox.y0) * 0.8 && other.bbox.x0 > bbox.x0 + 4)
+                    .sort((a,b) => a.bbox.x0 - b.bbox.x0)[0];
+                  if(sameLineNext){
+                    maxAvailWidthPts = Math.max(pdfW, (sameLineNext.bbox.x0 * scaleX) - pdfX - 2.5);
+                  } else {
+                    maxAvailWidthPts = Math.max(pdfW * 1.6, dims.w - pdfX - 24);
+                  }
+
+                  const replacedStr = exactHit
+                    ? replaceAllCI(rawText, findText, replaceText)
+                    : replaceText;
+
+                  const key = p.fileId + '_' + p.pageIndex + '_ocrw_' + uIdx + '_' + findLower;
+                  matches.push({
+                    key,
+                    findTerm:    findLower,
+                    replaceTerm: replaceText,
+                    uidPage:     p.uid,
+                    fileId:      p.fileId,
+                    pageIndex:   p.pageIndex,
+                    scanDocId:   scanItem ? scanItem.id : null,
+                    itemIndex:   'ocrw_' + uIdx,
+                    original:    rawText,
+                    replaced:    replacedStr,
+                    transform:   [pdfH, 0, 0, pdfH, pdfX, pdfY],
+                    width:       pdfW,
+                    maxAvailWidthPts,
+                    isOcrMatch:  true,
+                    enabled:     key in prevEnabled ? prevEnabled[key] : true
+                  });
+                  matchedRegions.push({ x0: bbox.x0, y0: bbox.y0, x1: bbox.x1, y1: bbox.y1 });
+                  newCount++;
+                }
+              });
+            }
+
+            // Also check lineList for multi-word searches OR any line where word-level tokenization missed a match
+            lineList.forEach((ln, lIdx) => {
+              const lineStr = (ln.text || '').trim();
+              if(!lineStr) return;
+              const lowerLine = lineStr.toLowerCase();
+              const matchIdx = lowerLine.indexOf(findLower);
+              if(matchIdx === -1) return;
+
+              const lb = ln.bbox || { x0: 0, y0: 0, x1: 200, y1: 20 };
+              // Skip if we already matched a word at this vertical & horizontal position
+              const fracStart = matchIdx / Math.max(1, lineStr.length);
+              const fracEnd   = (matchIdx + findText.length) / Math.max(1, lineStr.length);
+              const subX0 = lb.x0 + fracStart * (lb.x1 - lb.x0);
+              const subX1 = lb.x0 + fracEnd   * (lb.x1 - lb.x0);
+
+              const alreadyCovered = matchedRegions.some(r =>
+                Math.abs(r.y0 - lb.y0) < (lb.y1 - lb.y0) &&
+                Math.abs(r.x0 - subX0) < (lb.x1 - lb.x0) * 0.25
+              );
+              if(alreadyCovered) return;
+
+              const pdfX = subX0 * scaleX;
+              const pdfY = dims.h - (lb.y1 * scaleY);
+              const pdfW = Math.max(14, (subX1 - subX0) * scaleX);
+              const pdfH = Math.max(8, (lb.y1 - lb.y0) * scaleY);
+              const origSlice = lineStr.slice(matchIdx, matchIdx + findText.length);
+              const key = p.fileId + '_' + p.pageIndex + '_ocrl_' + lIdx + '_' + findLower;
+              matches.push({
+                key,
+                findTerm:    findLower,
+                replaceTerm: replaceText,
+                uidPage:     p.uid,
+                fileId:      p.fileId,
+                pageIndex:   p.pageIndex,
+                scanDocId:   scanItem ? scanItem.id : null,
+                itemIndex:   'ocrl_' + lIdx,
+                original:    origSlice,
+                replaced:    replaceText,
+                transform:   [pdfH, 0, 0, pdfH, pdfX, pdfY],
+                width:       pdfW,
+                maxAvailWidthPts: pdfW * 1.35,
+                isOcrMatch:  true,
+                enabled:     key in prevEnabled ? prevEnabled[key] : true
+              });
+              newCount++;
+            });
+          }
         }
-      });
-    }catch(err){ console.error('Scan failed for a page', err); }
+      }catch(err){ console.error('Scan failed for a page', err); }
+    }
+
+    renderMatches();
+    renderAll();
+    // Immediately refresh 2. PDF Scanner live preview & thumbnails so replacements appear right on the Scanner canvas!
+    if(window._scannerBridge && typeof window._scannerBridge.refreshPreview === 'function'){
+      window._scannerBridge.refreshPreview();
+    }
+    // Also refresh 1. PDF Workbench Focus Preview if active
+    if(matches.length > 0){
+      const firstEnabled = matches.find(m => m.enabled) || matches[0];
+      if(firstEnabled && firstEnabled.uidPage){
+        refreshFocusIfActive(firstEnabled.uidPage);
+      }
+    }
+
+    const ruleCount = new Set(matches.map(m => m.findTerm)).size;
+    showToast(
+      newCount === 0
+        ? 'No matches found for "' + findText + '".'
+        : '✓ Replaced ' + newCount + ' match' + (newCount===1?'':'es') + ' for "' + findText + '" → "' + replaceText + '"!'
+          + (ruleCount > 1 ? ' (' + ruleCount + ' rules active)' : '')
+    );
+  }finally{
+    if(ocrWorker){ try{ await ocrWorker.terminate(); }catch(e){} }
+    scanBtn.disabled = false;
+    scanBtn.textContent = 'Scan document';
   }
-
-  scanBtn.disabled = false;
-  scanBtn.textContent = 'Scan document';
-  renderMatches();
-  renderAll();
-  refreshFocusIfActive(); // ← update focus view with new replacements
-
-  const ruleCount = new Set(matches.map(m => m.findTerm)).size;
-  showToast(
-    newCount === 0
-      ? 'No matches found for "' + findText + '".'
-      : newCount + ' match' + (newCount===1?'':'es') + ' found for "' + findText + '".'
-        + (ruleCount > 1 ? ' (' + ruleCount + ' replacement rules active in total.)' : '')
-  );
 }
 
 function renderMatches(){
@@ -4178,10 +4888,9 @@ function renderMatches(){
 
   const ruleCount    = Object.keys(groups).length;
   const enabledCount = matches.filter(m => m.enabled).length;
-  matchesSummary.textContent =
-    enabledCount + ' of ' + matches.length + ' match' + (matches.length===1?'':'es')
-    + ' across ' + ruleCount + ' replacement rule' + (ruleCount===1?'':'s')
-    + ' — all will be applied on export.';
+  matchesSummary.innerHTML =
+    `<span style="color:#1E6F3D;font-weight:700;">✓ ${enabledCount} of ${matches.length} replacement${matches.length===1?'':'s'} applied live</span>`
+    + ` across ${ruleCount} rule${ruleCount===1?'': 's'} — visible in preview above &amp; baked into exported PDF.`;
 
   matchesList.innerHTML = '';
 
@@ -4211,6 +4920,9 @@ function renderMatches(){
       renderMatches();
       renderAll();
       refreshFocusIfActive(); // ← live update when rule is removed
+      if(window._scannerBridge && typeof window._scannerBridge.refreshPreview === 'function'){
+        window._scannerBridge.refreshPreview();
+      }
       showToast('Replacement rule "' + ft + '" removed.');
     });
     matchesList.appendChild(header);
@@ -4221,20 +4933,36 @@ function renderMatches(){
       const row = document.createElement('div');
       row.className = 'match-row';
       row.style.paddingLeft = '14px';
+      row.style.display = 'flex';
+      row.style.alignItems = 'center';
+      row.style.justifyContent = 'space-between';
+      row.style.gap = '8px';
       row.innerHTML = `
-        <label>
+        <label style="flex:1;">
           <input type="checkbox" ${m.enabled ? 'checked' : ''}>
           <span class="loc">${escapeHtml(fileName)} · p.${m.pageIndex}</span>
           <span class="before">${escapeHtml(m.original)}</span>
           <span>→</span>
           <span class="after">${escapeHtml(m.replaced)}</span>
         </label>
+        <button type="button" class="ghost preview-match-btn" style="font-size:11px;padding:2px 8px;border:1px solid var(--kraft-line);border-radius:5px;color:var(--teal-deep);white-space:nowrap;" title="Preview this replacement on the page">👁️ Preview</button>
       `;
       row.querySelector('input').addEventListener('change', e => {
         m.enabled = e.target.checked;
         renderMatches();
         renderAll();
         refreshFocusIfActive(m.uidPage); // ← live update if this page is in focus
+        if(window._scannerBridge && typeof window._scannerBridge.refreshPreview === 'function'){
+          window._scannerBridge.refreshPreview();
+        }
+      });
+      row.querySelector('.preview-match-btn').addEventListener('click', () => {
+        const isScanPage = (fileStore[m.fileId] && fileStore[m.fileId].isScannerSource) || !!m.scanDocId;
+        if(isScanPage && window._scannerBridge && typeof window._scannerBridge.focusScannerPage === 'function'){
+          window._scannerBridge.focusScannerPage(m.pageIndex);
+        } else {
+          focusPage(m.uidPage);
+        }
       });
       matchesList.appendChild(row);
     });
@@ -4316,7 +5044,7 @@ async function buildMergedWorkbenchPdfBytes(){
     // text find-replace (colour-matched, auto-fitting)
     const pageMatches = matches.filter(m => m.uidPage === p.uid && m.enabled);
     for(const m of pageMatches){
-      await applyTextReplacement(copied, m, helv, p.fileId, p.pageIndex);
+      await applyTextReplacement(copied, m, m.isOcrMatch ? helvBold : helv, p.fileId, p.pageIndex);
     }
 
     const pageWidthPts = copied.getWidth();
@@ -4514,33 +5242,46 @@ function openSharePdfModal(pdfFile, blob, cleanName){
 }
 
 async function mergeAndDownload(){
-  if(pages.length === 0) return;
-  // No gate here — user has already done their work. Gate is on the download button itself.
+  const allFromScanner = pages.length > 0 && pages.every(p => fileStore[p.fileId] && fileStore[p.fileId].isScannerSource);
+  const canUseScannerBuilder = (allFromScanner || (pages.length === 0 && window._scannerBridge && window._scannerBridge.getCount() > 0))
+    && window._scannerBridge && typeof window._scannerBridge.buildPdfBytes === 'function';
+  if(pages.length === 0 && !canUseScannerBuilder) return;
+
   downloadBtn.disabled = true;
   downloadBtn.textContent = 'Building PDF…';
+  if(frDownloadPdfBtn){ frDownloadPdfBtn.disabled = true; frDownloadPdfBtn.textContent = 'Building PDF…'; }
   try{
-    const outBytes = await buildMergedWorkbenchPdfBytes();
+    const outBytes = canUseScannerBuilder
+      ? await window._scannerBridge.buildPdfBytes(/*skipOverlayEdits*/ false)
+      : await buildMergedWorkbenchPdfBytes();
+    const outName = canUseScannerBuilder && typeof window._scannerBridge.getFileName === 'function'
+      ? window._scannerBridge.getFileName()
+      : 'merged-document.pdf';
     const blob = new Blob([outBytes], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'merged-document.pdf';
+    a.download = outName;
     document.body.appendChild(a);
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
-    showToast('Downloaded merged-document.pdf');
+    showToast('Downloaded "' + outName + '"');
   }catch(err){
     console.error(err);
     showToast('Export failed: ' + err.message);
   }finally{
     downloadBtn.disabled = pages.length === 0;
     downloadBtn.textContent = '⬇ Download merged PDF';
+    if(frDownloadPdfBtn){ frDownloadPdfBtn.disabled = false; frDownloadPdfBtn.textContent = '⬇ Download Replaced PDF'; }
   }
 }
 
 async function shareWorkbenchPdf(){
-  if(pages.length === 0){
+  const allFromScanner = pages.length > 0 && pages.every(p => fileStore[p.fileId] && fileStore[p.fileId].isScannerSource);
+  const canUseScannerBuilder = (allFromScanner || (pages.length === 0 && window._scannerBridge && window._scannerBridge.getCount() > 0))
+    && window._scannerBridge && typeof window._scannerBridge.buildPdfBytes === 'function';
+  if(pages.length === 0 && !canUseScannerBuilder){
     showToast('Upload at least one PDF first to share.');
     return;
   }
@@ -4548,9 +5289,17 @@ async function shareWorkbenchPdf(){
     shareWbPdfBtn.disabled = true;
     shareWbPdfBtn.textContent = '⏳ Preparing…';
   }
+  if(frSharePdfBtn){
+    frSharePdfBtn.disabled = true;
+    frSharePdfBtn.textContent = '⏳ Preparing…';
+  }
   try{
-    const outBytes = await buildMergedWorkbenchPdfBytes();
-    const fileName = getWorkbenchExportFileName();
+    const outBytes = canUseScannerBuilder
+      ? await window._scannerBridge.buildPdfBytes(/*skipOverlayEdits*/ false)
+      : await buildMergedWorkbenchPdfBytes();
+    const fileName = canUseScannerBuilder && typeof window._scannerBridge.getFileName === 'function'
+      ? window._scannerBridge.getFileName()
+      : getWorkbenchExportFileName();
     await sharePdfFileOrModal(outBytes, fileName);
   }catch(err){
     console.error(err);
@@ -4559,6 +5308,10 @@ async function shareWorkbenchPdf(){
     if(shareWbPdfBtn){
       shareWbPdfBtn.disabled = pages.length === 0;
       shareWbPdfBtn.textContent = '📤 Share PDF';
+    }
+    if(frSharePdfBtn){
+      frSharePdfBtn.disabled = false;
+      frSharePdfBtn.textContent = '📤 Share Replaced PDF';
     }
   }
 }
@@ -4753,10 +5506,9 @@ function buildPageElements(lines, pageWidthPts){
 ewExtractBtn.addEventListener('click', () => window._auth.premiumGate('extract your PDF to a Word document', extractToWord));
 
 async function extractToWord(){
-  if(pages.length === 0){ showToast('Add a PDF first.'); return; }
-  const scope = ewScope.value;
-  const targetPages = scope === 'selected' ? pages.filter(p => p.marked) : pages.slice();
-  if(targetPages.length === 0){ showToast('No pages selected. Tick some pages first, or choose "All pages".'); return; }
+  const scope = ewScope ? ewScope.value : 'all';
+  const targetPages = await resolveTargetPagesForTool(scope);
+  if(!targetPages || targetPages.length === 0) return;
 
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, PageBreak, Table, TableRow, TableCell, WidthType, BorderStyle } = docx;
   const useOcr = ewUseOcr.checked;
@@ -5104,10 +5856,9 @@ function autoSizeColumns(rows){
 xlExtractBtn.addEventListener('click', () => window._auth.premiumGate('extract your PDF to an Excel spreadsheet', extractToExcel));
 
 async function extractToExcel(){
-  if(pages.length === 0){ showToast('Add a PDF first.'); return; }
-  const scope = xlScope.value;
-  const targetPages = scope === 'selected' ? pages.filter(p => p.marked) : pages.slice();
-  if(targetPages.length === 0){ showToast('No pages selected. Tick some pages first, or choose "All pages".'); return; }
+  const scope = xlScope ? xlScope.value : 'all';
+  const targetPages = await resolveTargetPagesForTool(scope);
+  if(!targetPages || targetPages.length === 0) return;
 
   const sheetMode = xlSheetMode.value;
   const useOcr = xlUseOcr.checked;
@@ -5934,22 +6685,10 @@ function openAccountModal(){
   }
 
   const identityLabel = user.email || user.mobile || user.name || 'My Account';
-  const currentPersonalPath = (typeof window._getUserPersonalDrivePath === 'function') ? window._getUserPersonalDrivePath() : (user.drivePath || '');
 
   showAuthModal(`
     <div class="auth-logo"><span>📄</span><div><span>PDF Workbench</span><sub>${escapeHtml(user.name || identityLabel)}</sub></div></div>
     ${statusHTML}
-
-    <!-- Personal Google Drive Storage Path (Per-Login) -->
-    <div style="background:#F0F7F7;border:1.5px solid var(--teal);border-radius:9px;padding:10px 12px;margin-bottom:14px;">
-      <div style="font-size:12px;font-weight:700;color:var(--teal-deep);margin-bottom:4px;">📁 My Google Drive Path (Saved for this Login)</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        <input id="acctDrivePathInput" type="text" value="${escapeHtml(currentPersonalPath)}" placeholder="Paste Drive Folder URL or folder name (e.g. My Scans)"
-          style="flex:1;min-width:170px;padding:8px 10px;border:1px solid var(--kraft-line);border-radius:7px;font-size:12.5px;background:#fff;color:var(--ink);box-sizing:border-box;">
-        <button type="button" class="auth-btn primary" style="width:auto;padding:8px 12px;margin:0;font-size:12px;white-space:nowrap;" id="acctSaveDrivePathBtn">☁️ Save Path</button>
-      </div>
-      <div id="acctDrivePathMsg" style="font-size:11px;color:var(--ink-soft);margin-top:4px;">Stored individually for <strong>${escapeHtml(identityLabel)}</strong> across mobile &amp; desktop.</div>
-    </div>
 
     ${!['active'].includes(status.state) ? `
     <div class="plan-grid">
@@ -5987,24 +6726,6 @@ function openAccountModal(){
       <button onclick="window._auth.logout()" style="background:transparent;border:none;color:var(--red);font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline;">Sign out</button>
     </div>
   `, () => {
-    const acctSavePathBtn = document.getElementById('acctSaveDrivePathBtn');
-    if(acctSavePathBtn){
-      acctSavePathBtn.addEventListener('click', async () => {
-        const val = (document.getElementById('acctDrivePathInput').value || '').trim();
-        const msgEl = document.getElementById('acctDrivePathMsg');
-        acctSavePathBtn.disabled = true;
-        acctSavePathBtn.textContent = '⏳ Saving…';
-        if(typeof window._saveUserPersonalDrivePath === 'function'){
-          await window._saveUserPersonalDrivePath(val, true);
-        }
-        if(msgEl){
-          msgEl.innerHTML = `<span style="color:#1E6F3D;font-weight:700;">✓ Personal Google Drive Path saved for ${escapeHtml(identityLabel)}!</span>`;
-        }
-        acctSavePathBtn.disabled = false;
-        acctSavePathBtn.textContent = '☁️ Save Path';
-      });
-    }
-
     const activateBtn = document.getElementById('acctActivateBtn');
     if(activateBtn){
       activateBtn.addEventListener('click', ()=>{
@@ -6475,7 +7196,15 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
     return tc.toDataURL('image/jpeg', 0.8);
   }
 
-  // ── Upload image files ────────────────────────────────────────────
+  // ── Upload image or PDF files ─────────────────────────────────────
+  const scanSelectDriveBtn = document.getElementById('scanSelectDriveBtn');
+  if(scanSelectDriveBtn){
+    scanSelectDriveBtn.addEventListener('click', () => {
+      if(typeof window._openDrivePdfSelectorModal === 'function'){
+        window._openDrivePdfSelectorModal('scanner');
+      }
+    });
+  }
   scanUploadImgBtn.addEventListener('click', () => scanImgInput.click());
   scannerEmpty.addEventListener('click', () => scanImgInput.click());
   ['dragenter','dragover'].forEach(ev => scannerEmpty.addEventListener(ev, e => { e.preventDefault(); scannerEmpty.style.borderColor = 'var(--teal)'; }));
@@ -6483,27 +7212,78 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
   scannerEmpty.addEventListener('drop', e => handleScanFiles(e.dataTransfer.files));
   scanImgInput.addEventListener('change', e => { handleScanFiles(e.target.files); scanImgInput.value = ''; });
 
-  function handleScanFiles(fileList){
-    const files = Array.from(fileList || []);
-    if(!files.length) return;
-    let loaded = 0;
-    files.forEach(file => {
-      if(!file.type.startsWith('image/')){
-        showToast('Skipped "' + file.name + '" — please select an image or use Camera.');
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = ev => {
+  async function loadPdfBytesIntoScanner(rawBytes, fileName){
+    await workerReady;
+    const bytes = rawBytes instanceof Uint8Array ? rawBytes : new Uint8Array(rawBytes);
+    const pdfjsDoc = await pdfjsLib.getDocument({ data: bytes.slice() }).promise;
+    const numPages = pdfjsDoc.numPages;
+    const cleanBase = (fileName || 'Document').replace(/\.pdf$/i, '');
+    if(scanFileNameInput && (!scanFileNameInput.value || scanFileNameInput.value === 'Scanned-Document')){
+      scanFileNameInput.value = cleanBase;
+    }
+    for(let i = 1; i <= numPages; i++){
+      const page = await pdfjsDoc.getPage(i);
+      const vp1 = page.getViewport({ scale: 1 });
+      const scale = Math.min(2.5, Math.max(1.5, 1600 / Math.max(vp1.width, vp1.height)));
+      const vp = page.getViewport({ scale });
+      const c = document.createElement('canvas');
+      c.width = Math.round(vp.width);
+      c.height = Math.round(vp.height);
+      await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+      await new Promise(resolve => {
         const img = new Image();
         img.onload = () => {
-          addImageToScanner(img, file.name.replace(/\.[^.]+$/, ''));
-          loaded++;
-          if(loaded === files.length) showToast('Added ' + loaded + ' scanned page' + (loaded===1?'':'s') + '.');
+          addImageToScanner(img, numPages > 1 ? `${cleanBase}-p${i}` : cleanBase);
+          resolve();
         };
-        img.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
+        img.onerror = () => resolve();
+        img.src = c.toDataURL('image/jpeg', 0.94);
+      });
+    }
+    renderScannerUI();
+    return numPages;
+  }
+  window._loadPdfBytesIntoScanner = loadPdfBytesIntoScanner;
+
+  async function handleScanFiles(fileList){
+    const files = Array.from(fileList || []);
+    if(!files.length) return;
+    let loadedPages = 0;
+    for(const file of files){
+      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+      if(isPdf){
+        showToast('Loading PDF "' + file.name + '" into Scanner…');
+        try{
+          const buf = await file.arrayBuffer();
+          const count = await loadPdfBytesIntoScanner(new Uint8Array(buf), file.name);
+          loadedPages += count;
+        }catch(err){
+          console.error(err);
+          showToast('Could not read PDF "' + file.name + '".');
+        }
+      } else if(file.type.startsWith('image/')){
+        await new Promise(resolve => {
+          const reader = new FileReader();
+          reader.onload = ev => {
+            const img = new Image();
+            img.onload = () => {
+              addImageToScanner(img, file.name.replace(/\.[^.]+$/, ''));
+              loadedPages++;
+              resolve();
+            };
+            img.onerror = () => resolve();
+            img.src = ev.target.result;
+          };
+          reader.onerror = () => resolve();
+          reader.readAsDataURL(file);
+        });
+      } else {
+        showToast('Skipped "' + file.name + '" — please select a PDF or image.');
+      }
+    }
+    if(loadedPages > 0){
+      showToast('Added ' + loadedPages + ' page' + (loadedPages===1?'':'s') + ' to Scanner.');
+    }
   }
 
   // ── Full-Screen Live Camera Scanner with Live Scanned Lot Strip ──
@@ -6648,8 +7428,92 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
     await startStream();
   }
 
-  // ── Image Processing Pipeline (Rotation, Crop, Scale, Color, Light/Dark, Deblur) ──
-  function renderProcessedScanToCanvas(scanItem, targetCanvas, maxPreviewDim){
+  // ── Image Processing Pipeline (Rotation, Crop, Scale, Color, Light/Dark, Deblur, & Live Text Replacements) ──
+  function drawActiveReplacementsOnScanCanvas(scanItem, targetCanvas){
+    if(!scanItem || !targetCanvas) return;
+    const idx = scannedDocs.findIndex(x => x.id === scanItem.id);
+    if(idx < 0) return;
+    const pageIdx = idx + 1;
+
+    const scanMatches = matches.filter(m =>
+      m.enabled &&
+      m.pageIndex === pageIdx &&
+      (m.scanDocId === scanItem.id || (fileStore[m.fileId] && fileStore[m.fileId].isScannerSource))
+    );
+    if(scanMatches.length === 0) return;
+
+    const outW = targetCanvas.width;
+    const outH = targetCanvas.height;
+    const ctx  = targetCanvas.getContext('2d');
+
+    const pad = scanItem.margin != null ? scanItem.margin : 18;
+    let pw = 595.28, ph = 841.89;
+    if(scanItem.pageSize === 'a4-l'){ pw = 841.89; ph = 595.28; }
+    else if(scanItem.pageSize === 'letter-p'){ pw = 612; ph = 792; }
+    else if(scanItem.pageSize === 'fit'){ pw = outW + pad * 2; ph = outH + pad * 2; }
+
+    const availW = Math.max(20, pw - pad * 2);
+    const availH = Math.max(20, ph - pad * 2);
+    const pdfScale = Math.min(availW / outW, availH / outH);
+    const drawW = outW * pdfScale;
+    const drawH = outH * pdfScale;
+    const drawX = (pw - drawW) / 2;
+    const drawY = (ph - drawH) / 2;
+
+    for(const m of scanMatches){
+      const pdfFontSize = Math.abs(m.transform[0]) || Math.abs(m.transform[3]) || 12;
+      const pdfX = m.transform[4];
+      const pdfY = m.transform[5];
+      const pdfW = m.width || (pdfFontSize * 0.58 * (m.original || '').length);
+      const maxAvailPts = m.maxAvailWidthPts ? Math.max(pdfW, m.maxAvailWidthPts) : (pdfW * 1.45);
+
+      // Map PDF coordinates (points) back to targetCanvas pixel coordinates
+      const bx = ((pdfX - drawX) / drawW) * outW;
+      const topPdf = ph - (pdfY + pdfFontSize);
+      const by = ((topPdf - drawY) / drawH) * outH;
+      const bw = Math.max(8, (pdfW / drawW) * outW);
+      const bh = Math.max(8, (pdfFontSize / drawH) * outH);
+      const maxAvailPx = Math.max(bw, (maxAvailPts / drawW) * outW);
+
+      const bgHex  = sampleBackgroundColor(targetCanvas, bx / outW, by / outH, bw / outW, bh / outH);
+      const inkHex = exactDominantInkColor(ctx, bx, by, bw, bh, bgHex);
+
+      const padX = Math.max(1.5, bh * 0.06);
+      const padY = Math.max(1.5, bh * 0.12);
+      let fontPx = Math.max(8, bh * 0.88);
+      ctx.font = `bold ${fontPx}px Arial, sans-serif`;
+      let measuredW = ctx.measureText(m.replaced).width;
+      let hScale = 1;
+      if(measuredW > maxAvailPx){
+        const ratio = maxAvailPx / Math.max(1, measuredW);
+        if(ratio >= 0.70){
+          hScale = ratio;
+        } else {
+          hScale = 0.72;
+          while(fontPx > 7 && ctx.measureText(m.replaced).width * hScale > maxAvailPx){
+            fontPx -= 0.5;
+            ctx.font = `bold ${fontPx}px Arial, sans-serif`;
+          }
+        }
+        measuredW = ctx.measureText(m.replaced).width * hScale;
+      }
+
+      const coverW = Math.min(maxAvailPx + padX, Math.max(bw + padX * 2, measuredW + padX * 2));
+      ctx.fillStyle = bgHex;
+      ctx.fillRect(bx - padX, by - padY, coverW, bh + padY * 2);
+
+      ctx.save();
+      ctx.fillStyle = inkHex;
+      ctx.font = `bold ${fontPx}px Arial, sans-serif`;
+      ctx.textBaseline = 'alphabetic';
+      ctx.translate(bx, by + bh * 0.84);
+      if(hScale !== 1) ctx.scale(hScale, 1);
+      ctx.fillText(m.replaced, 0, 0);
+      ctx.restore();
+    }
+  }
+
+  function renderProcessedScanToCanvas(scanItem, targetCanvas, maxPreviewDim, opts){
     if(!scanItem || !scanItem.origImg) return;
     const img = scanItem.origImg;
     const rot = ((scanItem.rotation % 360) + 360) % 360;
@@ -6700,75 +7564,80 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
       scanItem.contrast !== 0 ||
       scanItem.sharpen > 0;
 
-    if(!needPixels) return;
+    if(needPixels){
+      const imgData = ctx.getImageData(0, 0, outW, outH);
+      const d = imgData.data;
 
-    const imgData = ctx.getImageData(0, 0, outW, outH);
-    const d = imgData.data;
+      const bright = scanItem.brightness || 0; // -80..80
+      let contrast = scanItem.contrast || 0;   // -60..90
+      const mode   = scanItem.colorMode || 'original';
+      const thresh = scanItem.bwThreshold || 145;
 
-    const bright = scanItem.brightness || 0; // -80..80
-    let contrast = scanItem.contrast || 0;   // -60..90
-    const mode   = scanItem.colorMode || 'original';
-    const thresh = scanItem.bwThreshold || 145;
+      // Magic color boosts contrast and brightness slightly to whiten paper background
+      const effBright   = mode === 'magic' ? bright + 18 : bright;
+      const effContrast = mode === 'magic' ? Math.min(110, contrast + 38) : contrast;
+      const factor = (259 * (effContrast + 255)) / (255 * (259 - effContrast));
 
-    // Magic color boosts contrast and brightness slightly to whiten paper background
-    const effBright   = mode === 'magic' ? bright + 18 : bright;
-    const effContrast = mode === 'magic' ? Math.min(110, contrast + 38) : contrast;
-    const factor = (259 * (effContrast + 255)) / (255 * (259 - effContrast));
+      for(let i = 0; i < d.length; i += 4){
+        let r = d[i];
+        let g = d[i+1];
+        let b = d[i+2];
 
-    for(let i = 0; i < d.length; i += 4){
-      let r = d[i];
-      let g = d[i+1];
-      let b = d[i+2];
+        // Brightness + Contrast
+        r = factor * (r + effBright - 128) + 128;
+        g = factor * (g + effBright - 128) + 128;
+        b = factor * (b + effBright - 128) + 128;
 
-      // Brightness + Contrast
-      r = factor * (r + effBright - 128) + 128;
-      g = factor * (g + effBright - 128) + 128;
-      b = factor * (b + effBright - 128) + 128;
-
-      if(mode === 'magic'){
-        // Whiten near-white paper pixels so shadows disappear
-        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-        if(lum > 195){
-          const boost = (lum - 195) * 0.85;
-          r += boost; g += boost; b += boost;
+        if(mode === 'magic'){
+          // Whiten near-white paper pixels so shadows disappear
+          const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+          if(lum > 195){
+            const boost = (lum - 195) * 0.85;
+            r += boost; g += boost; b += boost;
+          }
+        } else if(mode === 'grayscale'){
+          const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+          r = g = b = lum;
+        } else if(mode === 'bw'){
+          const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+          const v = lum >= thresh ? 255 : 0;
+          r = g = b = v;
         }
-      } else if(mode === 'grayscale'){
-        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-        r = g = b = lum;
-      } else if(mode === 'bw'){
-        const lum = 0.299 * r + 0.587 * g + 0.114 * b;
-        const v = lum >= thresh ? 255 : 0;
-        r = g = b = v;
+
+        d[i]   = r < 0 ? 0 : r > 255 ? 255 : r;
+        d[i+1] = g < 0 ? 0 : g > 255 ? 255 : g;
+        d[i+2] = b < 0 ? 0 : b > 255 ? 255 : b;
       }
 
-      d[i]   = r < 0 ? 0 : r > 255 ? 255 : r;
-      d[i+1] = g < 0 ? 0 : g > 255 ? 255 : g;
-      d[i+2] = b < 0 ? 0 : b > 255 ? 255 : b;
-    }
-
-    // 5. Deblur / Sharpen convolution (3x3 Unsharp Laplacians)
-    const sharpAmt = (scanItem.sharpen || 0) / 100; // 0.0 to 1.0
-    if(sharpAmt > 0){
-      const src = new Uint8ClampedArray(d);
-      const strength = sharpAmt * 1.35;
-      for(let y = 1; y < outH - 1; y++){
-        for(let x = 1; x < outW - 1; x++){
-          const idx = (y * outW + x) * 4;
-          const up  = ((y - 1) * outW + x) * 4;
-          const dn  = ((y + 1) * outW + x) * 4;
-          const lf  = (y * outW + (x - 1)) * 4;
-          const rt  = (y * outW + (x + 1)) * 4;
-          for(let cIdx = 0; cIdx < 3; cIdx++){
-            const center = src[idx + cIdx];
-            const lap = 4 * center - src[up + cIdx] - src[dn + cIdx] - src[lf + cIdx] - src[rt + cIdx];
-            const val = center + strength * lap;
-            d[idx + cIdx] = val < 0 ? 0 : val > 255 ? 255 : val;
+      // 5. Deblur / Sharpen convolution (3x3 Unsharp Laplacians)
+      const sharpAmt = (scanItem.sharpen || 0) / 100; // 0.0 to 1.0
+      if(sharpAmt > 0){
+        const src = new Uint8ClampedArray(d);
+        const strength = sharpAmt * 1.35;
+        for(let y = 1; y < outH - 1; y++){
+          for(let x = 1; x < outW - 1; x++){
+            const idx = (y * outW + x) * 4;
+            const up  = ((y - 1) * outW + x) * 4;
+            const dn  = ((y + 1) * outW + x) * 4;
+            const lf  = (y * outW + (x - 1)) * 4;
+            const rt  = (y * outW + (x + 1)) * 4;
+            for(let cIdx = 0; cIdx < 3; cIdx++){
+              const center = src[idx + cIdx];
+              const lap = 4 * center - src[up + cIdx] - src[dn + cIdx] - src[lf + cIdx] - src[rt + cIdx];
+              const val = center + strength * lap;
+              d[idx + cIdx] = val < 0 ? 0 : val > 255 ? 255 : val;
+            }
           }
         }
       }
+
+      ctx.putImageData(imgData, 0, 0);
     }
 
-    ctx.putImageData(imgData, 0, 0);
+    // 6. Paint active Find & Replace matches directly onto the Scanner preview / export canvas
+    if(!(opts && opts.skipTextEdits) && !cropModeActive){
+      drawActiveReplacementsOnScanCanvas(scanItem, targetCanvas);
+    }
   }
 
   // ── UI Rendering & Sync ───────────────────────────────────────────
@@ -6804,7 +7673,13 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
       s.thumbUrl = createThumbFromCanvas(scanPreviewCanvas);
     }
     const idx = scannedDocs.findIndex(x => x.id === s.id);
-    scanStageTitle.textContent = '✎ EDITING PAGE ' + (idx + 1) + ' OF ' + scannedDocs.length + ' · ' + s.name;
+    const activeReplCount = matches.filter(m =>
+      m.enabled &&
+      m.pageIndex === (idx + 1) &&
+      (m.scanDocId === s.id || (fileStore[m.fileId] && fileStore[m.fileId].isScannerSource))
+    ).length;
+    scanStageTitle.textContent = '✎ EDITING PAGE ' + (idx + 1) + ' OF ' + scannedDocs.length + ' · ' + s.name
+      + (activeReplCount > 0 ? ` · ✓ ${activeReplCount} word replacement${activeReplCount===1?'':'s'} applied` : '');
 
     // Show output resolution info
     const img = s.origImg;
@@ -6895,6 +7770,9 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
       if(!getActiveScan()) activeScanId = scannedDocs[0].id;
       syncControlsFromActive();
       updateActivePreviewAndThumb();
+    }
+    if(typeof window._updatePremiumSourceStatusBadge === 'function'){
+      window._updatePremiumSourceStatusBadge();
     }
   }
 
@@ -7145,15 +8023,30 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
   scanCropOverlay.addEventListener('touchstart', startCropDrag, { passive: false });
 
   // ── Build Combined PDF from All Scanned Pages ─────────────────────
-  async function buildScannedPdfBytes(){
+  let lastSyncedScannerSig = '';
+  let lastSyncedScannerFileId = null;
+
+  function getScannerStateSignature(){
+    return scannedDocs.map(s => [
+      s.id, s.rotation, s.crop.x.toFixed(3), s.crop.y.toFixed(3), s.crop.w.toFixed(3), s.crop.h.toFixed(3),
+      s.pageSize, s.margin, s.scalePct, s.colorMode, s.brightness, s.contrast, s.sharpen, s.bwThreshold
+    ].join(',')).join('|');
+  }
+
+  async function buildScannedPdfBytes(skipOverlayEdits){
     const pdfDoc = await PDFDocument.create();
+    const helv = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const helvBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const workCanvas = document.createElement('canvas');
     const wasCrop = cropModeActive;
     cropModeActive = false;
 
-    for(const s of scannedDocs){
-      renderProcessedScanToCanvas(s, workCanvas, null); // full chosen resolution
-      const dataUrl = workCanvas.toDataURL('image/jpeg', 0.90);
+    for(let idx = 0; idx < scannedDocs.length; idx++){
+      const s = scannedDocs[idx];
+      // When skipOverlayEdits is false (exporting/saving), renderProcessedScanToCanvas paints active
+      // Find & Replace matches directly onto workCanvas at full resolution!
+      renderProcessedScanToCanvas(s, workCanvas, null, { skipTextEdits: !!skipOverlayEdits });
+      const dataUrl = workCanvas.toDataURL('image/jpeg', 0.92);
       const jpgBytes = await fetch(dataUrl).then(r => r.arrayBuffer());
       const jpgImg = await pdfDoc.embedJpg(jpgBytes);
 
@@ -7176,6 +8069,48 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
       const drawY = (ph - drawH) / 2;
 
       page.drawImage(jpgImg, { x: drawX, y: drawY, width: drawW, height: drawH });
+
+      // Apply manual patches and watermark if present
+      if(!skipOverlayEdits){
+        const syncedPage = lastSyncedScannerFileId
+          ? pages.find(p => p.fileId === lastSyncedScannerFileId && p.pageIndex === (idx + 1))
+          : null;
+        const pageMatches = matches.filter(m =>
+          m.enabled && m.pageIndex === (idx + 1) &&
+          (m.scanDocId === s.id || (fileStore[m.fileId] && fileStore[m.fileId].isScannerSource))
+        );
+        if(syncedPage){
+          for(const patch of (syncedPage.patches || [])){
+            const rectX = patch.xPct * pw;
+            const rectWidth = patch.wPct * pw;
+            const rectHeight = patch.hPct * ph;
+            const rectY = ph - (patch.yPct + patch.hPct) * ph;
+            page.drawRectangle({
+              x: rectX, y: rectY, width: rectWidth, height: rectHeight,
+              color: hexToRgb01(patch.boxColor)
+            });
+            if(patch.text){
+              const font = patch.bold === false ? helv : helvBold;
+              let fontSize = patch.fontSize;
+              const maxTextWidth = rectWidth * 0.92;
+              while(fontSize > 6 && font.widthOfTextAtSize(patch.text, fontSize) > maxTextWidth){
+                fontSize -= 1;
+              }
+              const textWidth = font.widthOfTextAtSize(patch.text, fontSize);
+              const tx = rectX + Math.max(2, (rectWidth - textWidth) / 2);
+              const ty = rectY + Math.max(2, (rectHeight - fontSize) / 2) + fontSize * 0.12;
+              page.drawText(patch.text, {
+                x: tx, y: ty, size: fontSize, font, color: hexToRgb01(patch.textColor)
+              });
+            }
+          }
+        }
+        const wasEdited = pageMatches.length > 0 || (syncedPage && (syncedPage.patches || []).length > 0);
+        if(wasEdited && watermarkToggle && watermarkToggle.checked){
+          stampEditedWatermark(page, helvBold);
+        }
+        if(shouldStampTrial()) stampTrialWatermark(page, helvBold);
+      }
     }
 
     cropModeActive = wasCrop;
@@ -7186,6 +8121,163 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
     const raw = (scanFileNameInput.value || 'Scanned-Document').trim().replace(/\.pdf$/i, '');
     const safe = raw.replace(/[<>:"/\\|?*]+/g, '-') || 'Scanned-Document';
     return safe + '.pdf';
+  }
+
+  // Syncs current 2. PDF Scanner pages into fileStore/pages so Options 3–6 (Find & Replace, OCR, Word, Excel)
+  // work directly on scanned pages without duplicating files on repeated runs.
+  async function syncScannerToWorkbench(opts){
+    const silent = opts && opts.silent;
+    if(scannedDocs.length === 0) return [];
+    const curSig = getScannerStateSignature();
+    if(lastSyncedScannerSig === curSig && lastSyncedScannerFileId && fileStore[lastSyncedScannerFileId]){
+      const existingPages = pages.filter(p => p.fileId === lastSyncedScannerFileId);
+      if(existingPages.length === scannedDocs.length){
+        return existingPages;
+      }
+    }
+
+    await workerReady;
+    const fileName = getCleanScanFileName();
+    const rawBytes = await buildScannedPdfBytes(/*skipOverlayEdits*/ true);
+    const bytes = new Uint8Array(rawBytes);
+    const pdfjsDoc = await pdfjsLib.getDocument({ data: bytes.slice() }).promise;
+
+    const oldId = (lastSyncedScannerFileId && fileStore[lastSyncedScannerFileId]) ? lastSyncedScannerFileId : null;
+    if(oldId){
+      pages = pages.filter(p => p.fileId !== oldId);
+      delete fileStore[oldId];
+      fileOrder = fileOrder.filter(id => id !== oldId);
+    }
+
+    const fileId = genId();
+    fileStore[fileId] = {
+      name: '📷 ' + fileName,
+      bytes,
+      pdfjsDoc,
+      pdfLibDoc: null,
+      textCache: {},
+      ocrCache: {},
+      isScannerSource: true
+    };
+    fileOrder.push(fileId);
+    lastSyncedScannerFileId = fileId;
+    lastSyncedScannerSig = curSig;
+
+    const numPages = pdfjsDoc.numPages;
+    const addedPages = [];
+    for(let i = 1; i <= numPages; i++){
+      const thumb = await renderThumb(pdfjsDoc, i);
+      const pgObj = { uid: genId(), fileId, pageIndex: i, thumb, marked: false, patches: [] };
+      pages.push(pgObj);
+      addedPages.push(pgObj);
+    }
+
+    // Re-bind any existing Find & Replace matches from oldId to the updated fileId & page uids
+    if(oldId){
+      matches.forEach(m => {
+        if(m.fileId === oldId){
+          const newPg = addedPages[m.pageIndex - 1];
+          if(newPg){
+            m.fileId = fileId;
+            m.uidPage = newPg.uid;
+          }
+        }
+      });
+    }
+
+    renderAll();
+    if(!silent){
+      showToast('Synced "' + fileName + '" (' + numPages + ' scanned page' + (numPages===1?'':'s') + ')!');
+    }
+    return addedPages;
+  }
+
+  window._scannerBridge = {
+    getCount: () => scannedDocs.length,
+    getFileName: getCleanScanFileName,
+    getScanItemByPageIndex: (pageIdx) => scannedDocs[(pageIdx || 1) - 1] || null,
+    refreshPreview: () => {
+      updateActivePreviewAndThumb();
+    },
+    focusScannerPage: (pageIdx) => {
+      const target = scannedDocs[(pageIdx || 1) - 1] || scannedDocs[0];
+      if(target){
+        activeScanId = target.id;
+        exitCropMode();
+        syncControlsFromActive();
+        updateActivePreviewAndThumb();
+      }
+      const stageEl = document.getElementById('scanCanvasContainer') || document.getElementById('scannerSection');
+      if(stageEl){
+        stageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        stageEl.style.transition = 'box-shadow 0.25s ease';
+        stageEl.style.boxShadow = '0 0 0 4px #20D6C7, 0 8px 28px rgba(0,0,0,.45)';
+        setTimeout(() => { stageEl.style.boxShadow = ''; }, 1800);
+      }
+    },
+    syncToWorkbench: syncScannerToWorkbench,
+    buildPdfBytes: buildScannedPdfBytes
+  };
+
+  // Wire 2. PDF Scanner → Options 3–6 Quick Action Buttons
+  const scannerToPremTopBtn = document.getElementById('scannerToPremTopBtn');
+  if(scannerToPremTopBtn){
+    scannerToPremTopBtn.addEventListener('click', async () => {
+      if(scannedDocs.length > 0){
+        if(frScope) frScope.value = 'scanner';
+        if(ewScope) ewScope.value = 'scanner';
+        if(xlScope) xlScope.value = 'scanner';
+        await syncScannerToWorkbench({ silent: true });
+      }
+      const premSec = document.getElementById('premiumSection');
+      if(premSec) premSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  const scanQuickFindReplaceBtn = document.getElementById('scanQuickFindReplaceBtn');
+  if(scanQuickFindReplaceBtn){
+    scanQuickFindReplaceBtn.addEventListener('click', async () => {
+      if(scannedDocs.length === 0){ showToast('Scan or upload at least one page first.'); return; }
+      if(frScope) frScope.value = 'scanner';
+      if(frUseOcr) frUseOcr.checked = true;
+      await syncScannerToWorkbench({ silent: true });
+      const premSec = document.getElementById('premiumSection');
+      if(premSec) premSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => { if(findInput) findInput.focus(); }, 450);
+      showToast('Ready to Find & Replace text on your ' + scannedDocs.length + ' scanned page(s)!');
+    });
+  }
+
+  const scanQuickOcrLangBtn = document.getElementById('scanQuickOcrLangBtn');
+  if(scanQuickOcrLangBtn){
+    scanQuickOcrLangBtn.addEventListener('click', () => {
+      const ocrPanel = document.getElementById('ocrLangPanel');
+      if(ocrPanel) ocrPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }
+
+  const scanQuickWordBtn = document.getElementById('scanQuickWordBtn');
+  if(scanQuickWordBtn){
+    scanQuickWordBtn.addEventListener('click', async () => {
+      if(scannedDocs.length === 0){ showToast('Scan or upload at least one page first.'); return; }
+      if(ewScope) ewScope.value = 'scanner';
+      if(ewUseOcr) ewUseOcr.checked = true;
+      const wordPanel = document.getElementById('wordExtractPanel');
+      if(wordPanel) wordPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if(ewExtractBtn) ewExtractBtn.click();
+    });
+  }
+
+  const scanQuickExcelBtn = document.getElementById('scanQuickExcelBtn');
+  if(scanQuickExcelBtn){
+    scanQuickExcelBtn.addEventListener('click', async () => {
+      if(scannedDocs.length === 0){ showToast('Scan or upload at least one page first.'); return; }
+      if(xlScope) xlScope.value = 'scanner';
+      if(xlUseOcr) xlUseOcr.checked = true;
+      const excelPanel = document.getElementById('excelExtractPanel');
+      if(excelPanel) excelPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if(xlExtractBtn) xlExtractBtn.click();
+    });
   }
 
   // 1. Save & Download PDF directly (supports native Save As File Picker when available)
@@ -7240,9 +8332,7 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
     scanSendToWbBtn.disabled = true;
     scanSendToWbBtn.textContent = 'Adding to Workbench…';
     try{
-      const pdfBytes = await buildScannedPdfBytes();
-      const file = new File([pdfBytes], fileName, { type: 'application/pdf' });
-      await handleFiles([file]);
+      await syncScannerToWorkbench({ silent: true });
       showToast('Added "' + fileName + '" (' + scannedDocs.length + ' page' + (scannedDocs.length===1?'':'s') + ') to Workbench!');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }catch(err){
@@ -7556,26 +8646,730 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
     return btoa(binary);
   }
 
+  function base64ToUint8(b64){
+    const bin = atob((b64 || '').replace(/\s+/g, ''));
+    const out = new Uint8Array(bin.length);
+    for(let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  // ── Stored Google Drive PDFs Library (IndexedDB + Cloud Apps Script Sync) ──
+  const DRIVE_PDF_DB_NAME  = 'pdfwb_drive_files_v1';
+  const DRIVE_PDF_STORE    = 'drive_pdfs';
+
+  function openDrivePdfDb(){
+    return new Promise((resolve, reject) => {
+      if(!window.indexedDB){ resolve(null); return; }
+      const req = indexedDB.open(DRIVE_PDF_DB_NAME, 1);
+      req.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if(!db.objectStoreNames.contains(DRIVE_PDF_STORE)){
+          db.createObjectStore(DRIVE_PDF_STORE, { keyPath: 'id' });
+        }
+      };
+      req.onsuccess = (e) => resolve(e.target.result);
+      req.onerror   = () => resolve(null);
+    });
+  }
+
+  async function saveDrivePdfRecord(rec){
+    const db = await openDrivePdfDb();
+    if(!db) return null;
+    const item = {
+      id: rec.id || ('drv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)),
+      fileName: rec.fileName || 'Scanned-Document.pdf',
+      bytes: rec.bytes instanceof Uint8Array ? rec.bytes : new Uint8Array(rec.bytes || []),
+      drivePath: rec.drivePath || '',
+      fileId: rec.fileId || '',
+      fileUrl: rec.fileUrl || '',
+      userKey: rec.userKey || '',
+      pageCount: rec.pageCount || 1,
+      sizeBytes: rec.bytes ? rec.bytes.byteLength || rec.bytes.length : 0,
+      updatedAt: rec.updatedAt || new Date().toISOString()
+    };
+    return new Promise((resolve) => {
+      try{
+        const tx = db.transaction(DRIVE_PDF_STORE, 'readwrite');
+        const st = tx.objectStore(DRIVE_PDF_STORE);
+        // If same fileName + userKey already exists, update it so edits replace/update cleanly
+        const getAllReq = st.getAll();
+        getAllReq.onsuccess = () => {
+          const all = getAllReq.result || [];
+          const existing = all.find(x =>
+            (item.fileId && x.fileId === item.fileId) ||
+            (x.fileName.toLowerCase() === item.fileName.toLowerCase() && (x.userKey || '') === (item.userKey || ''))
+          );
+          if(existing) item.id = existing.id;
+          st.put(item);
+        };
+        tx.oncomplete = () => resolve(item);
+        tx.onerror = () => resolve(null);
+      }catch(e){
+        resolve(null);
+      }
+    });
+  }
+
+  async function listDrivePdfRecords(){
+    const db = await openDrivePdfDb();
+    if(!db) return [];
+    return new Promise((resolve) => {
+      try{
+        const tx = db.transaction(DRIVE_PDF_STORE, 'readonly');
+        const st = tx.objectStore(DRIVE_PDF_STORE);
+        const req = st.getAll();
+        req.onsuccess = () => {
+          const { key } = getCurrentUserIdentity();
+          const all = (req.result || []).filter(r => !key || !r.userKey || r.userKey === key);
+          all.sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+          resolve(all);
+        };
+        req.onerror = () => resolve([]);
+      }catch(e){
+        resolve([]);
+      }
+    });
+  }
+
+  async function deleteDrivePdfRecord(id){
+    const db = await openDrivePdfDb();
+    if(!db) return false;
+    return new Promise((resolve) => {
+      try{
+        const tx = db.transaction(DRIVE_PDF_STORE, 'readwrite');
+        tx.objectStore(DRIVE_PDF_STORE).delete(id);
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+      }catch(e){
+        resolve(false);
+      }
+    });
+  }
+
+  function extractDriveFileIdFromInput(raw){
+    const s = (raw || '').trim();
+    if(!s) return '';
+    const m1 = s.match(/\/file\/d\/([a-zA-Z0-9_-]{15,})/);
+    if(m1 && m1[1]) return m1[1];
+    const m2 = s.match(/[?&]id=([a-zA-Z0-9_-]{15,})/);
+    if(m2 && m2[1]) return m2[1];
+    if(/^[a-zA-Z0-9_-]{20,}$/.test(s) && !s.includes('/')) return s;
+    return '';
+  }
+
+  function extractDriveFolderIdFromPath(raw){
+    const s = (raw || '').trim();
+    if(!s) return '';
+    const m1 = s.match(/\/folders\/([a-zA-Z0-9_-]{15,})/);
+    if(m1 && m1[1]) return m1[1];
+    const m2 = s.match(/[?&]id=([a-zA-Z0-9_-]{15,})/);
+    if(m2 && m2[1]) return m2[1];
+    if(/^[a-zA-Z0-9_-]{20,}$/.test(s) && !s.includes('/') && !s.includes(' ')) return s;
+    return '';
+  }
+
+  function isValidPdfBytes(u8){
+    if(!u8 || u8.length < 16) return false;
+    const limit = Math.min(u8.length - 5, 1024);
+    for(let i = 0; i <= limit; i++){
+      // Check for '%PDF-' (0x25, 0x50, 0x44, 0x46, 0x2D)
+      if(u8[i] === 0x25 && u8[i+1] === 0x50 && u8[i+2] === 0x44 && u8[i+3] === 0x46 && u8[i+4] === 0x2D){
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async function fetchWithTimeout(url, opts, timeoutMs){
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), timeoutMs || 8500);
+    try{
+      const res = await fetch(url, { ...(opts || {}), signal: ctrl.signal });
+      return res;
+    }finally{
+      clearTimeout(timer);
+    }
+  }
+
+  async function fetchPublicDrivePdfViaRelays(fileId){
+    const dlUrls = [
+      `https://drive.usercontent.google.com/download?id=${encodeURIComponent(fileId)}&export=download&confirm=t`,
+      `https://drive.google.com/uc?export=download&id=${encodeURIComponent(fileId)}`
+    ];
+    const relayBuilders = [
+      (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+      (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+      (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`
+    ];
+
+    for(const targetUrl of dlUrls){
+      for(const buildRelay of relayBuilders){
+        try{
+          const proxyUrl = buildRelay(targetUrl);
+          const res = await fetchWithTimeout(proxyUrl, { method: 'GET', redirect: 'follow' }, 9000);
+          if(!res.ok) continue;
+          const buf = await res.arrayBuffer();
+          const u8 = new Uint8Array(buf);
+          if(isValidPdfBytes(u8)){
+            return u8;
+          }
+        }catch(e){}
+      }
+    }
+    return null;
+  }
+
+  async function fetchPublicDriveFileTitle(fileId){
+    const viewUrl = `https://drive.google.com/file/d/${encodeURIComponent(fileId)}/view`;
+    const relayBuilders = [
+      (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+      (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`
+    ];
+    for(const buildRelay of relayBuilders){
+      try{
+        const res = await fetchWithTimeout(buildRelay(viewUrl), { method: 'GET' }, 4500);
+        if(!res.ok) continue;
+        const html = await res.text();
+        const m = html.match(/<title>([^<]+)<\/title>/i) || html.match(/property="og:title"\s+content="([^"]+)"/i);
+        if(m && m[1]){
+          const clean = m[1].replace(/\s*-\s*Google Drive\s*$/i, '').trim();
+          if(clean && !/sign in|google drive|error|page not found/i.test(clean)){
+            return clean.endsWith('.pdf') ? clean : (clean + '.pdf');
+          }
+        }
+      }catch(e){}
+    }
+    return '';
+  }
+
+  async function fetchPublicDriveFolderFiles(folderId){
+    if(!folderId) return [];
+    const embedUrl = `https://drive.google.com/embeddedfolderview?id=${encodeURIComponent(folderId)}#list`;
+    const relayBuilders = [
+      (u) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+      (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`,
+      (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`
+    ];
+    for(const buildRelay of relayBuilders){
+      try{
+        const res = await fetchWithTimeout(buildRelay(embedUrl), { method: 'GET' }, 7000);
+        if(!res.ok) continue;
+        const html = await res.text();
+        if(!html || !html.includes('flip-entry')) continue;
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const entries = Array.from(doc.querySelectorAll('.flip-entry'));
+        const out = [];
+        for(const el of entries){
+          const rawId = (el.getAttribute('id') || '').replace(/^entry-/, '');
+          const titleEl = el.querySelector('.flip-entry-title');
+          const name = titleEl ? titleEl.textContent.trim() : '';
+          const linkEl = el.querySelector('a[href]');
+          const href = linkEl ? linkEl.getAttribute('href') : '';
+          const fid = rawId || extractDriveFileIdFromInput(href);
+          if(fid && name && (/\.pdf$/i.test(name) || !/\.[a-z0-9]{2,4}$/i.test(name))){
+            out.push({
+              fileId: fid,
+              fileName: /\.pdf$/i.test(name) ? name : (name + '.pdf'),
+              fileUrl: `https://drive.google.com/file/d/${fid}/view`,
+              sizeBytes: 0,
+              updatedAt: ''
+            });
+          }
+        }
+        if(out.length > 0) return out;
+      }catch(e){}
+    }
+    return [];
+  }
+
+  async function fetchDriveFileBytesByFileId(fileId, fallbackFileName){
+    // 1. Check local IndexedDB store first
+    const localRecs = await listDrivePdfRecords();
+    const hit = localRecs.find(r => r.fileId === fileId || (r.fileUrl && r.fileUrl.includes(fileId)));
+    if(hit && hit.bytes && hit.bytes.length > 0){
+      return { bytes: hit.bytes, fileName: hit.fileName || fallbackFileName || 'Drive-Document.pdf' };
+    }
+
+    let legacyScriptDetected = false;
+
+    // 2. Fetch via Google Apps Script if configured
+    const scriptUrl = getActiveScriptUrl();
+    if(scriptUrl && scriptUrl.includes('script.google.com/macros/s/')){
+      try{
+        const res = await fetchWithTimeout(scriptUrl + '?action=getFile&fileId=' + encodeURIComponent(fileId) + '&t=' + Date.now(), {
+          method: 'GET',
+          redirect: 'follow'
+        }, 9000);
+        const data = await res.json();
+        if(data && data.status === 'ok' && data.base64){
+          const bytes = base64ToUint8(data.base64);
+          if(isValidPdfBytes(bytes)){
+            const fName = data.fileName || fallbackFileName || 'Drive-Document.pdf';
+            const { key } = getCurrentUserIdentity();
+            await saveDrivePdfRecord({
+              fileName: fName,
+              bytes,
+              fileId: data.fileId || fileId,
+              userKey: key || ''
+            });
+            return { bytes, fileName: fName };
+          }
+        } else if(data && data.status === 'ok' && data.settings && !data.base64){
+          legacyScriptDetected = true;
+        }
+      }catch(e){
+        try{
+          const resPost = await fetchWithTimeout(scriptUrl, {
+            method: 'POST',
+            redirect: 'follow',
+            body: JSON.stringify({ action: 'getFile', fileId })
+          }, 9000);
+          const dataPost = await resPost.json();
+          if(dataPost && dataPost.status === 'ok' && dataPost.base64){
+            const bytes = base64ToUint8(dataPost.base64);
+            if(isValidPdfBytes(bytes)){
+              const fName = dataPost.fileName || fallbackFileName || 'Drive-Document.pdf';
+              const { key } = getCurrentUserIdentity();
+              await saveDrivePdfRecord({
+                fileName: fName,
+                bytes,
+                fileId: dataPost.fileId || fileId,
+                userKey: key || ''
+              });
+              return { bytes, fileName: fName };
+            }
+          }
+        }catch(e2){}
+      }
+    }
+
+    // 3. Try Public / Shared Google Drive download ("Anyone with the link") via CORS relays
+    const relayBytes = await fetchPublicDrivePdfViaRelays(fileId);
+    if(relayBytes && isValidPdfBytes(relayBytes)){
+      const detectedTitle = await fetchPublicDriveFileTitle(fileId);
+      const finalName = detectedTitle || fallbackFileName || ('Drive-' + fileId.slice(0, 8) + '.pdf');
+      const { key } = getCurrentUserIdentity();
+      await saveDrivePdfRecord({
+        fileName: finalName,
+        bytes: relayBytes,
+        fileId: fileId,
+        fileUrl: `https://drive.google.com/file/d/${fileId}/view`,
+        userKey: key || ''
+      });
+      return { bytes: relayBytes, fileName: finalName };
+    }
+
+    const err = new Error('This Google Drive file is set to "Restricted" (private to your Google login).');
+    err.isRestrictedDriveFile = true;
+    err.legacyScriptDetected  = legacyScriptDetected;
+    err.fileId = fileId;
+    throw err;
+  }
+
+  async function openSelectedDrivePdfBytes(bytes, fileName, targetMode){
+    const cleanName = (fileName || 'Drive-Document.pdf').endsWith('.pdf') ? fileName : (fileName + '.pdf');
+    if(targetMode === 'scanner'){
+      const count = await loadPdfBytesIntoScanner(bytes, cleanName);
+      const scanSec = document.getElementById('scannerSection');
+      if(scanSec) scanSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      showToast('Loaded "' + cleanName + '" (' + count + ' page' + (count===1?'':'s') + ') into PDF Scanner for editing!');
+    } else {
+      const count = await loadPdfBytesIntoWorkbench(bytes, cleanName);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      showToast('Loaded "' + cleanName + '" (' + count + ' page' + (count===1?'':'s') + ') into PDF Workbench for editing!');
+    }
+  }
+
+  function formatBytesShort(bytes){
+    const n = Number(bytes) || 0;
+    if(n < 1024) return n + ' B';
+    if(n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / (1024 * 1024)).toFixed(2) + ' MB';
+  }
+
+  function triggerAuthenticatedBrowserDriveDownload(fileId){
+    const dlUrl = `https://drive.google.com/uc?export=download&id=${encodeURIComponent(fileId)}`;
+    let iframe = document.getElementById('hiddenDriveDlIframe');
+    if(!iframe){
+      iframe = document.createElement('iframe');
+      iframe.id = 'hiddenDriveDlIframe';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+    }
+    iframe.src = dlUrl;
+  }
+
+  async function openDrivePdfSelectorModal(defaultTarget){
+    let activeTarget = defaultTarget === 'scanner' ? 'scanner' : 'workbench';
+    let pendingRestrictedFileId = '';
+    const { key, label } = getCurrentUserIdentity();
+    const activeDrivePath = ((scanDrivePathTopInput && scanDrivePathTopInput.value) || getUserPersonalDrivePath() || '').trim();
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop';
+    backdrop.innerHTML = `
+      <div class="modal-card" id="drvSelectorModalCard" style="max-width:650px;width:95%;position:relative;">
+        <div class="modal-head">
+          <h3>☁️ Select PDF from Google Drive</h3>
+          <button class="modal-close">✕</button>
+        </div>
+
+        <div style="background:#F0F7F7;border:1.5px solid var(--teal);border-radius:9px;padding:10px 12px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:8px;">
+            <span style="font-size:12px;font-weight:700;color:var(--teal-deep);">1. Choose where to open &amp; edit the selected PDF:</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);">${label ? ('👤 ' + escapeHtml(label)) : '👤 Guest'}</span>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+            <button type="button" id="drvTargetWbBtn" style="padding:8px 10px;border-radius:7px;font-size:12.5px;font-weight:700;cursor:pointer;border:1.5px solid var(--teal);background:${activeTarget==='workbench'?'var(--teal)':'#fff'};color:${activeTarget==='workbench'?'#fff':'var(--teal-deep)'};">
+              📄 1. PDF Workbench (Merge / Split / Replace)
+            </button>
+            <button type="button" id="drvTargetScanBtn" style="padding:8px 10px;border-radius:7px;font-size:12.5px;font-weight:700;cursor:pointer;border:1.5px solid var(--teal);background:${activeTarget==='scanner'?'var(--teal)':'#fff'};color:${activeTarget==='scanner'?'#fff':'var(--teal-deep)'};">
+              📷 2. PDF Scanner (Crop / Enhance / Replace)
+            </button>
+          </div>
+        </div>
+
+        <!-- Stored PDFs in User's Google Drive -->
+        <div style="border:1px solid var(--kraft-line);border-radius:9px;padding:12px;background:#fff;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+            <div style="min-width:0;flex:1;">
+              <strong style="font-size:13.5px;color:var(--ink);">📁 Stored PDFs in Your Google Drive</strong>
+              <div style="font-size:11px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Path: <code>${escapeHtml(activeDrivePath || 'My Google Drive Scans')}</code></div>
+            </div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button type="button" class="ghost" id="drvRefreshListBtn" style="padding:5px 10px;font-size:11.5px;">🔄 Refresh</button>
+              <button type="button" class="outline-teal" id="drvOpenFolderModalBtn" style="padding:5px 10px;font-size:11.5px;">📂 Open Drive Folder ↗</button>
+            </div>
+          </div>
+          <div id="drvFilesListContainer" style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:7px;padding:2px 0;">
+            <div style="font-size:12px;color:var(--ink-soft);padding:12px;text-align:center;">⏳ Loading your stored Google Drive PDFs…</div>
+          </div>
+        </div>
+
+        <!-- Option B: Paste Google Drive File Link or ID -->
+        <div style="border:1px solid var(--kraft-line);border-radius:9px;padding:11px 12px;background:var(--paper);margin-bottom:10px;">
+          <label style="display:block;font-size:12px;font-weight:700;color:var(--ink);margin-bottom:5px;">
+            🔗 Or Paste a Google Drive PDF File Link / File ID:
+          </label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <input type="text" id="drvPasteLinkInput" placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
+              style="flex:1;min-width:180px;padding:8px 10px;border:1.5px solid var(--kraft-line);border-radius:7px;font-size:12.5px;background:#fff;">
+            <button type="button" class="primary" id="drvLoadLinkBtn" style="padding:8px 14px;font-size:12.5px;white-space:nowrap;">☁️ Load PDF from Link</button>
+          </div>
+          <div id="drvLinkStatus" style="font-size:11.5px;color:var(--ink-soft);margin-top:6px;line-height:1.45;">
+            Tip: For instant 1-click loading via link, make sure the file/folder in Google Drive is set to <strong>Share → Anyone with the link</strong>.
+          </div>
+          <input type="file" id="drvModalQuickFileInput" accept="application/pdf" style="display:none;">
+        </div>
+
+        <div class="modal-foot" style="justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <button type="button" class="outline-teal" id="drvFallbackLocalBtn" style="font-size:12.5px;">💻 Browse Local / Google Drive Desktop File</button>
+          <button type="button" class="ghost" id="drvCloseModalBtn">Close</button>
+        </div>
+      </div>
+    `;
+    modalRoot.appendChild(backdrop);
+
+    const modalCard     = backdrop.querySelector('#drvSelectorModalCard');
+    const wbTargetBtn   = backdrop.querySelector('#drvTargetWbBtn');
+    const scanTargetBtn = backdrop.querySelector('#drvTargetScanBtn');
+    const listContainer = backdrop.querySelector('#drvFilesListContainer');
+    const linkInput     = backdrop.querySelector('#drvPasteLinkInput');
+    const loadLinkBtn   = backdrop.querySelector('#drvLoadLinkBtn');
+    const linkStatus    = backdrop.querySelector('#drvLinkStatus');
+    const quickFileInp  = backdrop.querySelector('#drvModalQuickFileInput');
+
+    function setTargetMode(mode){
+      activeTarget = mode;
+      wbTargetBtn.style.background   = mode === 'workbench' ? 'var(--teal)' : '#fff';
+      wbTargetBtn.style.color        = mode === 'workbench' ? '#fff' : 'var(--teal-deep)';
+      scanTargetBtn.style.background = mode === 'scanner' ? 'var(--teal)' : '#fff';
+      scanTargetBtn.style.color      = mode === 'scanner' ? '#fff' : 'var(--teal-deep)';
+    }
+    wbTargetBtn.addEventListener('click', () => setTargetMode('workbench'));
+    scanTargetBtn.addEventListener('click', () => setTargetMode('scanner'));
+
+    async function handleQuickPickedOrDroppedPdf(file){
+      if(!file) return;
+      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+      if(!isPdf){
+        showToast('Please select a PDF (.pdf) file.');
+        return;
+      }
+      showToast('Loading "' + file.name + '"…');
+      const buf = await file.arrayBuffer();
+      const bytes = new Uint8Array(buf);
+      await saveDrivePdfRecord({
+        fileName: file.name,
+        bytes,
+        drivePath: activeDrivePath,
+        fileId: pendingRestrictedFileId || '',
+        fileUrl: pendingRestrictedFileId ? `https://drive.google.com/file/d/${pendingRestrictedFileId}/view` : '',
+        userKey: key || ''
+      });
+      await openSelectedDrivePdfBytes(bytes, file.name, activeTarget);
+      backdrop.remove();
+    }
+
+    quickFileInp.addEventListener('change', (e) => {
+      if(e.target.files && e.target.files[0]){
+        handleQuickPickedOrDroppedPdf(e.target.files[0]);
+      }
+      quickFileInp.value = '';
+    });
+
+    // Support dragging & dropping a downloaded Drive PDF anywhere onto the modal card
+    ['dragenter', 'dragover'].forEach(ev => modalCard.addEventListener(ev, (e) => {
+      e.preventDefault();
+      modalCard.style.boxShadow = '0 0 0 4px #20D6C7, 0 20px 50px rgba(0,0,0,.45)';
+    }));
+    ['dragleave', 'drop'].forEach(ev => modalCard.addEventListener(ev, (e) => {
+      e.preventDefault();
+      modalCard.style.boxShadow = '';
+    }));
+    modalCard.addEventListener('drop', (e) => {
+      if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]){
+        handleQuickPickedOrDroppedPdf(e.dataTransfer.files[0]);
+      }
+    });
+
+    backdrop.querySelector('.modal-close').addEventListener('click', () => backdrop.remove());
+    backdrop.querySelector('#drvCloseModalBtn').addEventListener('click', () => backdrop.remove());
+    backdrop.querySelector('#drvOpenFolderModalBtn').addEventListener('click', openUserGoogleDriveFolder);
+    backdrop.querySelector('#drvFallbackLocalBtn').addEventListener('click', () => {
+      pendingRestrictedFileId = '';
+      quickFileInp.click();
+    });
+
+    function showRestrictedFileHelperUI(fileId, fileNameHint){
+      pendingRestrictedFileId = fileId;
+      triggerAuthenticatedBrowserDriveDownload(fileId);
+      const directViewUrl = `https://drive.google.com/file/d/${encodeURIComponent(fileId)}/view`;
+      const directDlUrl   = `https://drive.google.com/uc?export=download&id=${encodeURIComponent(fileId)}`;
+      linkStatus.innerHTML = `
+        <div style="margin-top:8px;padding:11px 12px;background:#E6F4F4;border:1.5px solid var(--teal);border-radius:8px;color:var(--ink);">
+          <div style="font-weight:700;color:var(--teal-deep);font-size:12.5px;margin-bottom:6px;">
+            🔒 Private / Restricted Google Drive Link Detected — Automatic Browser Download Started!
+          </div>
+          <div style="font-size:11.5px;color:var(--ink-soft);margin-bottom:9px;line-height:1.45;">
+            Because this file is restricted to your Google login, your browser is downloading it directly using your signed-in Google session.
+            <strong>Click the button below (or drag the downloaded file from your browser's download bar onto this window)</strong> to open it right now:
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button type="button" class="primary" id="drvPickDownloadedBtn" style="padding:8px 14px;font-size:12.5px;background:#1E6F3D;">
+              📂 Select Downloaded PDF to Edit Now
+            </button>
+            <a href="${escapeHtml(directDlUrl)}" target="_blank" rel="noopener" style="font-size:11.5px;color:var(--teal-deep);font-weight:700;text-decoration:underline;">
+              ⬇ Download Again ↗
+            </a>
+            <a href="${escapeHtml(directViewUrl)}" target="_blank" rel="noopener" style="font-size:11.5px;color:var(--ink-soft);text-decoration:underline;">
+              Open in Drive ↗
+            </a>
+          </div>
+          <div style="font-size:10.5px;color:var(--ink-soft);margin-top:8px;border-top:1px solid rgba(43,111,115,.2);padding-top:6px;">
+            💡 <strong>Want 1-click loading without downloading?</strong> In Google Drive, right-click your folder/file → <strong>Share → General access → Anyone with the link</strong>, then click <strong>☁️ Load PDF from Link</strong> again!
+          </div>
+        </div>
+      `;
+      const pickBtn = linkStatus.querySelector('#drvPickDownloadedBtn');
+      if(pickBtn){
+        pickBtn.addEventListener('click', () => quickFileInp.click());
+      }
+    }
+
+    async function renderStoredDriveFiles(){
+      listContainer.innerHTML = `<div style="font-size:12px;color:var(--ink-soft);padding:12px;text-align:center;">⏳ Checking your stored Google Drive PDFs…</div>`;
+      const localRecords = await listDrivePdfRecords();
+      let cloudFiles = [];
+
+      const scriptUrl = getActiveScriptUrl();
+      if(scriptUrl && scriptUrl.includes('script.google.com/macros/s/')){
+        try{
+          const res = await fetchWithTimeout(scriptUrl + '?action=listFiles&drivePath=' + encodeURIComponent(activeDrivePath) + '&t=' + Date.now(), {
+            method: 'GET',
+            redirect: 'follow'
+          }, 7500);
+          const data = await res.json();
+          if(data && data.status === 'ok' && Array.isArray(data.files)){
+            cloudFiles = data.files;
+          }
+        }catch(e){}
+      }
+
+      // If Apps Script didn't return files and activeDrivePath is a Google Drive Folder URL, also check public embeddedfolderview
+      if(cloudFiles.length === 0){
+        const folderId = extractDriveFolderIdFromPath(activeDrivePath);
+        if(folderId){
+          cloudFiles = await fetchPublicDriveFolderFiles(folderId);
+        }
+      }
+
+      // Merge local stored Drive PDFs and live Cloud Drive files without duplicates
+      const combined = [];
+      const seenNames = new Set();
+
+      for(const rec of localRecords){
+        seenNames.add((rec.fileName || '').toLowerCase());
+        combined.push({
+          source: 'cached',
+          id: rec.id,
+          fileId: rec.fileId || '',
+          fileName: rec.fileName,
+          fileUrl: rec.fileUrl || '',
+          sizeBytes: rec.sizeBytes || (rec.bytes ? rec.bytes.length : 0),
+          pageCount: rec.pageCount || null,
+          updatedAt: rec.updatedAt,
+          bytes: rec.bytes
+        });
+      }
+
+      for(const cf of cloudFiles){
+        if(cf.fileName && !seenNames.has(cf.fileName.toLowerCase())){
+          seenNames.add(cf.fileName.toLowerCase());
+          combined.push({
+            source: 'cloud',
+            id: 'cloud_' + cf.fileId,
+            fileId: cf.fileId,
+            fileName: cf.fileName,
+            fileUrl: cf.fileUrl || '',
+            sizeBytes: cf.sizeBytes || 0,
+            pageCount: null,
+            updatedAt: cf.updatedAt,
+            bytes: null
+          });
+        }
+      }
+
+      if(combined.length === 0){
+        listContainer.innerHTML = `
+          <div style="font-size:12.5px;color:var(--ink-soft);padding:14px 12px;text-align:center;background:#FCFAF4;border:1px dashed var(--kraft-line);border-radius:7px;line-height:1.5;">
+            No saved Google Drive PDFs found in the list yet.<br>
+            <span style="font-size:11.5px;">• Any scan you save using <strong>"☁️ Save to Google Drive"</strong> in the PDF Scanner appears here automatically.<br>
+            • To list existing files from your Google Drive folder automatically, set the folder's Share access in Google Drive to <strong>"Anyone with the link"</strong> and click <strong>🔄 Refresh</strong>, or paste a file link below!</span>
+          </div>
+        `;
+        return;
+      }
+
+      listContainer.innerHTML = '';
+      combined.forEach(item => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border:1px solid var(--kraft-line);border-radius:7px;background:#FCFAF4;flex-wrap:wrap;';
+        const dateStr = item.updatedAt ? new Date(item.updatedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : '';
+        const metaParts = [];
+        if(item.pageCount) metaParts.push(item.pageCount + ' page' + (item.pageCount===1?'':'s'));
+        if(item.sizeBytes) metaParts.push(formatBytesShort(item.sizeBytes));
+        if(dateStr) metaParts.push(dateStr);
+
+        row.innerHTML = `
+          <div style="display:flex;align-items:center;gap:8px;min-width:180px;flex:1;">
+            <span style="font-size:20px;">📄</span>
+            <div style="min-width:0;flex:1;">
+              <div style="font-size:13px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escapeHtml(item.fileName)}">
+                ${escapeHtml(item.fileName)}
+              </div>
+              <div style="font-size:11px;color:var(--ink-soft);">${escapeHtml(metaParts.join(' · ') || 'Google Drive PDF')}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            <button type="button" class="primary" data-act="open-wb" style="padding:6px 10px;font-size:11.5px;" title="Open in 1. PDF Workbench to reorder, merge, split, or Find & Replace">📄 Edit in Workbench</button>
+            <button type="button" class="outline-teal" data-act="open-scan" style="padding:6px 10px;font-size:11.5px;background:#fff;" title="Open in 2. PDF Scanner to crop, rotate, adjust Magic Color/Light/Dark, or Find & Replace">📷 Edit in Scanner</button>
+            ${item.fileUrl ? `<a href="${escapeHtml(item.fileUrl)}" target="_blank" rel="noopener" style="font-size:11.5px;color:var(--teal-deep);text-decoration:underline;padding:4px;" title="View in Google Drive">↗</a>` : ''}
+            ${item.source === 'cached' ? `<button type="button" class="ghost" data-act="del" style="padding:4px 7px;font-size:11px;color:var(--red);" title="Remove from saved list">✕</button>` : ''}
+          </div>
+        `;
+
+        async function handleOpenItem(targetMode, btnEl){
+          const origTxt = btnEl.textContent;
+          btnEl.disabled = true;
+          btnEl.textContent = '⏳ Loading…';
+          try{
+            let pdfBytes = item.bytes;
+            if(!pdfBytes || !pdfBytes.length){
+              const fetched = await fetchDriveFileBytesByFileId(item.fileId, item.fileName);
+              pdfBytes = fetched.bytes;
+            }
+            await openSelectedDrivePdfBytes(pdfBytes, item.fileName, targetMode);
+            backdrop.remove();
+          }catch(err){
+            btnEl.disabled = false;
+            btnEl.textContent = origTxt;
+            if(err && err.isRestrictedDriveFile){
+              setTargetMode(targetMode);
+              showRestrictedFileHelperUI(item.fileId, item.fileName);
+            } else {
+              showToast(err.message || 'Could not load PDF from Google Drive.');
+            }
+          }
+        }
+
+        row.querySelector('[data-act="open-wb"]').addEventListener('click', (e) => handleOpenItem('workbench', e.currentTarget));
+        row.querySelector('[data-act="open-scan"]').addEventListener('click', (e) => handleOpenItem('scanner', e.currentTarget));
+        const delBtn = row.querySelector('[data-act="del"]');
+        if(delBtn){
+          delBtn.addEventListener('click', async () => {
+            await deleteDrivePdfRecord(item.id);
+            renderStoredDriveFiles();
+          });
+        }
+        listContainer.appendChild(row);
+      });
+    }
+
+    backdrop.querySelector('#drvRefreshListBtn').addEventListener('click', renderStoredDriveFiles);
+
+    loadLinkBtn.addEventListener('click', async () => {
+      const rawUrl = (linkInput.value || '').trim();
+      if(!rawUrl){
+        showToast('Paste a Google Drive PDF link or File ID first.');
+        linkInput.focus();
+        return;
+      }
+      // Check if user pasted a Folder link instead of a File link
+      if(/\/folders\/([a-zA-Z0-9_-]{15,})/.test(rawUrl)){
+        const fId = extractDriveFolderIdFromPath(rawUrl);
+        linkStatus.innerHTML = `<span style="color:var(--teal-deep);">⏳ Scanning Google Drive folder for PDFs…</span>`;
+        const folderFiles = await fetchPublicDriveFolderFiles(fId);
+        if(folderFiles.length > 0){
+          renderStoredDriveFiles();
+          linkStatus.innerHTML = `<span style="color:#1E6F3D;font-weight:700;">✓ Found ${folderFiles.length} PDF(s) in that folder! Click "📄 Edit in Workbench" or "📷 Edit in Scanner" in the list above.</span>`;
+        } else {
+          linkStatus.innerHTML = `<span style="color:var(--rust);font-weight:600;">⚠️ That is a Google Drive Folder link (not a single PDF file link), and the folder is currently set to "Restricted". Either set the folder's Share access to <b>"Anyone with the link"</b>, or open the folder and copy a PDF file link!</span>`;
+        }
+        return;
+      }
+
+      const fileId = extractDriveFileIdFromInput(rawUrl);
+      if(!fileId){
+        linkStatus.innerHTML = `<span style="color:var(--rust);font-weight:600;">⚠️ Could not find a valid Google Drive File ID in that link. Make sure it looks like <code>https://drive.google.com/file/d/FILE_ID/view</code>.</span>`;
+        return;
+      }
+      loadLinkBtn.disabled = true;
+      loadLinkBtn.textContent = '⏳ Loading…';
+      linkStatus.innerHTML = `<span style="color:var(--teal-deep);">⏳ Fetching PDF from Google Drive…</span>`;
+      try{
+        const { bytes, fileName } = await fetchDriveFileBytesByFileId(fileId, 'Drive-Document.pdf');
+        await openSelectedDrivePdfBytes(bytes, fileName, activeTarget);
+        backdrop.remove();
+      }catch(err){
+        if(err && err.isRestrictedDriveFile){
+          showRestrictedFileHelperUI(fileId, 'Drive-Document.pdf');
+        } else {
+          linkStatus.innerHTML = `<span style="color:var(--rust);font-weight:600;">⚠️ ${escapeHtml(err.message)}</span>`;
+        }
+      }finally{
+        loadLinkBtn.disabled = false;
+        loadLinkBtn.textContent = '☁️ Load PDF from Link';
+      }
+    });
+
+    renderStoredDriveFiles();
+  }
+  window._openDrivePdfSelectorModal = openDrivePdfSelectorModal;
+
   if(scanSaveDriveBtn){
     scanSaveDriveBtn.addEventListener('click', async () => {
       if(scannedDocs.length === 0){ showToast('Scan or upload at least one page first.'); return; }
-      const scriptUrl = ((adminConfig && adminConfig.googleScriptUrl) || DEFAULT_GOOGLE_SCRIPT_URL || '').trim();
-      if(!scriptUrl){
-        showToast('Admin setup required: Configure Google Apps Script URL in ⚙ Admin settings.');
-        if(scanDriveStatus){
-          scanDriveStatus.innerHTML = `<span style="color:var(--rust);font-weight:600;">⚠️ Google Drive script not set by Admin yet.</span> <span style="text-decoration:underline;cursor:pointer;color:var(--teal-deep);font-weight:600;" onclick="document.getElementById('adminBtn').click()">Open ⚙ Admin settings (one-time setup)</span>`;
-        }
-        return;
-      }
-
-      if(scriptUrl.includes('drive.google.com') || !scriptUrl.includes('script.google.com/macros/s/')){
-        showToast('Invalid Admin Script URL — check ⚙ Admin settings.');
-        if(scanDriveStatus){
-          scanDriveStatus.innerHTML = `<span style="color:var(--rust);font-weight:600;">✕ Admin Script URL is not a Web App <code>/exec</code> URL (currently set to <code>${escapeHtml(scriptUrl.slice(0, 48))}…</code>).</span> <span style="text-decoration:underline;cursor:pointer;color:var(--teal-deep);font-weight:600;" onclick="document.getElementById('adminBtn').click()">Fix in ⚙ Admin settings</span>`;
-        }
-        return;
-      }
-
       const fileName = getCleanScanFileName();
       const { key, label } = getCurrentUserIdentity();
       const enteredPath = (scanDrivePathTopInput ? scanDrivePathTopInput.value.trim() : '') || (scanDrivePathInput ? scanDrivePathInput.value.trim() : '');
@@ -7587,11 +9381,29 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
       scanSaveDriveBtn.disabled = true;
       scanSaveDriveBtn.textContent = '☁️ Uploading to Drive…';
       if(scanDriveStatus){
-        scanDriveStatus.innerHTML = `<span style="color:var(--teal-deep);font-weight:600;">⏳ Building "${escapeHtml(fileName)}" (${scannedDocs.length} page${scannedDocs.length===1?'':'s'}) &amp; uploading to Google Drive…</span>`;
+        scanDriveStatus.innerHTML = `<span style="color:var(--teal-deep);font-weight:600;">⏳ Building "${escapeHtml(fileName)}" (${scannedDocs.length} page${scannedDocs.length===1?'':'s'}) &amp; saving to Google Drive…</span>`;
       }
 
       try{
         const pdfBytes = await buildScannedPdfBytes();
+        // Always store a copy in the user's Google Drive PDF Library (IndexedDB) so they can re-select and edit it anytime via "☁️ Select PDF from Google Drive"
+        await saveDrivePdfRecord({
+          fileName,
+          bytes: pdfBytes,
+          drivePath,
+          userKey: key || '',
+          pageCount: scannedDocs.length
+        });
+
+        const scriptUrl = ((adminConfig && adminConfig.googleScriptUrl) || DEFAULT_GOOGLE_SCRIPT_URL || '').trim();
+        if(!scriptUrl || scriptUrl.includes('drive.google.com') || !scriptUrl.includes('script.google.com/macros/s/')){
+          showToast('Saved "' + fileName + '" to your Google Drive Library! (Configure Admin Script URL for cloud sync)');
+          if(scanDriveStatus){
+            scanDriveStatus.innerHTML = `<span style="color:#1E6F3D;font-weight:700;">✓ Saved "${escapeHtml(fileName)}" to your Google Drive PDF list!</span> <span style="text-decoration:underline;cursor:pointer;color:var(--teal-deep);font-weight:700;margin-left:8px;" onclick="window._openDrivePdfSelectorModal('scanner')">☁️ Select PDF from Google Drive</span> <span style="font-size:11px;color:var(--ink-soft);margin-left:6px;">(For automatic cloud folder upload, set Web App URL in <span style="text-decoration:underline;cursor:pointer;" onclick="document.getElementById('adminBtn').click()">⚙ Admin settings</span>)</span>`;
+          }
+          return;
+        }
+
         const base64Data = uint8ToBase64(pdfBytes);
         const requestId = 'req_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
         const payloadStr = JSON.stringify({
@@ -7613,9 +9425,6 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
           });
           result = await response.json();
         }catch(corsErr){
-          // In Chrome with multiple Google accounts signed in, Google's 302 redirect from
-          // script.google.com -> script.googleusercontent.com can block reading the CORS response
-          // even though doPost(e) accepts the request. Fall back to mode: 'no-cors' with the same requestId.
           await fetch(scriptUrl, {
             method: 'POST',
             mode: 'no-cors',
@@ -7625,17 +9434,26 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
         }
 
         if(result && result.status === 'ok'){
+          await saveDrivePdfRecord({
+            fileName: result.fileName || fileName,
+            bytes: pdfBytes,
+            drivePath,
+            fileId: result.fileId || '',
+            fileUrl: result.fileUrl || '',
+            userKey: key || '',
+            pageCount: scannedDocs.length
+          });
           showToast('Saved "' + fileName + '" to Google Drive!');
           if(scanDriveStatus){
             const fileLink = result.fileUrl ? `<a href="${escapeHtml(result.fileUrl)}" target="_blank" rel="noopener" style="color:var(--teal-deep);font-weight:700;text-decoration:underline;margin-left:6px;">Open PDF in Drive ↗</a>` : '';
             const folderLink = result.folderUrl ? `<a href="${escapeHtml(result.folderUrl)}" target="_blank" rel="noopener" style="color:var(--ink-soft);text-decoration:underline;margin-left:8px;">Open Folder (${escapeHtml(result.folderName || drivePath)}) ↗</a>` : '';
-            scanDriveStatus.innerHTML = `<span style="color:#1E6F3D;font-weight:700;">✓ Saved "${escapeHtml(fileName)}" to Google Drive!</span> ${fileLink} ${folderLink}`;
+            scanDriveStatus.innerHTML = `<span style="color:#1E6F3D;font-weight:700;">✓ Saved "${escapeHtml(fileName)}" to Google Drive!</span> ${fileLink} ${folderLink} <span style="text-decoration:underline;cursor:pointer;color:var(--teal-deep);font-weight:700;margin-left:8px;" onclick="window._openDrivePdfSelectorModal('workbench')">☁️ Select from Drive to Edit</span>`;
           }
         } else if(usedNoCorsFallback){
           showToast('Sent "' + fileName + '" to Google Drive!');
           const openFolderHref = drivePath.startsWith('http') ? drivePath : 'https://drive.google.com/drive/my-drive';
           if(scanDriveStatus){
-            scanDriveStatus.innerHTML = `<span style="color:#1E6F3D;font-weight:700;">✓ Sent "${escapeHtml(fileName)}" to Google Drive!</span> <a href="${escapeHtml(openFolderHref)}" target="_blank" rel="noopener" style="color:var(--teal-deep);font-weight:700;text-decoration:underline;margin-left:8px;">Open Google Drive Folder ↗</a> <span style="font-size:11px;color:var(--ink-soft);margin-left:6px;">(If file doesn't appear in folder, make sure you copied the Fixed Script &amp; ran <code>authorizeDriveAccess</code> once in ⚙ Admin settings)</span>`;
+            scanDriveStatus.innerHTML = `<span style="color:#1E6F3D;font-weight:700;">✓ Sent "${escapeHtml(fileName)}" to Google Drive!</span> <a href="${escapeHtml(openFolderHref)}" target="_blank" rel="noopener" style="color:var(--teal-deep);font-weight:700;text-decoration:underline;margin-left:8px;">Open Google Drive Folder ↗</a> <span style="text-decoration:underline;cursor:pointer;color:var(--teal-deep);font-weight:700;margin-left:8px;" onclick="window._openDrivePdfSelectorModal('workbench')">☁️ Select from Drive to Edit</span>`;
           }
         } else {
           throw new Error((result && result.message) ? result.message : 'Google Script returned an unexpected response.');
@@ -7660,6 +9478,37 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
     c.width = 760;
     c.height = 1040;
     const ctx = c.getContext('2d');
+    const demoWords = [];
+    const demoLines = [];
+
+    function drawTextAndTrack(text, startX, baselineY, fontSizePx){
+      ctx.fillText(text, startX, baselineY);
+      const fullW = ctx.measureText(text).width;
+      const topY  = baselineY - fontSizePx * 0.86;
+      const botY  = baselineY + fontSizePx * 0.18;
+      demoLines.push({
+        text,
+        x0Pct: startX / c.width,
+        y0Pct: topY / c.height,
+        x1Pct: (startX + fullW) / c.width,
+        y1Pct: botY / c.height
+      });
+      const re = /\S+/g;
+      let m;
+      while((m = re.exec(text)) !== null){
+        const wStr = m[0];
+        const prefix = text.slice(0, m.index);
+        const wx0 = startX + ctx.measureText(prefix).width;
+        const ww  = ctx.measureText(wStr).width;
+        demoWords.push({
+          text: wStr,
+          x0Pct: wx0 / c.width,
+          y0Pct: topY / c.height,
+          x1Pct: (wx0 + ww) / c.width,
+          y1Pct: botY / c.height
+        });
+      }
+    }
 
     // Slightly off-white paper texture so Light/Dark & Magic Color visibly demonstrate enhancement
     ctx.fillStyle = '#EFECE4';
@@ -7672,12 +9521,12 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
 
     // Header
     ctx.fillStyle = '#1D5256';
-    ctx.font = 'bold 28px Georgia, serif';
-    ctx.fillText('SAMPLE SCANNED DOCUMENT', 70, 105);
+    ctx.font = 'bold 28px Arial, sans-serif';
+    drawTextAndTrack('SAMPLE SCANNED DOCUMENT', 70, 105, 28);
 
     ctx.fillStyle = '#6B6452';
     ctx.font = '16px Arial, sans-serif';
-    ctx.fillText('Try the controls on the right: Page Size, Light/Dark, Magic Color & Remove Blur!', 70, 140);
+    drawTextAndTrack('Try the controls on the right: Page Size, Light/Dark, Magic Color & Remove Blur!', 70, 140, 16);
 
     ctx.strokeStyle = '#B7A37D';
     ctx.lineWidth = 1.5;
@@ -7689,7 +9538,7 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
     // Sample body paragraphs
     ctx.fillStyle = '#25231E';
     ctx.font = 'bold 19px Arial, sans-serif';
-    ctx.fillText('1. Individual Page Editing & Enhancement', 70, 210);
+    drawTextAndTrack('1. Individual Page Editing & Enhancement', 70, 210, 19);
 
     ctx.font = '16px Arial, sans-serif';
     const lines = [
@@ -7704,7 +9553,7 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
       '  "➕ Send to Workbench" to merge or run OCR!'
     ];
     lines.forEach((ln, i) => {
-      ctx.fillText(ln, 70, 248 + i * 32);
+      drawTextAndTrack(ln, 70, 248 + i * 32, 16);
     });
 
     // Sample table / invoice box
@@ -7716,17 +9565,17 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
 
     ctx.fillStyle = '#211F1A';
     ctx.font = 'bold 16px monospace';
-    ctx.fillText('ITEM DESCRIPTION                     QTY          STATUS', 90, 588);
+    drawTextAndTrack('ITEM DESCRIPTION                     QTY          STATUS', 90, 588, 16);
 
     ctx.font = '15px monospace';
-    ctx.fillText('01. Multi-Page Document Scan          1           Connected', 90, 635);
-    ctx.fillText('02. Light / Dark & Color Balance      1           Active', 90, 675);
-    ctx.fillText('03. Deblur / Text Sharpening          1           Ready', 90, 715);
-    ctx.fillText('04. Custom PDF Filename & Storage     1           Ready', 90, 755);
+    drawTextAndTrack('01. Multi-Page Document Scan          1           Connected', 90, 635, 15);
+    drawTextAndTrack('02. Light / Dark & Color Balance      1           Active', 90, 675, 15);
+    drawTextAndTrack('03. Deblur / Text Sharpening          1           Ready', 90, 715, 15);
+    drawTextAndTrack('04. Custom PDF Filename & Storage     1           Ready', 90, 755, 15);
 
     ctx.fillStyle = '#6B6452';
     ctx.font = 'italic 14px Georgia, serif';
-    ctx.fillText('Tip: Click the ✕ button on this sample thumbnail on the left whenever you want to remove it.', 70, 940);
+    drawTextAndTrack('Tip: Click the ✕ button on this sample thumbnail on the left whenever you want to remove it.', 70, 940, 14);
 
     const img = new Image();
     img.onload = () => {
@@ -7746,7 +9595,9 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
         sharpen: 0,
         bwThreshold: 145,
         thumbUrl: '',
-        isDemo: true
+        isDemo: true,
+        demoWords,
+        demoLines
       };
       scannedDocs.push(sampleItem);
       activeScanId = id;
