@@ -12,6 +12,10 @@
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- Firebase SDKs (App, Auth for Email & Phone/OTP/SMS, Analytics) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
 <style>
   :root{
     --paper:#F6F1E6;
@@ -309,6 +313,7 @@
     position:relative;display:inline-block;max-width:100%;
     border:1px solid var(--kraft-line);border-radius:6px;overflow:hidden;
     cursor:crosshair;background:#fff;
+    touch-action:none;user-select:none;-webkit-user-select:none;
   }
   .editor-stage img{display:block;max-width:100%;user-select:none;-webkit-user-drag:none;}
   .draw-rect{
@@ -319,15 +324,20 @@
     position:absolute;display:flex;align-items:center;justify-content:center;
     overflow:hidden;cursor:move;border:1px solid rgba(91,95,166,.5);
     font-family:'Inter',sans-serif;font-weight:700;
+    touch-action:none;
   }
   .patch-box:hover{outline:2px solid #5B5FA6;}
   .resize-handle{
-    position:absolute;width:11px;height:11px;
-    background:#fff;border:2px solid var(--teal);border-radius:2px;
-    transform:translate(-50%,-50%);z-index:5;
+    position:absolute;width:14px;height:14px;
+    background:#fff;border:2.5px solid var(--teal);border-radius:50%;
+    transform:translate(-50%,-50%);z-index:5;touch-action:none;
+    box-shadow:0 1px 4px rgba(0,0,0,.35);
   }
+  .resize-handle::after{content:'';position:absolute;inset:-8px;}
   .handle-nw, .handle-se{cursor:nwse-resize;}
   .handle-ne, .handle-sw{cursor:nesw-resize;}
+  .handle-n,  .handle-s {cursor:ns-resize;border-radius:3px;width:16px;height:10px;}
+  .handle-e,  .handle-w {cursor:ew-resize;border-radius:3px;width:10px;height:16px;}
   .modal-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px;}
 
   .patch-form-backdrop{
@@ -903,17 +913,22 @@
     position:absolute;width:20px;height:20px;
     background:#fff;border:3px solid var(--teal);
     border-radius:50%;transform:translate(-50%,-50%);
-    z-index:5;touch-action:none;
-    box-shadow:0 2px 6px rgba(0,0,0,.45);
+    z-index:10;touch-action:none;pointer-events:auto;
+    box-shadow:0 2px 6px rgba(0,0,0,.55);
   }
-  /* Invisible 38x38px touch hit-area around each handle for easy finger grabbing on mobile */
+  /* Invisible 40x40px touch hit-area around each handle for easy finger grabbing on mobile */
   .scan-crop-handle::after{
-    content:'';position:absolute;inset:-10px;
+    content:'';position:absolute;inset:-11px;
   }
   .scan-crop-handle.nw,.scan-crop-handle.se{cursor:nwse-resize;}
   .scan-crop-handle.ne,.scan-crop-handle.sw{cursor:nesw-resize;}
-  .scan-crop-handle.n,.scan-crop-handle.s{cursor:ns-resize;border-radius:5px;width:24px;height:14px;}
-  .scan-crop-handle.e,.scan-crop-handle.w{cursor:ew-resize;border-radius:5px;width:14px;height:24px;}
+  .scan-crop-handle.n,.scan-crop-handle.s{cursor:ns-resize;border-radius:6px;width:26px;height:14px;background:#20D6C7;border-color:#fff;}
+  .scan-crop-handle.e,.scan-crop-handle.w{cursor:ew-resize;border-radius:6px;width:14px;height:26px;background:#20D6C7;border-color:#fff;}
+  @media (max-width:680px){
+    .scan-crop-handle{width:22px;height:22px;border-width:3px;}
+    .scan-crop-handle.n,.scan-crop-handle.s{width:28px;height:15px;}
+    .scan-crop-handle.e,.scan-crop-handle.w{width:15px;height:28px;}
+  }
 
   .scanner-controls{
     display:flex;flex-direction:column;gap:12px;
@@ -947,11 +962,44 @@
     display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;
   }
   .scan-filename-wrap{
-    display:flex;align-items:center;gap:8px;flex:1;min-width:240px;
+    display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:1;min-width:240px;
   }
   .scan-filename-wrap input{
-    flex:1;padding:9px 12px;border:1.5px solid var(--kraft-line);border-radius:7px;
-    font-family:'Inter',sans-serif;font-size:13.5px;background:#fff;color:var(--ink);
+    flex:1;min-width:160px;padding:9px 12px;border:1.5px solid var(--kraft-line);border-radius:7px;
+    font-family:'Inter',sans-serif;font-size:13.5px;background:#fff;color:var(--ink);box-sizing:border-box;
+  }
+  .scanner-drive-card{
+    background:#F0F7F7;border:1.5px solid var(--teal);border-radius:10px;
+    padding:12px 14px;margin-bottom:14px;
+    display:flex;flex-direction:column;gap:8px;
+  }
+  .scanner-drive-card-head{
+    display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;
+    font-size:13px;color:var(--teal-deep);
+  }
+  .scan-drive-user-badge{
+    font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;
+    background:#fff;border:1px solid var(--teal);color:var(--teal-deep);
+    padding:3px 9px;border-radius:20px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .scanner-drive-card-row{
+    display:flex;flex-wrap:wrap;gap:8px;align-items:center;
+  }
+  .scanner-drive-card-row input{
+    flex:1;min-width:200px;padding:9px 12px;border:1.5px solid var(--kraft-line);
+    border-radius:7px;font-family:'Inter',sans-serif;font-size:13.5px;background:#fff;color:var(--ink);box-sizing:border-box;
+  }
+  @media (max-width:680px){
+    .scanner-drive-card{padding:11px 12px;}
+    .scanner-drive-card-row{flex-direction:column;align-items:stretch;}
+    .scanner-drive-card-row input{width:100%;min-width:0;}
+    .scanner-drive-card-row button{width:100%;padding:10px 12px !important;font-size:13px !important;}
+    .scan-filename-wrap{min-width:100% !important;flex-direction:column;align-items:stretch;gap:6px;}
+    .scan-filename-wrap label{white-space:normal !important;}
+    .scan-filename-wrap input{width:100% !important;min-width:0 !important;}
+    .scan-filename-wrap button{width:100% !important;padding:10px 12px !important;font-size:13px !important;}
+    .scan-export-actions{width:100%;display:flex;flex-direction:column;gap:8px;}
+    .scan-export-actions button{width:100%;padding:11px 12px;font-size:13.5px;}
   }
 
   /* ── Full-Screen Camera Scanner Overlay ── */
@@ -1240,6 +1288,21 @@
     <h2>PDF Scanner — Capture, Enhance &amp; Combine into One File</h2>
     <p class="sub">Scan physical pages using your device camera or upload photos/scans. Edit each scanned page individually — adjust page size (A4, Letter, Fit), fix light/dark exposure, convert to crisp B&amp;W document mode, or remove blur (sharpen) — then save all pages together into a single named PDF file or send straight to the workbench above.</p>
 
+    <!-- Per-Login Google Drive Path Card (Always visible on Mobile & Desktop) -->
+    <div class="scanner-drive-card" id="scannerTopDriveBar">
+      <div class="scanner-drive-card-head">
+        <span>📁 <strong>My Google Drive Storage Path</strong> <span style="font-size:11.5px;font-weight:500;color:var(--ink-soft);">(Saved individually for your login)</span></span>
+        <span class="scan-drive-user-badge" id="scanDriveUserBadge">👤 Not signed in</span>
+      </div>
+      <div class="scanner-drive-card-row">
+        <input type="text" id="scanDrivePathTopInput" placeholder="Paste your Google Drive Folder URL or type folder name (e.g. My Scans/2026)">
+        <button type="button" class="primary" id="scanSavePathTopBtn" style="padding:9px 14px;font-size:12.5px;white-space:nowrap;background:var(--teal-deep);">☁️ Save My Path</button>
+      </div>
+      <div id="scanDriveTopStatus" style="font-size:11.5px;color:var(--ink-soft);line-height:1.4;">
+        Each logged-in email/mobile user stores their own personal Google Drive folder path across mobile &amp; desktop.
+      </div>
+    </div>
+
     <div class="scanner-top-actions">
       <button class="primary" id="scanOpenCamBtn">📸 Scan with Camera</button>
       <button class="outline-teal" id="scanUploadImgBtn">🖼️ Upload Scanned Images / Photos</button>
@@ -1273,7 +1336,7 @@
         <div class="scanner-stage-wrap">
           <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:#ECE1C7;font-size:12px;font-family:'JetBrains Mono',monospace;">
             <span id="scanStageTitle">Page 1</span>
-            <div style="display:flex;gap:6px;">
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
               <button id="scanRotateLeftBtn" style="padding:4px 9px;font-size:11.5px;background:#3A3730;color:#fff;border:1px solid #575246;">↺ Rotate Left</button>
               <button id="scanRotateRightBtn" style="padding:4px 9px;font-size:11.5px;background:#3A3730;color:#fff;border:1px solid #575246;">↻ Rotate Right</button>
               <button id="scanToggleCropBtn" style="padding:4px 9px;font-size:11.5px;background:#2B6F73;color:#fff;border:1px solid #20D6C7;">✂️ Crop Area</button>
@@ -1373,20 +1436,34 @@
         </div>
       </div>
 
-      <!-- Bottom Bar: File Name + Save / Send to Workbench -->
-      <div class="scan-export-bar">
-        <div class="scan-filename-wrap">
-          <label for="scanFileNameInput" style="font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;">📄 File Name:</label>
-          <input type="text" id="scanFileNameInput" value="Scanned-Document" placeholder="Enter file name (e.g. Invoice-Oct-2026)">
-          <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-soft);">.pdf</span>
+      <!-- Bottom Bar: File Name + Google Drive Path + Save / Send to Workbench -->
+      <div class="scan-export-bar" style="flex-direction:column;align-items:stretch;gap:12px;">
+        <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;">
+          <div class="scan-filename-wrap" style="flex:1;min-width:240px;">
+            <label for="scanFileNameInput" style="font-size:12.5px;font-weight:700;color:var(--ink);white-space:nowrap;">📄 File Name (.pdf):</label>
+            <input type="text" id="scanFileNameInput" value="Scanned-Document" placeholder="Enter file name (e.g. Invoice-Oct-2026)">
+          </div>
+          <div class="scan-filename-wrap" style="flex:1.4;min-width:260px;">
+            <label for="scanDrivePathInput" style="font-size:12.5px;font-weight:700;color:var(--teal-deep);white-space:nowrap;" title="Stored individually for your login">📁 My Google Drive Path:</label>
+            <input type="text" id="scanDrivePathInput" value="" placeholder="Paste your Google Drive Folder URL or folder name">
+            <button type="button" class="ghost" id="scanSavePathCloudBtn" style="padding:7px 11px;font-size:12px;white-space:nowrap;border:1px solid var(--teal);color:var(--teal-deep);" title="Save this Google Drive Path to your logged-in account">☁️ Save My Path</button>
+          </div>
         </div>
-        <div style="display:flex;flex-wrap:wrap;gap:10px;">
-          <button class="outline-teal" id="scanSendToWbBtn" title="Combine all scanned pages into one PDF file and add it to the PDF Workbench above for merging, OCR, or Word/Excel extraction">
-            ➕ Send to Workbench
-          </button>
-          <button class="primary" id="scanSavePdfBtn" title="Combine all scanned pages into a single PDF file and download/store it on your device">
-            💾 Save &amp; Download PDF
-          </button>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
+          <div id="scanDriveStatus" style="font-size:12px;color:var(--ink-soft);">
+            ☁️ Ready to save all scanned pages as one combined PDF to your personal Google Drive path or device.
+          </div>
+          <div class="scan-export-actions" style="display:flex;flex-wrap:wrap;gap:10px;">
+            <button class="outline-teal" id="scanSendToWbBtn" title="Combine all scanned pages into one PDF file and add it to the PDF Workbench above for merging, OCR, or Word/Excel extraction">
+              ➕ Send to Workbench
+            </button>
+            <button class="ghost" id="scanSavePdfBtn" title="Download combined PDF file locally to your device">
+              💾 Save to Device
+            </button>
+            <button class="primary" id="scanSaveDriveBtn" style="background:var(--teal-deep);" title="Save combined PDF directly to your personal Google Drive path">
+              ☁️ Save to Google Drive
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1729,6 +1806,9 @@ const modalRoot = document.getElementById('modalRoot');
 // access to this file or browser dev tools could bypass it, since there is
 // no server involved anywhere in this app.
 const ADMIN_CONFIG_KEY = 'pdfWorkbenchAdminConfig';
+// Optional: Admin can also paste their deployed Google Apps Script Web App URL directly here once before publishing to GitHub Pages:
+const DEFAULT_GOOGLE_SCRIPT_URL = '';
+const DEFAULT_GOOGLE_DRIVE_PATH = 'https://drive.google.com/drive/folders/1w93PgcMe_h1CQZ8G3IZhrCG5qpeDMVjI';
 
 function simpleHash(str){
   let h = 0;
@@ -1739,9 +1819,24 @@ function simpleHash(str){
 function loadAdminConfig(){
   try{
     const raw = localStorage.getItem(ADMIN_CONFIG_KEY);
-    if(raw) return JSON.parse(raw);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      return {
+        watermarkMode: parsed.watermarkMode || 'optional',
+        watermarkDefaultChecked: parsed.watermarkDefaultChecked !== undefined ? parsed.watermarkDefaultChecked : true,
+        passwordHash: parsed.passwordHash || null,
+        googleScriptUrl: parsed.googleScriptUrl || DEFAULT_GOOGLE_SCRIPT_URL,
+        defaultDrivePath: parsed.defaultDrivePath || DEFAULT_GOOGLE_DRIVE_PATH
+      };
+    }
   }catch(e){ /* ignore corrupt/unavailable storage */ }
-  return { watermarkMode: 'optional', watermarkDefaultChecked: true, passwordHash: null };
+  return {
+    watermarkMode: 'optional',
+    watermarkDefaultChecked: true,
+    passwordHash: null,
+    googleScriptUrl: DEFAULT_GOOGLE_SCRIPT_URL,
+    defaultDrivePath: DEFAULT_GOOGLE_DRIVE_PATH
+  };
 }
 function saveAdminConfig(cfg){
   try{ localStorage.setItem(ADMIN_CONFIG_KEY, JSON.stringify(cfg)); }catch(e){ /* ignore */ }
@@ -2177,7 +2272,13 @@ function openAdminLoginModal(){
       'Since there is no server, the only way to recover a forgotten PIN is to reset admin settings on this browser. This removes the current PIN and restores the watermark policy to its default (optional, on by default). You can set a new PIN afterward.',
       'Reset admin access',
       () => {
-        adminConfig = { watermarkMode: 'optional', watermarkDefaultChecked: true, passwordHash: null };
+        adminConfig = {
+          watermarkMode: 'optional',
+          watermarkDefaultChecked: true,
+          passwordHash: null,
+          googleScriptUrl: (adminConfig && adminConfig.googleScriptUrl) || DEFAULT_GOOGLE_SCRIPT_URL,
+          defaultDrivePath: (adminConfig && adminConfig.defaultDrivePath) || DEFAULT_GOOGLE_DRIVE_PATH
+        };
         saveAdminConfig(adminConfig);
         applyAdminWatermarkConfig();
         showToast('Admin access reset. Click "Admin settings" again to set a new PIN.');
@@ -2220,7 +2321,44 @@ function openAdminSettingsModal(){
         </label>
       </div>
 
-      <details style="margin-top:16px;">
+      <details style="margin-top:14px;" open>
+        <summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--teal-deep);">☁️ Google Drive Script Setup (One-Time Admin Config)</summary>
+        <div style="margin-top:10px;padding:12px;background:var(--paper-deep);border-radius:8px;border:1px solid var(--kraft-line);">
+          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 10px;line-height:1.5;">
+            Configure the <strong>Google Apps Script Web App URL</strong> once as Admin. Regular users will <strong>never</strong> see or touch this script — they only get a simple <em>Google Drive Path</em> box to type their folder name or folder link and click <strong>☁️ Save to Google Drive</strong>.
+          </p>
+
+          <label style="font-size:12px;color:var(--ink);font-weight:600;display:block;margin-bottom:4px;">Google Apps Script Web App URL (must end with <code>/exec</code>)</label>
+          <div style="display:flex;gap:6px;margin-bottom:6px;">
+            <input type="url" id="adminGasUrl" value="${escapeHtml(adminConfig.googleScriptUrl || '')}" placeholder="https://script.google.com/macros/s/.../exec" style="flex:1;padding:8px 10px;border:1px solid var(--kraft-line);border-radius:6px;font-size:12.5px;background:#fff;font-family:'JetBrains Mono',monospace;">
+            <button type="button" class="ghost" id="testGasUrlBtn" style="font-size:12px;padding:7px 10px;white-space:nowrap;">🔌 Test URL</button>
+          </div>
+          <div id="adminGasTestStatus" style="font-size:11.5px;margin-bottom:10px;display:none;"></div>
+
+          <label style="font-size:12px;color:var(--ink);font-weight:600;display:block;margin-bottom:4px;">Default Google Drive Folder Path / Folder URL</label>
+          <input type="text" id="adminDefaultDrivePath" value="${escapeHtml(adminConfig.defaultDrivePath || 'https://drive.google.com/drive/folders/1w93PgcMe_h1CQZ8G3IZhrCG5qpeDMVjI')}" placeholder="e.g. PDF Workbench Scans or Drive Folder link" style="width:100%;padding:8px 10px;border:1px solid var(--kraft-line);border-radius:6px;font-size:12.5px;margin-bottom:10px;background:#fff;">
+
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+            <button type="button" class="outline-teal" id="copyGasCodeBtn" style="font-size:12px;padding:7px 12px;">📋 Copy Google Apps Script Code (Fixed)</button>
+            <button type="button" class="primary" id="exportBakedHtmlBtn" style="font-size:12px;padding:7px 12px;background:var(--teal-deep);" title="Saves a copy of this HTML file with your Script URL & Default Drive Path permanently embedded inside the code so every mobile/desktop visitor on your website uses it automatically">💾 Save into Website HTML File</button>
+            <a href="https://script.google.com/home/start" target="_blank" rel="noopener" style="font-size:12px;color:var(--teal-deep);font-weight:600;text-decoration:underline;">Open script.google.com ↗</a>
+          </div>
+
+          <details style="margin-top:10px;" open>
+            <summary style="cursor:pointer;font-size:11.5px;color:var(--ink-soft);font-weight:600;">📖 Important 1-Minute Setup Steps &amp; Script Code</summary>
+            <ol style="font-size:11.5px;color:var(--ink-soft);margin:8px 0;padding-left:18px;line-height:1.6;">
+              <li>Click <strong>📋 Copy Google Apps Script Code (Fixed)</strong> above, open your <strong>MyPDF</strong> Apps Script project, replace all code in <code>Code.gs</code>, and click <strong>Save 💾</strong>.</li>
+              <li><strong>Authorize Drive once:</strong> In the top toolbar of Apps Script, select <code>authorizeDriveAccess</code> from the function dropdown and click <strong>▷ Run</strong> → Click <strong>Review permissions → Allow</strong> (if Google shows "Google hasn't verified this app", click <em>Advanced → Go to MyPDF (unsafe) → Allow</em>).</li>
+              <li>Click <strong>Deploy → New deployment</strong> (or <strong>Manage deployments → ✎ Edit → Version: New version</strong>) → Select type: <strong>Web app</strong>.</li>
+              <li>Set <em>Execute as</em>: <strong>Me</strong>, and <em>Who has access</em>: <strong>Anyone</strong> → Click <strong>Deploy</strong>.</li>
+              <li>Copy the <strong>Web app URL</strong> (starts with <code>https://script.google.com/macros/s/</code> and ends with <code>/exec</code>), paste it in the box above, click <strong>🔌 Test URL</strong>, and click <strong>Save settings</strong>!</li>
+            </ol>
+            <pre id="gasCodePreview" style="background:#1A1814;color:#F6F1E7;padding:10px;border-radius:6px;font-size:10.5px;overflow-x:auto;max-height:160px;line-height:1.4;margin:6px 0 0;white-space:pre;"></pre>
+          </details>
+        </div>
+      </details>
+
+      <details style="margin-top:12px;">
         <summary style="cursor:pointer;font-size:12.5px;color:var(--teal-deep);">Change admin PIN</summary>
         <div style="margin-top:8px;">
           <input type="password" id="wmNewPw1" placeholder="New PIN (leave blank to keep current)" style="width:100%;margin-bottom:8px;padding:8px 10px;border:1px solid var(--kraft-line);border-radius:6px;font-size:13px;">
@@ -2280,6 +2418,286 @@ function openAdminSettingsModal(){
     </div>
   `;
   modalRoot.appendChild(backdrop);
+
+  const GAS_TEMPLATE_CODE = [
+    "/* ── ONE-TIME GOOGLE APPS SCRIPT FOR PDF WORKBENCH (CLOUD DRIVE + SETTINGS FOLDER) ── */",
+    "/* Step 1: Select 'authorizeDriveAccess' in toolbar and click Run once to grant Drive permission */",
+    "/* Step 2: Deploy -> Manage deployments -> Edit (or New deployment) -> New version -> Deploy */",
+    "",
+    "var MASTER_FOLDER_ID = '1w93PgcMe_h1CQZ8G3IZhrCG5qpeDMVjI';",
+    "var SETTINGS_FOLDER_NAME = 'Settings';",
+    "var SETTINGS_FILE_NAME = 'app-settings.json';",
+    "",
+    "function authorizeDriveAccess() {",
+    "  var settings = readCloudSettings();",
+    "  Logger.log('Drive & Settings folder ready: ' + JSON.stringify(settings));",
+    "}",
+    "",
+    "function getMasterFolder() {",
+    "  try {",
+    "    if (MASTER_FOLDER_ID) return DriveApp.getFolderById(MASTER_FOLDER_ID);",
+    "  } catch (e) {}",
+    "  var iter = DriveApp.getRootFolder().getFoldersByName('MyPdf');",
+    "  return iter.hasNext() ? iter.next() : DriveApp.getRootFolder().createFolder('MyPdf');",
+    "}",
+    "",
+    "function getSettingsFolder() {",
+    "  var master = getMasterFolder();",
+    "  var iter = master.getFoldersByName(SETTINGS_FOLDER_NAME);",
+    "  return iter.hasNext() ? iter.next() : master.createFolder(SETTINGS_FOLDER_NAME);",
+    "}",
+    "",
+    "function readCloudSettings() {",
+    "  var sFolder = getSettingsFolder();",
+    "  var master = getMasterFolder();",
+    "  var defaults = {",
+    "    drivePath: master.getUrl(),",
+    "    defaultDrivePath: master.getUrl(),",
+    "    watermarkMode: 'optional',",
+    "    watermarkDefaultChecked: true,",
+    "    passwordHash: null,",
+    "    settingsFolderUrl: sFolder.getUrl(),",
+    "    updatedAt: new Date().toISOString()",
+    "  };",
+    "  var files = sFolder.getFilesByName(SETTINGS_FILE_NAME);",
+    "  if (!files.hasNext()) {",
+    "    sFolder.createFile(SETTINGS_FILE_NAME, JSON.stringify(defaults, null, 2), MimeType.PLAIN_TEXT);",
+    "    return defaults;",
+    "  }",
+    "  try {",
+    "    var content = files.next().getBlob().getDataAsString();",
+    "    var parsed = JSON.parse(content);",
+    "    parsed.settingsFolderUrl = sFolder.getUrl();",
+    "    return parsed;",
+    "  } catch (e) {",
+    "    return defaults;",
+    "  }",
+    "}",
+    "",
+    "function writeCloudSettings(patch) {",
+    "  var sFolder = getSettingsFolder();",
+    "  var current = readCloudSettings();",
+    "  for (var k in patch) {",
+    "    if (patch[k] !== undefined) current[k] = patch[k];",
+    "  }",
+    "  current.updatedAt = new Date().toISOString();",
+    "  current.settingsFolderUrl = sFolder.getUrl();",
+    "  var jsonStr = JSON.stringify(current, null, 2);",
+    "  var files = sFolder.getFilesByName(SETTINGS_FILE_NAME);",
+    "  if (files.hasNext()) {",
+    "    files.next().setContent(jsonStr);",
+    "  } else {",
+    "    sFolder.createFile(SETTINGS_FILE_NAME, jsonStr, MimeType.PLAIN_TEXT);",
+    "  }",
+    "  return current;",
+    "}",
+    "",
+    "function doGet(e) {",
+    "  try {",
+    "    var settings = readCloudSettings();",
+    "    return ContentService.createTextOutput(JSON.stringify({",
+    "      status: 'ok',",
+    "      message: 'PDF Workbench Cloud Drive & Settings Folder connected!',",
+    "      settings: settings",
+    "    })).setMimeType(ContentService.MimeType.JSON);",
+    "  } catch (err) {",
+    "    return ContentService.createTextOutput(JSON.stringify({",
+    "      status: 'error',",
+    "      message: err.toString()",
+    "    })).setMimeType(ContentService.MimeType.JSON);",
+    "  }",
+    "}",
+    "",
+    "function doPost(e) {",
+    "  try {",
+    "    var raw = (e && e.postData && e.postData.contents) ? e.postData.contents : ((e && e.parameter && e.parameter.payload) ? e.parameter.payload : '{}');",
+    "    var data = JSON.parse(raw);",
+    "    var cache = CacheService.getScriptCache();",
+    "    if (data.requestId && cache.get(data.requestId)) {",
+    "      return ContentService.createTextOutput(cache.get(data.requestId)).setMimeType(ContentService.MimeType.JSON);",
+    "    }",
+    "",
+    "    /* Action 1: Save Settings / Update Google Drive Path in Settings Folder */",
+    "    if (data.action === 'saveSettings') {",
+    "      var updated = writeCloudSettings(data.settings || {});",
+    "      var resSettings = JSON.stringify({ status: 'ok', settings: updated });",
+    "      if (data.requestId) { try { cache.put(data.requestId, resSettings, 300); } catch (ce) {} }",
+    "      return ContentService.createTextOutput(resSettings).setMimeType(ContentService.MimeType.JSON);",
+    "    }",
+    "",
+    "    /* Action 2: Upload Scanned PDF & Persist Active Path in Settings Folder */",
+    "    var cloudCfg = readCloudSettings();",
+    "    var fileName = data.filename || ('Scanned-' + new Date().getTime() + '.pdf');",
+    "    var drivePath = (data.drivePath || cloudCfg.drivePath || cloudCfg.defaultDrivePath || '').trim();",
+    "    var folder = resolveTargetFolder(drivePath);",
+    "    var bytes = Utilities.base64Decode(data.base64);",
+    "    var blob = Utilities.newBlob(bytes, data.mimeType || 'application/pdf', fileName);",
+    "    var file = folder.createFile(blob);",
+    "",
+    "    /* Save this active drivePath into Settings/app-settings.json so any device uses the same path */",
+    "    if (drivePath) {",
+    "      writeCloudSettings({ drivePath: drivePath });",
+    "    }",
+    "",
+    "    var responseJson = JSON.stringify({",
+    "      status: 'ok',",
+    "      fileName: file.getName(),",
+    "      fileId: file.getId(),",
+    "      fileUrl: file.getUrl(),",
+    "      folderName: folder.getName(),",
+    "      folderUrl: folder.getUrl(),",
+    "      drivePath: drivePath",
+    "    });",
+    "    if (data.requestId) {",
+    "      try { cache.put(data.requestId, responseJson, 300); } catch (ce) {}",
+    "    }",
+    "    return ContentService.createTextOutput(responseJson).setMimeType(ContentService.MimeType.JSON);",
+    "  } catch (err) {",
+    "    return ContentService.createTextOutput(JSON.stringify({",
+    "      status: 'error',",
+    "      message: err.toString()",
+    "    })).setMimeType(ContentService.MimeType.JSON);",
+    "  }",
+    "}",
+    "",
+    "function resolveTargetFolder(pathOrUrl) {",
+    "  if (!pathOrUrl) return getMasterFolder();",
+    "  var urlMatch = pathOrUrl.match(/folders\\/([a-zA-Z0-9_-]{15,})/) || pathOrUrl.match(/[?&]id=([a-zA-Z0-9_-]{15,})/);",
+    "  if (urlMatch && urlMatch[1]) {",
+    "    return DriveApp.getFolderById(urlMatch[1]);",
+    "  }",
+    "  if (/^[a-zA-Z0-9_-]{20,}$/.test(pathOrUrl) && pathOrUrl.indexOf('/') === -1 && pathOrUrl.indexOf(' ') === -1) {",
+    "    try { return DriveApp.getFolderById(pathOrUrl); } catch (e) {}",
+    "  }",
+    "  var parts = pathOrUrl.replace(/^\\/+|\\/+$/g, '').split('/').map(function(p){ return p.trim(); }).filter(Boolean);",
+    "  var current = getMasterFolder();",
+    "  for (var i = 0; i < parts.length; i++) {",
+    "    if (i === 0 && parts[i].toLowerCase() === current.getName().toLowerCase()) continue;",
+    "    var iter = current.getFoldersByName(parts[i]);",
+    "    current = iter.hasNext() ? iter.next() : current.createFolder(parts[i]);",
+    "  }",
+    "  return current;",
+    "}"
+  ].join('\n');
+
+  const gasPreviewEl = backdrop.querySelector('#gasCodePreview');
+  if(gasPreviewEl) gasPreviewEl.textContent = GAS_TEMPLATE_CODE;
+
+  const copyGasBtn = backdrop.querySelector('#copyGasCodeBtn');
+  if(copyGasBtn){
+    copyGasBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(GAS_TEMPLATE_CODE)
+        .then(() => showToast('Cloud Settings + Drive Script copied! Paste in Code.gs & re-deploy.'))
+        .catch(() => showToast('Could not auto-copy — expand the preview below and copy manually.'));
+    });
+  }
+
+  const exportBakedBtn = backdrop.querySelector('#exportBakedHtmlBtn');
+  if(exportBakedBtn){
+    exportBakedBtn.addEventListener('click', async () => {
+      const gasUrl = (backdrop.querySelector('#adminGasUrl').value || '').trim();
+      const defPath = (backdrop.querySelector('#adminDefaultDrivePath').value || '').trim() || DEFAULT_GOOGLE_DRIVE_PATH;
+      if(!gasUrl || !gasUrl.includes('script.google.com/macros/s/')){
+        showToast('Please paste your valid Google Apps Script /exec URL in the box above first.');
+        return;
+      }
+      adminConfig.googleScriptUrl  = gasUrl;
+      adminConfig.defaultDrivePath = defPath;
+      saveAdminConfig(adminConfig);
+      if(typeof window._syncDrivePathDefault === 'function') window._syncDrivePathDefault();
+      if(typeof window._saveSettingsToCloudDrive === 'function'){
+        window._saveSettingsToCloudDrive({
+          drivePath: defPath,
+          defaultDrivePath: defPath,
+          watermarkMode: adminConfig.watermarkMode,
+          watermarkDefaultChecked: adminConfig.watermarkDefaultChecked,
+          passwordHash: adminConfig.passwordHash
+        });
+      }
+
+      try{
+        let rawHtml = '';
+        try{
+          const resp = await fetch(window.location.href, { cache: 'no-store' });
+          if(resp.ok) rawHtml = await resp.text();
+        }catch(fe){}
+        if(!rawHtml || !rawHtml.includes('DEFAULT_GOOGLE_SCRIPT_URL')){
+          rawHtml = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+        }
+        const safeUrl  = gasUrl.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        const safePath = defPath.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        rawHtml = rawHtml
+          .replace(/const DEFAULT_GOOGLE_SCRIPT_URL\s*=\s*'[^']*';/, `const DEFAULT_GOOGLE_SCRIPT_URL = '${safeUrl}';`)
+          .replace(/const DEFAULT_GOOGLE_DRIVE_PATH\s*=\s*'[^']*';/, `const DEFAULT_GOOGLE_DRIVE_PATH = '${safePath}';`);
+
+        const blob = new Blob([rawHtml], { type: 'text/html;charset=utf-8' });
+        if(window.showSaveFilePicker){
+          try{
+            const handle = await window.showSaveFilePicker({
+              suggestedName: 'pdf-workbench 08-07.html',
+              types: [{ description: 'HTML Website File', accept: { 'text/html': ['.html'] } }]
+            });
+            const writable = await handle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+            showToast('Website HTML saved with your Script URL & Drive Path permanently baked in!');
+            return;
+          }catch(pe){
+            if(pe.name === 'AbortError') return;
+          }
+        }
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'pdf-workbench 08-07.html';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        showToast('Downloaded updated HTML with Script URL & Drive Path permanently baked in!');
+      }catch(err){
+        showToast('Could not export HTML: ' + err.message);
+      }
+    });
+  }
+
+  const testGasBtn = backdrop.querySelector('#testGasUrlBtn');
+  const testStatusEl = backdrop.querySelector('#adminGasTestStatus');
+  if(testGasBtn && testStatusEl){
+    testGasBtn.addEventListener('click', async () => {
+      const url = (backdrop.querySelector('#adminGasUrl').value || '').trim();
+      testStatusEl.style.display = 'block';
+      if(!url){
+        testStatusEl.innerHTML = `<span style="color:var(--rust);font-weight:600;">✕ Please paste your deployed Google Apps Script Web App URL first.</span>`;
+        return;
+      }
+      if(url.includes('drive.google.com')){
+        testStatusEl.innerHTML = `<span style="color:var(--rust);font-weight:600;">✕ That is a Google Drive Folder URL, not a Google Apps Script Web App URL!</span><br><span style="color:var(--ink-soft);">Put the Drive Folder URL in "Default Google Drive Folder Path" below. In the top box, paste the URL from <b>script.google.com → Deploy → New deployment → Web app</b> (starts with <code>https://script.google.com/macros/s/.../exec</code>).</span>`;
+        return;
+      }
+      if(!url.includes('script.google.com/macros/s/') || !url.endsWith('/exec')){
+        testStatusEl.innerHTML = `<span style="color:var(--rust);font-weight:600;">⚠️ URL should start with <code>https://script.google.com/macros/s/</code> and end with <code>/exec</code> (not <code>/edit</code>).</span>`;
+        return;
+      }
+      testStatusEl.innerHTML = `<span style="color:var(--teal-deep);">⏳ Testing connection to Web App &amp; Cloud Settings folder…</span>`;
+      try{
+        const res = await fetch(url + '?action=getSettings', { method: 'GET', redirect: 'follow' });
+        const txt = await res.text();
+        if(txt && txt.includes('"status":"ok"')){
+          let extra = '';
+          try{
+            const j = JSON.parse(txt);
+            if(j.settings && j.settings.settingsFolderUrl){
+              extra = ` <a href="${escapeHtml(j.settings.settingsFolderUrl)}" target="_blank" rel="noopener" style="color:var(--teal-deep);text-decoration:underline;">Open Cloud Settings Folder ↗</a>`;
+            }
+          }catch(pe){}
+          testStatusEl.innerHTML = `<span style="color:#1E6F3D;font-weight:700;">✓ Connected! Cloud Settings folder is active.${extra}</span>`;
+        } else {
+          testStatusEl.innerHTML = `<span style="color:var(--rust);font-weight:600;">⚠️ Web App responded, but didn't return JSON. Make sure you pasted the updated script, ran <code>authorizeDriveAccess</code> once, and deployed a <b>New version</b> with "Who has access: Anyone".</span>`;
+        }
+      }catch(e){
+        testStatusEl.innerHTML = `<span style="color:var(--rust);font-weight:600;">⚠️ Could not verify via CORS (${escapeHtml(e.message)}). Make sure in Apps Script you clicked <b>Deploy → New deployment → Web app</b> with <b>Who has access: Anyone</b>, and ran <code>authorizeDriveAccess</code> once. <a href="${escapeHtml(url)}" target="_blank" rel="noopener" style="color:var(--teal-deep);text-decoration:underline;">Click here to open &amp; verify URL in new tab ↗</a></span>`;
+      }
+    });
+  }
 
   backdrop.querySelectorAll('input[name="wmMode"]').forEach(radio => {
     radio.addEventListener('change', () => {
@@ -2375,11 +2793,13 @@ function openAdminSettingsModal(){
 
   backdrop.querySelector('.modal-close').addEventListener('click', () => backdrop.remove());
   backdrop.querySelector('#adminSettingsCancel').addEventListener('click', () => backdrop.remove());
-  backdrop.querySelector('#adminSettingsSave').addEventListener('click', () => {
+  backdrop.querySelector('#adminSettingsSave').addEventListener('click', async () => {
     const selectedMode   = backdrop.querySelector('input[name="wmMode"]:checked').value;
     const defaultChecked = backdrop.querySelector('#wmDefaultChecked').checked;
     const pw1 = backdrop.querySelector('#wmNewPw1').value;
     const pw2 = backdrop.querySelector('#wmNewPw2').value;
+    const gasUrl = (backdrop.querySelector('#adminGasUrl').value || '').trim();
+    const defDrivePath = (backdrop.querySelector('#adminDefaultDrivePath').value || '').trim() || DEFAULT_GOOGLE_DRIVE_PATH;
 
     if(pw1 || pw2){
       if(pw1.length < 4){ showToast('New PIN must be at least 4 characters.'); return; }
@@ -2387,12 +2807,24 @@ function openAdminSettingsModal(){
       adminConfig.passwordHash = simpleHash(pw1);
     }
 
-    adminConfig.watermarkMode        = selectedMode;
+    adminConfig.watermarkMode           = selectedMode;
     adminConfig.watermarkDefaultChecked = defaultChecked;
+    adminConfig.googleScriptUrl         = gasUrl;
+    adminConfig.defaultDrivePath        = defDrivePath;
     saveAdminConfig(adminConfig);
     applyAdminWatermarkConfig();
+    if(typeof window._syncDrivePathDefault === 'function') window._syncDrivePathDefault();
+    if(typeof window._saveSettingsToCloudDrive === 'function'){
+      window._saveSettingsToCloudDrive({
+        drivePath: defDrivePath,
+        defaultDrivePath: defDrivePath,
+        watermarkMode: adminConfig.watermarkMode,
+        watermarkDefaultChecked: adminConfig.watermarkDefaultChecked,
+        passwordHash: adminConfig.passwordHash
+      });
+    }
     backdrop.remove();
-    showToast('Admin settings saved.');
+    showToast('Admin settings saved & synced to Google Drive Settings folder.');
   });
 }
 
@@ -3252,30 +3684,45 @@ async function openPageEditor(p){
       stage.appendChild(box);
       attachDrag(box, patch, 'move');
 
-      ['nw','ne','sw','se'].forEach(corner => {
+      const pts = [
+        { k:'nw', x: patch.xPct,                  y: patch.yPct },
+        { k:'n',  x: patch.xPct + patch.wPct / 2, y: patch.yPct },
+        { k:'ne', x: patch.xPct + patch.wPct,     y: patch.yPct },
+        { k:'e',  x: patch.xPct + patch.wPct,     y: patch.yPct + patch.hPct / 2 },
+        { k:'se', x: patch.xPct + patch.wPct,     y: patch.yPct + patch.hPct },
+        { k:'s',  x: patch.xPct + patch.wPct / 2, y: patch.yPct + patch.hPct },
+        { k:'sw', x: patch.xPct,                  y: patch.yPct + patch.hPct },
+        { k:'w',  x: patch.xPct,                  y: patch.yPct + patch.hPct / 2 }
+      ];
+      pts.forEach(pt => {
         const h = document.createElement('div');
-        h.className = 'resize-handle handle-' + corner;
-        h.style.left = corner.includes('w') ? (patch.xPct*100)+'%' : ((patch.xPct+patch.wPct)*100)+'%';
-        h.style.top = corner.includes('n') ? (patch.yPct*100)+'%' : ((patch.yPct+patch.hPct)*100)+'%';
+        h.className = 'resize-handle handle-' + pt.k;
+        h.style.left = (pt.x * 100) + '%';
+        h.style.top  = (pt.y * 100) + '%';
         stage.appendChild(h);
-        attachDrag(h, patch, 'resize-' + corner);
+        attachDrag(h, patch, 'resize-' + pt.k);
       });
     });
   }
 
   function attachDrag(el, patch, mode){
-    el.addEventListener('mousedown', e => {
+    function startDrag(e){
+      const isTouch = e.type.startsWith('touch');
+      if(isTouch && e.touches.length > 1) return;
       e.preventDefault();
       e.stopPropagation();
+      const pt = isTouch ? e.touches[0] : e;
       const stageRect = stage.getBoundingClientRect();
-      const startX = e.clientX, startY = e.clientY;
+      const startX = pt.clientX, startY = pt.clientY;
       const orig = { xPct: patch.xPct, yPct: patch.yPct, wPct: patch.wPct, hPct: patch.hPct };
       let moved = false;
 
       function onMove(ev){
-        const dx = (ev.clientX - startX) / stageRect.width;
-        const dy = (ev.clientY - startY) / stageRect.height;
-        if(Math.abs(ev.clientX - startX) > 2 || Math.abs(ev.clientY - startY) > 2) moved = true;
+        if(ev.cancelable) ev.preventDefault();
+        const cur = ev.touches ? ev.touches[0] : ev;
+        const dx = (cur.clientX - startX) / (stageRect.width || 1);
+        const dy = (cur.clientY - startY) / (stageRect.height || 1);
+        if(Math.abs(cur.clientX - startX) > 2 || Math.abs(cur.clientY - startY) > 2) moved = true;
 
         if(mode === 'move'){
           patch.xPct = clamp(orig.xPct + dx, 0, 1 - orig.wPct);
@@ -3296,13 +3743,24 @@ async function openPageEditor(p){
       function onUp(){
         document.removeEventListener('mousemove', onMove);
         document.removeEventListener('mouseup', onUp);
+        document.removeEventListener('touchmove', onMove);
+        document.removeEventListener('touchend', onUp);
+        document.removeEventListener('touchcancel', onUp);
         if(mode === 'move' && !moved){
           openPatchForm(p, patch, drawPatchBoxes);
         }
       }
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onUp);
-    });
+      if(isTouch){
+        document.addEventListener('touchmove', onMove, { passive: false });
+        document.addEventListener('touchend', onUp);
+        document.addEventListener('touchcancel', onUp);
+      } else {
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+      }
+    }
+    el.addEventListener('mousedown', startDrag);
+    el.addEventListener('touchstart', startDrag, { passive: false });
   }
 
   drawPatchBoxes();
@@ -4591,13 +5049,35 @@ async function extractToExcel(){
 
 
 // ═══════════════════════════════════════════════════════════════════
-//  AUTH ENGINE — PDF Workbench
-//  Handles: signup, login, OTP verify, session, subscription status
-//
-//  🔥 FIREBASE REPLACEMENT POINTS are clearly marked.
-//  Every localStorage call → Firebase Auth + Firestore equivalent.
-//  Swapping takes ~30 minutes once your Firebase project is ready.
+//  AUTH ENGINE — PDF Workbench (Connected to Firebase Auth: mypdf-1f1bf)
+//  Supports: Email & Password (Sign In / Sign Up / Reset) + Phone OTP/SMS
 // ═══════════════════════════════════════════════════════════════════
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAuuTKfZnF8d0EUdSY092Cai8mQ18REG_I",
+  authDomain: "mypdf-1f1bf.firebaseapp.com",
+  projectId: "mypdf-1f1bf",
+  storageBucket: "mypdf-1f1bf.firebasestorage.app",
+  messagingSenderId: "431379286932",
+  appId: "1:431379286932:web:34d16d6772a9e79e869d81",
+  measurementId: "G-BT04DLSZ2Y"
+};
+
+let fbApp = null;
+let fbAuth = null;
+let fbAnalytics = null;
+let fbConfirmationResult = null;
+let fbRecaptchaVerifier = null;
+
+try{
+  if(typeof firebase !== 'undefined'){
+    fbApp = firebase.apps && firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+    fbAuth = firebase.auth();
+    try{ if(firebase.analytics) fbAnalytics = firebase.analytics(); }catch(ae){}
+  }
+}catch(fbInitErr){
+  console.error('Firebase init error:', fbInitErr);
+}
 
 const AUTH_USER_KEY  = 'pdfwb_user';
 const AUTH_SUB_KEY   = 'pdfwb_subscription';
@@ -4612,12 +5092,6 @@ const PLAN_LABELS  = { '1D':'1 Day',  '1M':'1 Month',  '1Y':'1 Year'  };
 const PLAN_PRICES  = { '1D':'₹100',   '1M':'₹500',     '1Y':'₹1,500'  };
 const PLAN_SLASHED = { '1D':'₹200',   '1M':'₹1,000',   '1Y':'₹5,000'  };
 
-// ── Data helpers ─────────────────────────────────────────────────────
-// 🔥 FIREBASE: replace getUser()   → firebase.auth().currentUser
-// 🔥 FIREBASE: replace getSub()    → firestore.collection('users').doc(uid).collection('subscription').get()
-// 🔥 FIREBASE: replace saveUser()  → firebase.auth().createUserWithEmailAndPassword / updateProfile
-// 🔥 FIREBASE: replace saveSub()   → firestore.collection('users').doc(uid).collection('subscription').set()
-
 function getUser(){
   try{ return JSON.parse(localStorage.getItem(AUTH_USER_KEY)); }catch(e){ return null; }
 }
@@ -4628,11 +5102,89 @@ function saveUser(u){ localStorage.setItem(AUTH_USER_KEY, JSON.stringify(u)); }
 function saveSub(s){ localStorage.setItem(AUTH_SUB_KEY, JSON.stringify(s)); }
 function clearSession(){
   localStorage.removeItem(AUTH_USER_KEY);
-  localStorage.removeItem(AUTH_SUB_KEY);
+}
+
+function encodeDrivePathForFirebaseProfile(drivePath){
+  const clean = (drivePath || '').trim();
+  if(!clean) return null;
+  return 'https://drive.google.com/drive/my-drive#pdfwb_path=' + encodeURIComponent(clean);
+}
+
+function decodeDrivePathFromFirebaseProfile(photoURL){
+  if(!photoURL) return '';
+  const marker = '#pdfwb_path=';
+  const idx = photoURL.indexOf(marker);
+  if(idx !== -1){
+    try{ return decodeURIComponent(photoURL.slice(idx + marker.length)); }catch(e){}
+  }
+  if(photoURL.includes('drive.google.com')) return photoURL;
+  return '';
+}
+
+function getUserStorageKey(u){
+  const usr = u || getUser();
+  if(!usr) return '';
+  const id = (usr.email || usr.mobile || usr.uid || '').trim().toLowerCase();
+  return id ? id.replace(/[^a-z0-9@._+-]/gi, '_') : '';
+}
+
+function syncFirebaseUserToLocal(fbUser){
+  if(!fbUser) return null;
+  const existing = getUser() || {};
+  const isSameUser = existing.uid === fbUser.uid;
+  const fbDrivePath = decodeDrivePathFromFirebaseProfile(fbUser.photoURL || '');
+  const merged = {
+    uid: fbUser.uid,
+    email: fbUser.email || (isSameUser ? existing.email : '') || '',
+    mobile: fbUser.phoneNumber || (isSameUser ? existing.mobile : '') || '',
+    name: fbUser.displayName || (isSameUser ? existing.name : '') || (fbUser.email ? fbUser.email.split('@')[0] : ''),
+    drivePath: fbDrivePath || (isSameUser ? (existing.drivePath || '') : ''),
+    profession: isSameUser ? (existing.profession || '') : '',
+    company: isSameUser ? (existing.company || '') : '',
+    trialStart: (isSameUser && existing.trialStart) ? existing.trialStart : (fbUser.metadata && fbUser.metadata.creationTime ? new Date(fbUser.metadata.creationTime).getTime() : Date.now()),
+    created: (isSameUser && existing.created) ? existing.created : Date.now()
+  };
+  saveUser(merged);
+  const uKey = getUserStorageKey(merged);
+  if(uKey && merged.drivePath){
+    try{ localStorage.setItem('pdfwb_user_drive_path::' + uKey, merged.drivePath); }catch(e){}
+  }
+  if(typeof window._syncDrivePathDefault === 'function'){
+    setTimeout(() => window._syncDrivePathDefault(), 0);
+  }
+  return merged;
+}
+
+function formatFirebaseError(err){
+  if(!err) return 'Authentication failed. Please try again.';
+  const code = err.code || '';
+  if(code === 'auth/invalid-email') return 'Please enter a valid email address.';
+  if(code === 'auth/user-not-found' || code === 'auth/invalid-credential' || code === 'auth/wrong-password')
+    return 'Incorrect email or password. If you are new, switch to "Create Account".';
+  if(code === 'auth/email-already-in-use')
+    return 'This email is already registered. Switch to "Sign In" to log in.';
+  if(code === 'auth/weak-password')
+    return 'Password should be at least 6 characters long.';
+  if(code === 'auth/too-many-requests')
+    return 'Too many attempts. Please wait a minute or reset your password.';
+  if(code === 'auth/invalid-phone-number')
+    return 'Invalid phone number format. Include country code (e.g. +919876543210).';
+  if(code === 'auth/invalid-verification-code')
+    return 'Invalid 6-digit OTP code. Please check the SMS and try again.';
+  if(code === 'auth/code-expired')
+    return 'This OTP has expired. Please request a new OTP.';
+  if(code === 'auth/unauthorized-domain')
+    return 'Domain "' + (window.location.hostname || 'localhost') + '" is not authorized in Firebase yet. In Firebase Console → Authentication → Settings → Authorized domains, add "' + (window.location.hostname || 'localhost') + '".';
+  if(code === 'auth/billing-not-enabled')
+    return 'Firebase Phone SMS requires billing (Blaze plan) or test phone numbers in Firebase Console → Authentication → Sign-in method → Phone. You can also sign in with Email anytime!';
+  return err.message || String(err);
 }
 
 // ── Subscription status helpers ──────────────────────────────────────
-function isLoggedIn(){ return !!getUser(); }
+function isLoggedIn(){
+  if(fbAuth && fbAuth.currentUser) return true;
+  return !!getUser();
+}
 
 function getSubscriptionStatus(){
   const sub = getSub();
@@ -4665,7 +5217,7 @@ function getSubscriptionStatus(){
     }
   }
 
-  return { state:'registered' }; // logged in but no trial started yet
+  return { state:'registered' };
 }
 
 function isPremiumAllowed(){
@@ -4673,12 +5225,11 @@ function isPremiumAllowed(){
   return ['active','trial'].includes(status.state);
 }
 
-// ── OTP mock (🔥 FIREBASE: replace with firebase.auth().signInWithPhoneNumber) ──
+// ── Fallback local OTP (only used if offline/demo) ────────────────────
 const otpStore = {};
 function generateOTP(mobile){
   const code = String(Math.floor(100000 + Math.random() * 900000));
-  otpStore[mobile] = { code, expires: Date.now() + 300000 }; // 5 min
-  console.log('📱 OTP for '+mobile+': '+code+' (dev mode — will be SMS in production)');
+  otpStore[mobile] = { code, expires: Date.now() + 300000 };
   return code;
 }
 function verifyOTP(mobile, entered){
@@ -4691,136 +5242,396 @@ function verifyOTP(mobile, entered){
 // ── Auth modal builder ───────────────────────────────────────────────
 const authRoot = document.getElementById('authRoot');
 
+function clearRecaptcha(){
+  if(fbRecaptchaVerifier){
+    try{ fbRecaptchaVerifier.clear(); }catch(e){}
+    fbRecaptchaVerifier = null;
+  }
+}
+
 function closeAuthModal(){
+  clearRecaptcha();
   authRoot.innerHTML = '';
 }
 
 function showAuthModal(html, onMounted){
+  clearRecaptcha();
   authRoot.innerHTML = `
     <div class="auth-backdrop" id="authBackdrop">
-      <div class="auth-card">
-        <button class="auth-close" onclick="window._auth.closeAuthModal()">✕</button>
+      <div class="auth-card" style="max-width:440px;">
+        <button class="auth-close" onclick="window._auth.closeAuthModal()" title="Close">✕</button>
         ${html}
       </div>
     </div>
   `;
-  // Click outside to close
   document.getElementById('authBackdrop').addEventListener('click', function(e){
     if(e.target === this) window._auth.closeAuthModal();
   });
   if(onMounted) onMounted();
 }
 
-// ── Step 1 — Mobile number entry ─────────────────────────────────────
-function openLoginModal(featureName, afterLoginCallback){
+// ── Step 1 — Firebase Login Modal (Email/Password + Phone OTP/SMS) ───
+function openLoginModal(featureName, afterLoginCallback, initialTab){
+  const splash = document.getElementById('welcomeSplash');
+  if(splash && splash.style.display !== 'none'){
+    splash.style.opacity = '0';
+    setTimeout(() => { splash.style.display = 'none'; }, 300);
+  }
+
   const featureMsg = featureName
-    ? `<p class="auth-sub">Your work is ready — sign in free to <strong>${featureName}</strong>.<br>Takes 30 seconds. 7-day full access, no card needed.</p>`
-    : `<p class="auth-sub">Sign in to your PDF Workbench account.</p>`;
+    ? `<p class="auth-sub" style="margin-bottom:12px;">Sign in to unlock <strong>${escapeHtml(featureName)}</strong>. Includes 7-day full access.</p>`
+    : `<p class="auth-sub" style="margin-bottom:12px;">Sign in with your <strong>Email</strong> or <strong>Mobile OTP / SMS</strong> (powered by Firebase).</p>`;
 
   showAuthModal(`
-    <div class="auth-logo"><span>📄</span><div><span>PDF Workbench</span><sub>Professional Edition</sub></div></div>
-    <div class="auth-trial-badge">
-      <strong>🚀 Your work is saved — sign in to download it free</strong>
-      7-day full access · No credit card · Cancel anytime
-    </div>
-    <h3 class="auth-title">Create account or sign in</h3>
-    ${featureMsg}
-    <div class="auth-error" id="authErr"></div>
-    <div class="auth-field">
-      <label>Mobile number</label>
-      <div style="display:flex;gap:8px;">
-        <select id="countryCode" style="padding:10px 8px;border:1.5px solid var(--kraft-line);border-radius:8px;background:#fff;font-size:14px;color:var(--ink);">
-          <option value="+91">🇮🇳 +91</option>
-          <option value="+1">🇺🇸 +1</option>
-          <option value="+44">🇬🇧 +44</option>
-          <option value="+971">🇦🇪 +971</option>
-        </select>
-        <input type="tel" id="mobileInput" placeholder="9876543210" maxlength="10"
-          style="flex:1;padding:10px 12px;border:1.5px solid var(--kraft-line);border-radius:8px;font-size:15px;font-family:'JetBrains Mono',monospace;background:#fff;color:var(--ink);">
+    <div class="auth-logo" style="margin-bottom:12px;">
+      <span>📄</span>
+      <div>
+        <span>PDF Workbench</span>
+        <sub>Firebase Secure Login · Email &amp; Mobile OTP</sub>
       </div>
     </div>
-    <button class="auth-btn primary" id="sendOtpBtn">Send OTP →</button>
-    <div class="auth-divider">or</div>
-    <button class="auth-btn outline" id="googleBtn">
-      <img src="https://www.google.com/favicon.ico" width="14" style="vertical-align:middle;margin-right:6px;">
-      Continue with Google
-      <span style="font-size:10px;margin-left:4px;opacity:.7;">(coming soon)</span>
-    </button>
-    <div class="auth-switch">Already have a license key? <a onclick="window._auth.openKeyEntryModal()">Enter it here</a></div>
-  `, () => {
-    document.getElementById('sendOtpBtn').addEventListener('click', () => {
-      const mobile = document.getElementById('mobileInput').value.trim();
-      const code   = document.getElementById('countryCode').value;
-      const err    = document.getElementById('authErr');
-      if(mobile.length < 8){ err.textContent='Enter a valid mobile number.'; err.style.display='block'; return; }
-      const fullMobile = code + mobile;
-      generateOTP(fullMobile); // 🔥 FIREBASE: firebase.auth().signInWithPhoneNumber(fullMobile, recaptchaVerifier)
-      openOTPModal(fullMobile, featureName, afterLoginCallback);
-    });
-    document.getElementById('mobileInput').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('sendOtpBtn').click(); });
-    document.getElementById('googleBtn').addEventListener('click', () => {
-      showToast('Google login coming soon — use mobile OTP for now.');
-      // 🔥 FIREBASE: firebase.auth().signInWithPopup(new firebase.auth.GoogleAuthProvider())
-    });
-  });
-}
-
-// ── Step 2 — OTP verification ────────────────────────────────────────
-function openOTPModal(mobile, featureName, afterLoginCallback){
-  showAuthModal(`
-    <div class="auth-logo"><span>📄</span><div><span>PDF Workbench</span></div></div>
-    <h3 class="auth-title">Enter OTP</h3>
-    <p class="auth-sub">We sent a 6-digit code to <strong>${mobile}</strong>.<br>
-      <em style="font-size:11px;color:var(--gold);">Dev mode: check the browser console for the OTP code.</em>
-    </p>
-    <div class="auth-error" id="otpErr"></div>
-    <div class="auth-success" id="otpSuccess"></div>
-    <div class="auth-field">
-      <label>6-digit OTP</label>
-      <input type="number" id="otpInput" placeholder="123456" maxlength="6"
-        style="font-family:'JetBrains Mono',monospace;font-size:22px;letter-spacing:.2em;text-align:center;padding:12px;">
+    <div class="auth-trial-badge" style="margin-bottom:14px;padding:8px 12px;">
+      <strong>🔐 Welcome to PDF Workbench</strong>
+      Sign in or create your account · 7-day full access
     </div>
-    <button class="auth-btn primary" id="verifyOtpBtn">Verify & Continue →</button>
-    <div class="auth-switch">Wrong number? <a onclick="window._auth.openLoginModal('${featureName||''}')">Go back</a></div>
+    ${featureMsg}
+
+    <!-- Auth Method Tabs: Email vs Phone OTP -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--paper-deep);padding:4px;border-radius:9px;margin-bottom:14px;border:1px solid var(--kraft-line);">
+      <button type="button" id="tabBtnEmail" style="padding:8px 10px;border:none;border-radius:7px;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;background:var(--teal);color:#fff;">
+        📧 Email Login
+      </button>
+      <button type="button" id="tabBtnPhone" style="padding:8px 10px;border:none;border-radius:7px;font-family:'Inter',sans-serif;font-size:12.5px;font-weight:700;cursor:pointer;background:transparent;color:var(--ink);">
+        📱 Mobile OTP / SMS
+      </button>
+    </div>
+
+    <div class="auth-error" id="authErr"></div>
+    <div class="auth-success" id="authOk"></div>
+
+    <!-- PANEL 1: EMAIL & PASSWORD (SIGN IN / SIGN UP) -->
+    <div id="authPanelEmail">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span id="emailModeTitle" style="font-size:13px;font-weight:700;color:var(--ink);">Sign in with Email</span>
+        <span id="emailModeToggle" style="font-size:12px;color:var(--teal-deep);font-weight:700;cursor:pointer;text-decoration:underline;">New user? Create Account</span>
+      </div>
+
+      <div class="auth-field" id="emailNameField" style="display:none;">
+        <label>Your Full Name</label>
+        <input type="text" id="emailNameInput" placeholder="e.g. Pradeep Parmar" autocomplete="name">
+      </div>
+
+      <div class="auth-field">
+        <label>Email Address</label>
+        <input type="email" id="emailAddrInput" placeholder="you@example.com" autocomplete="email">
+      </div>
+
+      <div class="auth-field">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+          <label style="margin:0;">Password</label>
+          <span id="forgotPassLink" style="font-size:11.5px;color:var(--teal-deep);cursor:pointer;text-decoration:underline;">Forgot password?</span>
+        </div>
+        <div style="position:relative;">
+          <input type="password" id="emailPassInput" placeholder="Enter password (min 6 chars)" autocomplete="current-password" style="padding-right:38px;">
+          <span id="togglePassEye" title="Show/Hide Password" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);cursor:pointer;font-size:15px;user-select:none;">👁</span>
+        </div>
+      </div>
+
+      <button type="button" class="auth-btn primary" id="emailSubmitBtn">Sign In with Email →</button>
+    </div>
+
+    <!-- PANEL 2: PHONE / OTP / SMS -->
+    <div id="authPanelPhone" style="display:none;">
+      <div class="auth-field">
+        <label>Mobile Number (receives 6-digit SMS OTP)</label>
+        <div style="display:flex;gap:8px;">
+          <select id="countryCode" style="padding:10px 8px;border:1.5px solid var(--kraft-line);border-radius:8px;background:#fff;font-size:14px;color:var(--ink);">
+            <option value="+91">🇮🇳 +91</option>
+            <option value="+1">🇺🇸 +1</option>
+            <option value="+44">🇬🇧 +44</option>
+            <option value="+971">🇦🇪 +971</option>
+            <option value="+61">🇦🇺 +61</option>
+            <option value="+65">🇸🇬 +65</option>
+          </select>
+          <input type="tel" id="mobileInput" placeholder="9876543210" maxlength="12"
+            style="flex:1;padding:10px 12px;border:1.5px solid var(--kraft-line);border-radius:8px;font-size:15px;font-family:'JetBrains Mono',monospace;background:#fff;color:var(--ink);">
+        </div>
+      </div>
+      <div id="firebase-recaptcha-container" style="margin:8px 0;display:flex;justify-content:center;"></div>
+      <button type="button" class="auth-btn primary" id="sendOtpBtn">Send SMS OTP →</button>
+    </div>
+
+    <div class="auth-switch" style="margin-top:12px;">
+      Already have a license key? <a onclick="window._auth.openKeyEntryModal()">Enter key</a>
+      &nbsp;·&nbsp;
+      <a onclick="window._auth.openPricingModal()">View Plans</a>
+    </div>
   `, () => {
-    document.getElementById('otpInput').focus();
-    document.getElementById('verifyOtpBtn').addEventListener('click', () => {
-      const entered = document.getElementById('otpInput').value.trim();
-      const err = document.getElementById('otpErr');
-      const suc = document.getElementById('otpSuccess');
-      // 🔥 FIREBASE: confirmationResult.confirm(entered).then(result => { const user = result.user; ... })
-      if(verifyOTP(mobile, entered)){
-        suc.textContent = '✓ Verified! Setting up your account…';
-        suc.style.display = 'block';
-        // Create or fetch user
-        const existingUser = getUser();
-        if(!existingUser || existingUser.mobile !== mobile){
-          const newUser = {
-            uid: 'local_' + Date.now(),
-            mobile,
-            name: '',
-            profession: '',
-            company: '',
-            trialStart: Date.now(),
-            created: Date.now()
-          };
-          saveUser(newUser);
+    const tabBtnEmail    = document.getElementById('tabBtnEmail');
+    const tabBtnPhone    = document.getElementById('tabBtnPhone');
+    const panelEmail     = document.getElementById('authPanelEmail');
+    const panelPhone     = document.getElementById('authPanelPhone');
+    const errEl          = document.getElementById('authErr');
+    const okEl           = document.getElementById('authOk');
+
+    let isSignUpMode = false;
+
+    function showErr(msg){
+      okEl.style.display = 'none';
+      errEl.textContent = msg;
+      errEl.style.display = 'block';
+    }
+    function showOk(msg){
+      errEl.style.display = 'none';
+      okEl.textContent = msg;
+      okEl.style.display = 'block';
+    }
+    function clearMsgs(){
+      errEl.style.display = 'none';
+      okEl.style.display = 'none';
+    }
+
+    function switchTab(tab){
+      clearMsgs();
+      if(tab === 'phone'){
+        tabBtnPhone.style.background = 'var(--teal)';
+        tabBtnPhone.style.color      = '#fff';
+        tabBtnEmail.style.background = 'transparent';
+        tabBtnEmail.style.color      = 'var(--ink)';
+        panelEmail.style.display     = 'none';
+        panelPhone.style.display     = 'block';
+        const mobInp = document.getElementById('mobileInput');
+        if(mobInp) mobInp.focus();
+      } else {
+        tabBtnEmail.style.background = 'var(--teal)';
+        tabBtnEmail.style.color      = '#fff';
+        tabBtnPhone.style.background = 'transparent';
+        tabBtnPhone.style.color      = 'var(--ink)';
+        panelPhone.style.display     = 'none';
+        panelEmail.style.display     = 'block';
+        const emInp = document.getElementById('emailAddrInput');
+        if(emInp) emInp.focus();
+      }
+    }
+
+    tabBtnEmail.addEventListener('click', () => switchTab('email'));
+    tabBtnPhone.addEventListener('click', () => switchTab('phone'));
+    if(initialTab === 'phone') switchTab('phone');
+
+    // Toggle Sign In <-> Create Account in Email tab
+    const emailModeTitle  = document.getElementById('emailModeTitle');
+    const emailModeToggle = document.getElementById('emailModeToggle');
+    const emailNameField  = document.getElementById('emailNameField');
+    const emailSubmitBtn  = document.getElementById('emailSubmitBtn');
+    const forgotPassLink  = document.getElementById('forgotPassLink');
+
+    emailModeToggle.addEventListener('click', () => {
+      isSignUpMode = !isSignUpMode;
+      clearMsgs();
+      if(isSignUpMode){
+        emailModeTitle.textContent  = 'Create New Account';
+        emailModeToggle.textContent = 'Have an account? Sign In';
+        emailNameField.style.display = 'block';
+        emailSubmitBtn.textContent  = 'Create Account & Start Trial →';
+        forgotPassLink.style.display = 'none';
+      } else {
+        emailModeTitle.textContent  = 'Sign in with Email';
+        emailModeToggle.textContent = 'New user? Create Account';
+        emailNameField.style.display = 'none';
+        emailSubmitBtn.textContent  = 'Sign In with Email →';
+        forgotPassLink.style.display = 'inline';
+      }
+    });
+
+    // Show / Hide password toggle
+    const passInput = document.getElementById('emailPassInput');
+    const toggleEye = document.getElementById('togglePassEye');
+    if(toggleEye && passInput){
+      toggleEye.addEventListener('click', () => {
+        passInput.type = passInput.type === 'password' ? 'text' : 'password';
+      });
+    }
+
+    // Forgot Password handler
+    forgotPassLink.addEventListener('click', async () => {
+      const email = (document.getElementById('emailAddrInput').value || '').trim();
+      if(!email || !email.includes('@')){
+        showErr('Enter your email address above first, then click "Forgot password?".');
+        return;
+      }
+      if(!fbAuth){ showErr('Firebase Auth is not loaded.'); return; }
+      try{
+        await fbAuth.sendPasswordResetEmail(email);
+        showOk('✓ Password reset link sent to ' + email + '! Check your inbox.');
+      }catch(err){
+        showErr(formatFirebaseError(err));
+      }
+    });
+
+    // Email Sign In / Sign Up submit handler
+    async function handleEmailAuth(){
+      clearMsgs();
+      const email = (document.getElementById('emailAddrInput').value || '').trim();
+      const pass  = document.getElementById('emailPassInput').value || '';
+      const name  = (document.getElementById('emailNameInput').value || '').trim();
+
+      if(!email || !email.includes('@')){ showErr('Please enter a valid email address.'); return; }
+      if(pass.length < 6){ showErr('Password must be at least 6 characters.'); return; }
+      if(!fbAuth){ showErr('Firebase Auth SDK could not be reached. Check your internet connection.'); return; }
+
+      emailSubmitBtn.disabled = true;
+      emailSubmitBtn.textContent = isSignUpMode ? 'Creating account…' : 'Signing in…';
+
+      try{
+        let userCred;
+        if(isSignUpMode){
+          userCred = await fbAuth.createUserWithEmailAndPassword(email, pass);
+          if(name && userCred.user && userCred.user.updateProfile){
+            await userCred.user.updateProfile({ displayName: name });
+          }
+        } else {
+          userCred = await fbAuth.signInWithEmailAndPassword(email, pass);
         }
+        const localUser = syncFirebaseUserToLocal(userCred.user);
+        if(name && localUser){
+          localUser.name = name;
+          saveUser(localUser);
+        }
+        showOk('✓ Signed in as ' + (userCred.user.email || name) + '!');
         setTimeout(() => {
           updateAccountButton();
           updateLicenseBanner();
           closeAuthModal();
-          // Show profile completion prompt after a short delay
-          setTimeout(() => openProfilePrompt(), 800);
+          if(!localUser.name) setTimeout(() => openProfilePrompt(), 600);
           if(afterLoginCallback) afterLoginCallback();
-          showToast('Welcome to PDF Workbench! Your 7-day free trial has started.');
-        }, 900);
-      } else {
-        err.textContent = 'Incorrect OTP. Please try again.';
-        err.style.display = 'block';
+          showToast('Welcome, ' + (localUser.name || userCred.user.email) + '!');
+        }, 500);
+      }catch(err){
+        console.error('Firebase Email Auth error:', err);
+        showErr(formatFirebaseError(err));
+      }finally{
+        emailSubmitBtn.disabled = false;
+        emailSubmitBtn.textContent = isSignUpMode ? 'Create Account & Start Trial →' : 'Sign In with Email →';
+      }
+    }
+
+    emailSubmitBtn.addEventListener('click', handleEmailAuth);
+    passInput.addEventListener('keydown', e => { if(e.key === 'Enter') handleEmailAuth(); });
+    document.getElementById('emailAddrInput').addEventListener('keydown', e => { if(e.key === 'Enter') handleEmailAuth(); });
+
+    // Phone / OTP / SMS Submit handler
+    const sendOtpBtn = document.getElementById('sendOtpBtn');
+    sendOtpBtn.addEventListener('click', async () => {
+      clearMsgs();
+      const rawMobile = (document.getElementById('mobileInput').value || '').trim().replace(/\s+/g, '');
+      const code      = document.getElementById('countryCode').value;
+      if(rawMobile.length < 7){
+        showErr('Please enter a valid mobile number.');
+        return;
+      }
+      const fullMobile = rawMobile.startsWith('+') ? rawMobile : (code + rawMobile);
+
+      if(!fbAuth){
+        showErr('Firebase Auth SDK not loaded.');
+        return;
+      }
+
+      sendOtpBtn.disabled = true;
+      sendOtpBtn.textContent = 'Sending SMS OTP…';
+
+      try{
+        if(!fbRecaptchaVerifier){
+          fbRecaptchaVerifier = new firebase.auth.RecaptchaVerifier('firebase-recaptcha-container', {
+            size: 'invisible'
+          });
+        }
+        fbConfirmationResult = await fbAuth.signInWithPhoneNumber(fullMobile, fbRecaptchaVerifier);
+        openOTPModal(fullMobile, featureName, afterLoginCallback);
+      }catch(err){
+        console.error('Firebase Phone Auth error:', err);
+        clearRecaptcha();
+        showErr(formatFirebaseError(err));
+      }finally{
+        if(document.getElementById('sendOtpBtn')){
+          sendOtpBtn.disabled = false;
+          sendOtpBtn.textContent = 'Send SMS OTP →';
+        }
       }
     });
-    document.getElementById('otpInput').addEventListener('keydown', e=>{ if(e.key==='Enter') document.getElementById('verifyOtpBtn').click(); });
+
+    document.getElementById('mobileInput').addEventListener('keydown', e => {
+      if(e.key === 'Enter') sendOtpBtn.click();
+    });
+  });
+}
+
+// ── Step 2 — Firebase SMS OTP verification ───────────────────────────
+function openOTPModal(mobile, featureName, afterLoginCallback){
+  showAuthModal(`
+    <div class="auth-logo"><span>📄</span><div><span>PDF Workbench</span><sub>SMS OTP Verification</sub></div></div>
+    <h3 class="auth-title">Enter 6-Digit SMS OTP</h3>
+    <p class="auth-sub">We sent a 6-digit verification code via Firebase SMS to <strong>${escapeHtml(mobile)}</strong>.</p>
+    <div class="auth-error" id="otpErr"></div>
+    <div class="auth-success" id="otpSuccess"></div>
+    <div class="auth-field">
+      <label>6-digit OTP</label>
+      <input type="text" inputmode="numeric" id="otpInput" placeholder="123456" maxlength="6"
+        style="font-family:'JetBrains Mono',monospace;font-size:22px;letter-spacing:.2em;text-align:center;padding:12px;">
+    </div>
+    <button class="auth-btn primary" id="verifyOtpBtn">Verify OTP &amp; Continue →</button>
+    <div class="auth-switch">Wrong number or didn't receive SMS? <a onclick="window._auth.openLoginModal('${escapeHtml(featureName||'')}', null, 'phone')">Go back</a></div>
+  `, () => {
+    const otpInp = document.getElementById('otpInput');
+    const verifyBtn = document.getElementById('verifyOtpBtn');
+    otpInp.focus();
+
+    verifyBtn.addEventListener('click', async () => {
+      const entered = (otpInp.value || '').trim();
+      const err = document.getElementById('otpErr');
+      const suc = document.getElementById('otpSuccess');
+      err.style.display = 'none';
+      if(entered.length < 6){
+        err.textContent = 'Please enter the 6-digit OTP code.';
+        err.style.display = 'block';
+        return;
+      }
+
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = 'Verifying OTP…';
+
+      try{
+        let fbUser = null;
+        if(fbConfirmationResult){
+          const result = await fbConfirmationResult.confirm(entered);
+          fbUser = result.user;
+        } else if(verifyOTP(mobile, entered)){
+          fbUser = { uid: 'local_' + Date.now(), phoneNumber: mobile };
+        } else {
+          throw { code: 'auth/invalid-verification-code' };
+        }
+
+        const localUser = syncFirebaseUserToLocal(fbUser);
+        suc.textContent = '✓ Phone number verified! Signing you in…';
+        suc.style.display = 'block';
+
+        setTimeout(() => {
+          updateAccountButton();
+          updateLicenseBanner();
+          closeAuthModal();
+          if(!localUser.name) setTimeout(() => openProfilePrompt(), 700);
+          if(afterLoginCallback) afterLoginCallback();
+          showToast('Welcome to PDF Workbench! Signed in via Mobile OTP.');
+        }, 600);
+      }catch(e){
+        console.error('OTP confirm error:', e);
+        err.textContent = formatFirebaseError(e);
+        err.style.display = 'block';
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = 'Verify OTP & Continue →';
+      }
+    });
+
+    otpInp.addEventListener('keydown', e => { if(e.key === 'Enter') verifyBtn.click(); });
   });
 }
 
@@ -4828,36 +5639,39 @@ function openOTPModal(mobile, featureName, afterLoginCallback){
 function openProfilePrompt(){
   if(!isLoggedIn()) return;
   const user = getUser();
-  if(user.name) return; // already filled
+  if(!user || user.name) return;
   showAuthModal(`
     <h3 class="auth-title">One quick thing 👋</h3>
     <p class="auth-sub">Help us personalise your experience. You can skip this — it takes 20 seconds.</p>
     <div class="auth-field">
       <label>Your name</label>
-      <input type="text" id="profileName" placeholder="Pradeep Parmar" value="${user.name||''}">
+      <input type="text" id="profileName" placeholder="Pradeep Parmar" value="${escapeHtml(user.name||'')}">
     </div>
     <div class="auth-field">
       <label>Profession</label>
       <div style="display:flex;flex-wrap:wrap;gap:6px;" id="profBtns">
         ${['CA','Lawyer','Finance','Banker','Trader','Business','Student','Other'].map(p=>
-          `<button onclick="window._auth.selectProf(this,'${p}')" style="padding:6px 12px;border:1.5px solid var(--kraft-line);border-radius:20px;background:#fff;font-size:12px;cursor:pointer;">${p}</button>`
+          `<button type="button" onclick="window._auth.selectProf(this,'${p}')" style="padding:6px 12px;border:1.5px solid var(--kraft-line);border-radius:20px;background:#fff;font-size:12px;cursor:pointer;">${p}</button>`
         ).join('')}
       </div>
-      <input type="hidden" id="profileProf" value="${user.profession||''}">
+      <input type="hidden" id="profileProf" value="${escapeHtml(user.profession||'')}">
     </div>
     <div class="auth-field">
       <label>Company / Firm (optional)</label>
-      <input type="text" id="profileCompany" placeholder="e.g. Parmar & Associates" value="${user.company||''}">
+      <input type="text" id="profileCompany" placeholder="e.g. Parmar & Associates" value="${escapeHtml(user.company||'')}">
     </div>
-    <button class="auth-btn primary" id="saveProfileBtn">Save & continue</button>
+    <button class="auth-btn primary" id="saveProfileBtn">Save &amp; continue</button>
     <div class="auth-switch"><a onclick="window._auth.closeAuthModal()">Skip for now</a></div>
   `, () => {
-    document.getElementById('saveProfileBtn').addEventListener('click', ()=>{
-      const u = getUser();
-      u.name      = document.getElementById('profileName').value.trim();
-      u.profession= document.getElementById('profileProf').value;
-      u.company   = document.getElementById('profileCompany').value.trim();
-      saveUser(u); // 🔥 FIREBASE: firestore.collection('users').doc(uid).update({name, profession, company})
+    document.getElementById('saveProfileBtn').addEventListener('click', async ()=>{
+      const u = getUser() || {};
+      u.name       = document.getElementById('profileName').value.trim();
+      u.profession = document.getElementById('profileProf').value;
+      u.company    = document.getElementById('profileCompany').value.trim();
+      saveUser(u);
+      if(fbAuth && fbAuth.currentUser && u.name){
+        try{ await fbAuth.currentUser.updateProfile({ displayName: u.name }); }catch(e){}
+      }
       closeAuthModal();
       updateAccountButton();
       showToast('Profile saved!');
@@ -4874,7 +5688,7 @@ function selectProf(btn, prof){
 // ── Account modal — status, plan, device, renewal ────────────────────
 function openAccountModal(){
   if(!isLoggedIn()){ openLoginModal(); return; }
-  const user   = getUser();
+  const user   = getUser() || {};
   const status = getSubscriptionStatus();
   const now    = Date.now();
 
@@ -4919,9 +5733,24 @@ function openAccountModal(){
       </div>`;
   }
 
+  const identityLabel = user.email || user.mobile || user.name || 'My Account';
+  const currentPersonalPath = (typeof window._getUserPersonalDrivePath === 'function') ? window._getUserPersonalDrivePath() : (user.drivePath || '');
+
   showAuthModal(`
-    <div class="auth-logo"><span>📄</span><div><span>PDF Workbench</span><sub>${user.name||user.mobile||'My Account'}</sub></div></div>
+    <div class="auth-logo"><span>📄</span><div><span>PDF Workbench</span><sub>${escapeHtml(user.name || identityLabel)}</sub></div></div>
     ${statusHTML}
+
+    <!-- Personal Google Drive Storage Path (Per-Login) -->
+    <div style="background:#F0F7F7;border:1.5px solid var(--teal);border-radius:9px;padding:10px 12px;margin-bottom:14px;">
+      <div style="font-size:12px;font-weight:700;color:var(--teal-deep);margin-bottom:4px;">📁 My Google Drive Path (Saved for this Login)</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <input id="acctDrivePathInput" type="text" value="${escapeHtml(currentPersonalPath)}" placeholder="Paste Drive Folder URL or folder name (e.g. My Scans)"
+          style="flex:1;min-width:170px;padding:8px 10px;border:1px solid var(--kraft-line);border-radius:7px;font-size:12.5px;background:#fff;color:var(--ink);box-sizing:border-box;">
+        <button type="button" class="auth-btn primary" style="width:auto;padding:8px 12px;margin:0;font-size:12px;white-space:nowrap;" id="acctSaveDrivePathBtn">☁️ Save Path</button>
+      </div>
+      <div id="acctDrivePathMsg" style="font-size:11px;color:var(--ink-soft);margin-top:4px;">Stored individually for <strong>${escapeHtml(identityLabel)}</strong> across mobile &amp; desktop.</div>
+    </div>
+
     ${!['active'].includes(status.state) ? `
     <div class="plan-grid">
       ${Object.entries(PLAN_LABELS).map(([k,v])=>`
@@ -4954,17 +5783,34 @@ function openAccountModal(){
     </div>
     `}
     <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--kraft-line);padding-top:10px;margin-top:4px;">
-      <div style="font-size:11.5px;color:var(--ink-soft);">📱 ${user.mobile||'—'} &nbsp;·&nbsp; ${user.profession||'Professional'}</div>
+      <div style="font-size:11.5px;color:var(--ink-soft);">${user.email ? '📧 '+escapeHtml(user.email) : ('📱 '+escapeHtml(user.mobile||'—'))} &nbsp;·&nbsp; ${escapeHtml(user.profession||'Professional')}</div>
       <button onclick="window._auth.logout()" style="background:transparent;border:none;color:var(--red);font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline;">Sign out</button>
     </div>
   `, () => {
+    const acctSavePathBtn = document.getElementById('acctSaveDrivePathBtn');
+    if(acctSavePathBtn){
+      acctSavePathBtn.addEventListener('click', async () => {
+        const val = (document.getElementById('acctDrivePathInput').value || '').trim();
+        const msgEl = document.getElementById('acctDrivePathMsg');
+        acctSavePathBtn.disabled = true;
+        acctSavePathBtn.textContent = '⏳ Saving…';
+        if(typeof window._saveUserPersonalDrivePath === 'function'){
+          await window._saveUserPersonalDrivePath(val, true);
+        }
+        if(msgEl){
+          msgEl.innerHTML = `<span style="color:#1E6F3D;font-weight:700;">✓ Personal Google Drive Path saved for ${escapeHtml(identityLabel)}!</span>`;
+        }
+        acctSavePathBtn.disabled = false;
+        acctSavePathBtn.textContent = '☁️ Save Path';
+      });
+    }
+
     const activateBtn = document.getElementById('acctActivateBtn');
     if(activateBtn){
       activateBtn.addEventListener('click', ()=>{
         const val  = (document.getElementById('acctKeyInput').value||'').trim();
         const err  = document.getElementById('acctKeyErr');
         const ok   = document.getElementById('acctKeyOk');
-        // 🔥 FIREBASE: validate key against Firestore, update subscription
         const engine = window._licenseEngine;
         if(!engine){ showToast('Key system loading…'); return; }
         const info = engine.parseKey(val);
@@ -4992,11 +5838,11 @@ function openAccountModal(){
   });
 }
 
-// ── Upgrade prompt (shown when premium feature clicked, user logged in but expired) ──
+// ── Upgrade prompt ───────────────────────────────────────────────────
 function openUpgradeModal(featureName){
   showAuthModal(`
     <h3 class="auth-title">Upgrade to continue</h3>
-    <p class="auth-sub">Your trial has ended. Purchase a plan to use <strong>${featureName||'premium features'}</strong> without watermarks.</p>
+    <p class="auth-sub">Your trial has ended. Purchase a plan to use <strong>${escapeHtml(featureName||'premium features')}</strong> without watermarks.</p>
     <div class="plan-grid">
       ${Object.entries(PLAN_LABELS).map(([k,v])=>`
         <a href="${PLAN_URLS[k]}" target="_blank" class="plan-card ${k==='1Y'?'featured':''}">
@@ -5024,7 +5870,7 @@ function openKeyEntryModal(){
         style="font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:.06em;">
     </div>
     <button class="auth-btn primary" id="keyEntrySubmit">Activate</button>
-    <div class="auth-switch">Don't have a key? <a onclick="window._auth.openLoginModal()">Sign up free</a></div>
+    <div class="auth-switch">Don't have a key? <a onclick="window._auth.openLoginModal()">Sign in / Sign up</a></div>
   `, () => {
     document.getElementById('keyEntryInput').focus();
     document.getElementById('keyEntrySubmit').addEventListener('click', ()=>{
@@ -5034,7 +5880,6 @@ function openKeyEntryModal(){
       const engine = window._licenseEngine;
       const info = engine ? engine.parseKey(val) : null;
       if(info && info.isActive){
-        // Ensure user account exists
         if(!getUser()){
           saveUser({ uid:'key_'+Date.now(), mobile:'', name:'', trialStart:Date.now(), created:Date.now() });
         }
@@ -5054,13 +5899,17 @@ function openKeyEntryModal(){
 }
 
 // ── Logout ───────────────────────────────────────────────────────────
-function logout(){
-  // 🔥 FIREBASE: firebase.auth().signOut()
+async function logout(){
+  if(fbAuth){
+    try{ await fbAuth.signOut(); }catch(e){}
+  }
   clearSession();
   closeAuthModal();
   updateAccountButton();
   updateLicenseBanner();
+  if(typeof window._syncDrivePathDefault === 'function') window._syncDrivePathDefault();
   showToast('Signed out.');
+  openLoginModal();
 }
 
 // ── Account button updater ────────────────────────────────────────────
@@ -5069,21 +5918,21 @@ function updateAccountButton(){
   const badge  = document.getElementById('licenseBadge');
   if(!btn) return;
   if(!isLoggedIn()){
-    btn.textContent = 'Sign in';
+    btn.textContent = '🔐 Sign in';
     btn.className   = 'outline';
-    btn.setAttribute('style','font-size:12px;font-weight:600;background:transparent;border:1.5px solid var(--teal);color:var(--teal-deep);border-radius:20px;padding:5px 12px;cursor:pointer;white-space:nowrap;');
+    btn.setAttribute('style','font-size:12px;font-weight:700;background:transparent;border:1.5px solid var(--teal);color:var(--teal-deep);border-radius:20px;padding:5px 12px;cursor:pointer;white-space:nowrap;');
     if(badge) badge.textContent = '';
     return;
   }
-  const user   = getUser();
+  const user   = getUser() || {};
   const status = getSubscriptionStatus();
-  const name   = user.name ? user.name.split(' ')[0] : user.mobile ? user.mobile.slice(-4) : 'Account';
+  const name   = user.name ? user.name.split(' ')[0] : (user.email ? user.email.split('@')[0] : (user.mobile ? user.mobile.slice(-4) : 'Account'));
   if(status.state === 'active'){
     btn.textContent = '✓ '+name;
     btn.setAttribute('style','font-size:12px;font-weight:600;background:var(--teal);color:#fff;border:1.5px solid var(--teal-deep);border-radius:20px;padding:5px 12px;cursor:pointer;white-space:nowrap;');
     if(badge) badge.textContent = PLAN_LABELS[status.plan]+' — '+status.daysLeft+'d left';
   } else if(status.state === 'trial'){
-    btn.textContent = '⏳ '+name+' (Trial)';
+    btn.textContent = '👤 '+name+' (Trial)';
     btn.setAttribute('style','font-size:12px;font-weight:600;background:#FBF3E2;border:1.5px solid #E5CE9B;color:#6B5526;border-radius:20px;padding:5px 12px;cursor:pointer;white-space:nowrap;');
     if(badge) badge.textContent = 'Trial: '+status.daysLeft+'d left';
   } else {
@@ -5093,9 +5942,7 @@ function updateAccountButton(){
   }
 }
 
-// ── Premium gate — called before every premium action ────────────────
-// ── Pricing modal — shown before login when a premium gate triggers ───
-// Sequence: premium action → pricing screen → login → action executes
+// ── Pricing modal ────────────────────────────────────────────────────
 function openPricingModal(featureName, afterLoginCallback){
   const existing = document.getElementById('pricingBackdrop');
   if(existing) existing.remove();
@@ -5139,7 +5986,7 @@ function openPricingModal(featureName, afterLoginCallback){
       <button class="pricing-close" id="pricingClose">✕</button>
       <div class="pricing-header">
         <div class="pp-offer">🎉 50% Introductory offer — limited time</div><br>
-        ${featureName ? `<div class="pricing-feature-pill">Unlocking: ${featureName}</div>` : ''}
+        ${featureName ? `<div class="pricing-feature-pill">Unlocking: ${escapeHtml(featureName)}</div>` : ''}
         <h2>Choose your PDF Workbench plan</h2>
         <p>All features · Unlimited use · 7-day free trial starts after sign up · No card needed today</p>
       </div>
@@ -5154,19 +6001,14 @@ function openPricingModal(featureName, afterLoginCallback){
 
   document.body.appendChild(backdrop);
 
-  // Close
   backdrop.querySelector('#pricingClose').addEventListener('click', ()=>backdrop.remove());
   backdrop.addEventListener('click', e=>{ if(e.target===backdrop) backdrop.remove(); });
 
-  // Plan CTA buttons — open login then redirect to Gumroad after login
   backdrop.querySelectorAll('.pp-cta').forEach(btn => {
     btn.addEventListener('click', () => {
       const planKey = btn.dataset.plan;
       const gumUrl  = btn.dataset.url;
       backdrop.remove();
-      // Open login with an afterLogin callback that:
-      // 1. Executes the premium action (download/export)
-      // 2. Opens Gumroad in a new tab to complete payment
       openLoginModal(featureName, () => {
         if(afterLoginCallback) afterLoginCallback();
         setTimeout(() => {
@@ -5177,19 +6019,16 @@ function openPricingModal(featureName, afterLoginCallback){
     });
   });
 
-  // Already have account
   backdrop.querySelector('#pricingSignIn').addEventListener('click', () => {
     backdrop.remove();
     openLoginModal(featureName, afterLoginCallback);
   });
 
-  // Have a key
   backdrop.querySelector('#pricingHaveKey').addEventListener('click', () => {
     backdrop.remove();
     openKeyEntryModal();
   });
 
-  // Skip — allow free use (vanilla actions only)
   backdrop.querySelector('#pricingSkip').addEventListener('click', () => {
     backdrop.remove();
     if(afterLoginCallback) afterLoginCallback();
@@ -5198,8 +6037,7 @@ function openPricingModal(featureName, afterLoginCallback){
 
 function premiumGate(featureName, callback){
   if(!isLoggedIn()){
-    // Not logged in — show pricing first, then login
-    openPricingModal(featureName, callback);
+    openLoginModal(featureName, callback);
     return false;
   }
   const status = getSubscriptionStatus();
@@ -5207,7 +6045,6 @@ function premiumGate(featureName, callback){
     callback();
     return true;
   }
-  // Logged in but trial/license expired — show upgrade pricing
   openPricingModal(featureName, callback);
   return false;
 }
@@ -5241,20 +6078,45 @@ function updateLicenseBanner(){
     action.innerHTML = '<span onclick="window._auth.openAccountModal()" style="color:#fff;text-decoration:underline;cursor:pointer;margin-left:10px;">Upgrade now →</span>';
     return;
   }
-  // expired
   banner.setAttribute('style','display:block;padding:7px 16px;text-align:center;font-size:12.5px;font-weight:600;color:#fff;position:sticky;top:0;z-index:40;background:#BD3B22;');
   msg.textContent = '⚠️ Trial ended — upgrade to continue with full access.';
   action.innerHTML = '<span onclick="window._auth.openAccountModal()" style="color:#fff;text-decoration:underline;cursor:pointer;margin-left:10px;">Buy license →</span>';
 }
 
-// ── Initialise on load ────────────────────────────────────────────────
-updateAccountButton();
-updateLicenseBanner();
+// ── Listen to Firebase Auth State & Open Login Screen if Guest ───────
+let initialAuthChecked = false;
+if(fbAuth){
+  fbAuth.onAuthStateChanged(fbUser => {
+    if(fbUser){
+      syncFirebaseUserToLocal(fbUser);
+      const splash = document.getElementById('welcomeSplash');
+      if(splash) splash.style.display = 'none';
+    }
+    updateAccountButton();
+    updateLicenseBanner();
+    if(!initialAuthChecked){
+      initialAuthChecked = true;
+      if(!fbUser && !isLoggedIn()){
+        const splash = document.getElementById('welcomeSplash');
+        if(splash) splash.style.display = 'none';
+        openLoginModal();
+      }
+    }
+  });
+} else {
+  updateAccountButton();
+  updateLicenseBanner();
+  if(!isLoggedIn()){
+    const splash = document.getElementById('welcomeSplash');
+    if(splash) splash.style.display = 'none';
+    openLoginModal();
+  }
+}
 
 // Expose public API
 window._auth = {
   openLoginModal, openOTPModal, openAccountModal, openUpgradeModal,
-  openKeyEntryModal, openProfilePrompt, closeAuthModal,
+  openKeyEntryModal, openProfilePrompt, openPricingModal, closeAuthModal,
   selectProf, logout, premiumGate, isPremiumAllowed,
   getSubscriptionStatus, isLoggedIn, updateAccountButton, updateLicenseBanner
 };
@@ -5946,8 +6808,27 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
     );
   });
 
-  // ── Interactive Crop Overlay ──────────────────────────────────────
+  // ── Interactive Crop Overlay (8-Point + 4-Edge) ───────────────────
+  function ensureEightCropHandles(){
+    if(scanCropOverlay.querySelectorAll('.scan-crop-handle').length === 8) return;
+    scanCropOverlay.innerHTML = `
+      <div class="scan-crop-edge edge-n" data-corner="n"></div>
+      <div class="scan-crop-edge edge-s" data-corner="s"></div>
+      <div class="scan-crop-edge edge-w" data-corner="w"></div>
+      <div class="scan-crop-edge edge-e" data-corner="e"></div>
+      <div class="scan-crop-handle nw" data-corner="nw" style="left:0%;top:0%;"></div>
+      <div class="scan-crop-handle n"  data-corner="n"  style="left:50%;top:0%;"></div>
+      <div class="scan-crop-handle ne" data-corner="ne" style="left:100%;top:0%;"></div>
+      <div class="scan-crop-handle e"  data-corner="e"  style="left:100%;top:50%;"></div>
+      <div class="scan-crop-handle se" data-corner="se" style="left:100%;top:100%;"></div>
+      <div class="scan-crop-handle s"  data-corner="s"  style="left:50%;top:100%;"></div>
+      <div class="scan-crop-handle sw" data-corner="sw" style="left:0%;top:100%;"></div>
+      <div class="scan-crop-handle w"  data-corner="w"  style="left:0%;top:50%;"></div>
+    `;
+  }
+
   function updateCropOverlayDOM(){
+    ensureEightCropHandles();
     scanCropOverlay.style.left   = (tempCrop.x * 100) + '%';
     scanCropOverlay.style.top    = (tempCrop.y * 100) + '%';
     scanCropOverlay.style.width  = (tempCrop.w * 100) + '%';
@@ -6148,7 +7029,7 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
       showToast('Failed to build PDF: ' + err.message);
     }finally{
       scanSavePdfBtn.disabled = false;
-      scanSavePdfBtn.textContent = '💾 Save & Download PDF';
+      scanSavePdfBtn.textContent = '💾 Save to Device';
     }
   });
 
@@ -6172,6 +7053,355 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
       scanSendToWbBtn.textContent = '➕ Send to Workbench';
     }
   });
+
+  // 3. Save Combined PDF Directly to Google Drive & Per-Login Personal Path Sync
+  const scanDrivePathTopInput = document.getElementById('scanDrivePathTopInput');
+  const scanSavePathTopBtn    = document.getElementById('scanSavePathTopBtn');
+  const scanDriveUserBadge    = document.getElementById('scanDriveUserBadge');
+  const scanDriveTopStatus    = document.getElementById('scanDriveTopStatus');
+  const scanDrivePathInput    = document.getElementById('scanDrivePathInput');
+  const scanSavePathCloudBtn  = document.getElementById('scanSavePathCloudBtn');
+  const scanSaveDriveBtn      = document.getElementById('scanSaveDriveBtn');
+  const scanDriveStatus       = document.getElementById('scanDriveStatus');
+  const USER_DRIVE_PATH_PREFIX = 'pdfwb_user_drive_path::';
+  const CLOUD_USER_PATHS_CACHE = 'pdfwb_cloud_user_paths_cache';
+
+  function getActiveScriptUrl(){
+    return ((adminConfig && adminConfig.googleScriptUrl) || DEFAULT_GOOGLE_SCRIPT_URL || '').trim();
+  }
+
+  function getCurrentUserIdentity(){
+    const u = getUser();
+    if(!u) return { key: '', label: '' };
+    const label = (u.email || u.mobile || u.name || u.uid || '').trim();
+    const key   = getUserStorageKey(u);
+    return { key, label, user: u };
+  }
+
+  function getCloudCachedUserPath(userKey){
+    if(!userKey) return '';
+    try{
+      const map = JSON.parse(localStorage.getItem(CLOUD_USER_PATHS_CACHE) || '{}');
+      return map['userDrivePath_' + userKey] || (map.userPaths && map.userPaths[userKey]) || '';
+    }catch(e){ return ''; }
+  }
+
+  function getUserPersonalDrivePath(){
+    const { key, user } = getCurrentUserIdentity();
+    if(!key){
+      return '';
+    }
+    // 1. Check per-user localStorage
+    try{
+      const localVal = localStorage.getItem(USER_DRIVE_PATH_PREFIX + key);
+      if(localVal !== null && localVal.trim() !== '') return localVal.trim();
+    }catch(e){}
+    // 2. Check Firebase Auth user profile (photoURL encoded path)
+    if(fbAuth && fbAuth.currentUser){
+      const fromFb = decodeDrivePathFromFirebaseProfile(fbAuth.currentUser.photoURL || '');
+      if(fromFb) return fromFb;
+    }
+    if(user && user.drivePath) return user.drivePath;
+    // 3. Check Cloud Settings per-user map
+    const fromCloud = getCloudCachedUserPath(key);
+    if(fromCloud) return fromCloud;
+    return '';
+  }
+  window._getUserPersonalDrivePath = getUserPersonalDrivePath;
+
+  function setBothDriveInputs(val){
+    if(scanDrivePathTopInput && scanDrivePathTopInput.value !== val) scanDrivePathTopInput.value = val;
+    if(scanDrivePathInput && scanDrivePathInput.value !== val) scanDrivePathInput.value = val;
+  }
+
+  function syncDrivePathDefault(){
+    const { key, label } = getCurrentUserIdentity();
+    const personalPath = getUserPersonalDrivePath();
+    setBothDriveInputs(personalPath);
+
+    if(scanDriveUserBadge){
+      if(key){
+        scanDriveUserBadge.textContent = '👤 ' + label;
+        scanDriveUserBadge.style.background = '#E6F4F4';
+      } else {
+        scanDriveUserBadge.textContent = '🔐 Sign in to save personal path';
+        scanDriveUserBadge.style.background = '#fff';
+      }
+    }
+    if(scanDriveTopStatus){
+      if(key && personalPath){
+        scanDriveTopStatus.innerHTML = `<span style="color:#1E6F3D;font-weight:700;">✓ Active personal Google Drive path for ${escapeHtml(label)}</span>`;
+      } else if(key){
+        scanDriveTopStatus.innerHTML = `Signed in as <strong>${escapeHtml(label)}</strong> — paste your personal Google Drive Folder URL or folder name above and tap <strong>☁️ Save My Path</strong>.`;
+      } else {
+        scanDriveTopStatus.innerHTML = `<span style="cursor:pointer;color:var(--teal-deep);text-decoration:underline;font-weight:600;" onclick="window._auth.openLoginModal()">Sign in with your Email or Mobile OTP</span> so your Google Drive path is saved individually to your login.`;
+      }
+    }
+  }
+  window._syncDrivePathDefault = syncDrivePathDefault;
+  syncDrivePathDefault();
+
+  // Save settings/path into Google Drive 'Settings/app-settings.json'
+  async function saveSettingsToCloudDrive(settingsPatch, showFeedback){
+    const scriptUrl = getActiveScriptUrl();
+    if(!scriptUrl || !scriptUrl.includes('script.google.com/macros/s/')) return false;
+    const payloadStr = JSON.stringify({
+      requestId: 'cfg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+      action: 'saveSettings',
+      settings: settingsPatch
+    });
+    try{
+      const res = await fetch(scriptUrl, { method: 'POST', redirect: 'follow', body: payloadStr });
+      const data = await res.json();
+      if(data && data.status === 'ok' && data.settings){
+        try{ localStorage.setItem(CLOUD_USER_PATHS_CACHE, JSON.stringify(data.settings)); }catch(e){}
+        if(showFeedback && scanDriveStatus){
+          const sLink = data.settings.settingsFolderUrl ? `<a href="${escapeHtml(data.settings.settingsFolderUrl)}" target="_blank" rel="noopener" style="color:var(--teal-deep);text-decoration:underline;margin-left:6px;">Open Cloud Settings Folder ↗</a>` : '';
+          scanDriveStatus.innerHTML = `<span style="color:#1E6F3D;font-weight:700;">✓ Personal Google Drive Path synced for your login across all devices!</span> ${sLink}`;
+        }
+        return true;
+      }
+    }catch(e){
+      try{
+        await fetch(scriptUrl, { method: 'POST', mode: 'no-cors', body: payloadStr });
+        if(showFeedback && scanDriveStatus){
+          scanDriveStatus.innerHTML = `<span style="color:#1E6F3D;font-weight:700;">✓ Personal Google Drive Path saved for your login across all devices!</span>`;
+        }
+        return true;
+      }catch(e2){}
+    }
+    return false;
+  }
+  window._saveSettingsToCloudDrive = saveSettingsToCloudDrive;
+
+  // Save the current logged-in user's personal Google Drive path to:
+  // 1) Per-user localStorage  2) Firebase Auth User Profile  3) Cloud Settings Folder per-user key
+  async function saveUserPersonalDrivePath(rawPath, showFeedback){
+    const newPath = (rawPath || '').trim();
+    const { key, label, user } = getCurrentUserIdentity();
+    if(!key){
+      showToast('Please sign in first to save your personal Google Drive path.');
+      openLoginModal('Save Personal Google Drive Path');
+      return false;
+    }
+
+    setBothDriveInputs(newPath);
+    try{ localStorage.setItem(USER_DRIVE_PATH_PREFIX + key, newPath); }catch(e){}
+
+    if(user){
+      user.drivePath = newPath;
+      saveUser(user);
+    }
+
+    // Save to Firebase Auth user profile so logging in on any mobile/desktop device restores it automatically
+    if(fbAuth && fbAuth.currentUser && fbAuth.currentUser.updateProfile){
+      try{
+        await fbAuth.currentUser.updateProfile({
+          photoURL: encodeDrivePathForFirebaseProfile(newPath)
+        });
+      }catch(fbErr){
+        console.warn('Could not update Firebase profile photoURL:', fbErr);
+      }
+    }
+
+    // Also save per-user key in Cloud Settings Folder (Settings/app-settings.json)
+    const patch = {};
+    patch['userDrivePath_' + key] = newPath;
+    try{
+      const cached = JSON.parse(localStorage.getItem(CLOUD_USER_PATHS_CACHE) || '{}');
+      cached['userDrivePath_' + key] = newPath;
+      localStorage.setItem(CLOUD_USER_PATHS_CACHE, JSON.stringify(cached));
+    }catch(e){}
+
+    await saveSettingsToCloudDrive(patch, showFeedback);
+
+    if(scanDriveTopStatus){
+      scanDriveTopStatus.innerHTML = `<span style="color:#1E6F3D;font-weight:700;">✓ Saved personal Google Drive path for ${escapeHtml(label)}!</span>`;
+    }
+    if(showFeedback){
+      showToast('Saved Google Drive Path for ' + label + '!');
+    }
+    return true;
+  }
+  window._saveUserPersonalDrivePath = saveUserPersonalDrivePath;
+
+  // Automatically load Admin Settings & per-user Drive Path from Google Drive 'Settings/app-settings.json'
+  async function loadSettingsFromCloudDrive(){
+    const scriptUrl = getActiveScriptUrl();
+    if(!scriptUrl || !scriptUrl.includes('script.google.com/macros/s/')) return;
+    try{
+      const res = await fetch(scriptUrl + '?action=getSettings&t=' + Date.now(), { method: 'GET', redirect: 'follow' });
+      const data = await res.json();
+      if(data && data.status === 'ok' && data.settings){
+        const s = data.settings;
+        try{ localStorage.setItem(CLOUD_USER_PATHS_CACHE, JSON.stringify(s)); }catch(e){}
+        const { key } = getCurrentUserIdentity();
+        if(key && s['userDrivePath_' + key]){
+          try{ localStorage.setItem(USER_DRIVE_PATH_PREFIX + key, s['userDrivePath_' + key]); }catch(e){}
+        }
+        if(s.defaultDrivePath) adminConfig.defaultDrivePath = s.defaultDrivePath;
+        if(s.watermarkMode) adminConfig.watermarkMode = s.watermarkMode;
+        if(s.watermarkDefaultChecked !== undefined) adminConfig.watermarkDefaultChecked = s.watermarkDefaultChecked;
+        if(s.passwordHash) adminConfig.passwordHash = s.passwordHash;
+        saveAdminConfig(adminConfig);
+        applyAdminWatermarkConfig();
+        syncDrivePathDefault();
+      }
+    }catch(e){
+      // Quietly fall back to local/Firebase profile path if offline or CORS restricted
+    }
+  }
+  loadSettingsFromCloudDrive();
+
+  if(scanDrivePathTopInput){
+    scanDrivePathTopInput.addEventListener('input', () => {
+      const val = scanDrivePathTopInput.value;
+      if(scanDrivePathInput) scanDrivePathInput.value = val;
+      const { key } = getCurrentUserIdentity();
+      if(key){
+        try{ localStorage.setItem(USER_DRIVE_PATH_PREFIX + key, val.trim()); }catch(e){}
+      }
+    });
+  }
+
+  if(scanDrivePathInput){
+    scanDrivePathInput.addEventListener('input', () => {
+      const val = scanDrivePathInput.value;
+      if(scanDrivePathTopInput) scanDrivePathTopInput.value = val;
+      const { key } = getCurrentUserIdentity();
+      if(key){
+        try{ localStorage.setItem(USER_DRIVE_PATH_PREFIX + key, val.trim()); }catch(e){}
+      }
+    });
+  }
+
+  async function handleSaveUserPathClick(btnEl){
+    const val = (scanDrivePathTopInput ? scanDrivePathTopInput.value.trim() : '') || (scanDrivePathInput ? scanDrivePathInput.value.trim() : '');
+    if(!val){
+      showToast('Paste your Google Drive Folder URL or type a folder name first.');
+      if(scanDrivePathTopInput) scanDrivePathTopInput.focus();
+      return;
+    }
+    const origText = btnEl.textContent;
+    btnEl.disabled = true;
+    btnEl.textContent = '⏳ Saving…';
+    await saveUserPersonalDrivePath(val, true);
+    btnEl.disabled = false;
+    btnEl.textContent = origText;
+  }
+
+  if(scanSavePathTopBtn){
+    scanSavePathTopBtn.addEventListener('click', () => handleSaveUserPathClick(scanSavePathTopBtn));
+  }
+  if(scanSavePathCloudBtn){
+    scanSavePathCloudBtn.addEventListener('click', () => handleSaveUserPathClick(scanSavePathCloudBtn));
+  }
+
+  function uint8ToBase64(uint8){
+    let binary = '';
+    const chunkSize = 0x8000;
+    for(let i = 0; i < uint8.length; i += chunkSize){
+      binary += String.fromCharCode.apply(null, uint8.subarray(i, i + chunkSize));
+    }
+    return btoa(binary);
+  }
+
+  if(scanSaveDriveBtn){
+    scanSaveDriveBtn.addEventListener('click', async () => {
+      if(scannedDocs.length === 0){ showToast('Scan or upload at least one page first.'); return; }
+      const scriptUrl = ((adminConfig && adminConfig.googleScriptUrl) || DEFAULT_GOOGLE_SCRIPT_URL || '').trim();
+      if(!scriptUrl){
+        showToast('Admin setup required: Configure Google Apps Script URL in ⚙ Admin settings.');
+        if(scanDriveStatus){
+          scanDriveStatus.innerHTML = `<span style="color:var(--rust);font-weight:600;">⚠️ Google Drive script not set by Admin yet.</span> <span style="text-decoration:underline;cursor:pointer;color:var(--teal-deep);font-weight:600;" onclick="document.getElementById('adminBtn').click()">Open ⚙ Admin settings (one-time setup)</span>`;
+        }
+        return;
+      }
+
+      if(scriptUrl.includes('drive.google.com') || !scriptUrl.includes('script.google.com/macros/s/')){
+        showToast('Invalid Admin Script URL — check ⚙ Admin settings.');
+        if(scanDriveStatus){
+          scanDriveStatus.innerHTML = `<span style="color:var(--rust);font-weight:600;">✕ Admin Script URL is not a Web App <code>/exec</code> URL (currently set to <code>${escapeHtml(scriptUrl.slice(0, 48))}…</code>).</span> <span style="text-decoration:underline;cursor:pointer;color:var(--teal-deep);font-weight:600;" onclick="document.getElementById('adminBtn').click()">Fix in ⚙ Admin settings</span>`;
+        }
+        return;
+      }
+
+      const fileName = getCleanScanFileName();
+      const { key, label } = getCurrentUserIdentity();
+      const enteredPath = (scanDrivePathTopInput ? scanDrivePathTopInput.value.trim() : '') || (scanDrivePathInput ? scanDrivePathInput.value.trim() : '');
+      const drivePath = enteredPath || (label ? ('UserScans/' + label) : ((adminConfig && adminConfig.defaultDrivePath) || 'PDF Workbench Scans'));
+      if(key && enteredPath){
+        saveUserPersonalDrivePath(enteredPath, false);
+      }
+
+      scanSaveDriveBtn.disabled = true;
+      scanSaveDriveBtn.textContent = '☁️ Uploading to Drive…';
+      if(scanDriveStatus){
+        scanDriveStatus.innerHTML = `<span style="color:var(--teal-deep);font-weight:600;">⏳ Building "${escapeHtml(fileName)}" (${scannedDocs.length} page${scannedDocs.length===1?'':'s'}) &amp; uploading to Google Drive…</span>`;
+      }
+
+      try{
+        const pdfBytes = await buildScannedPdfBytes();
+        const base64Data = uint8ToBase64(pdfBytes);
+        const requestId = 'req_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+        const payloadStr = JSON.stringify({
+          requestId: requestId,
+          filename: fileName,
+          mimeType: 'application/pdf',
+          base64: base64Data,
+          drivePath: drivePath
+        });
+
+        let result = null;
+        let usedNoCorsFallback = false;
+
+        try{
+          const response = await fetch(scriptUrl, {
+            method: 'POST',
+            redirect: 'follow',
+            body: payloadStr
+          });
+          result = await response.json();
+        }catch(corsErr){
+          // In Chrome with multiple Google accounts signed in, Google's 302 redirect from
+          // script.google.com -> script.googleusercontent.com can block reading the CORS response
+          // even though doPost(e) accepts the request. Fall back to mode: 'no-cors' with the same requestId.
+          await fetch(scriptUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: payloadStr
+          });
+          usedNoCorsFallback = true;
+        }
+
+        if(result && result.status === 'ok'){
+          showToast('Saved "' + fileName + '" to Google Drive!');
+          if(scanDriveStatus){
+            const fileLink = result.fileUrl ? `<a href="${escapeHtml(result.fileUrl)}" target="_blank" rel="noopener" style="color:var(--teal-deep);font-weight:700;text-decoration:underline;margin-left:6px;">Open PDF in Drive ↗</a>` : '';
+            const folderLink = result.folderUrl ? `<a href="${escapeHtml(result.folderUrl)}" target="_blank" rel="noopener" style="color:var(--ink-soft);text-decoration:underline;margin-left:8px;">Open Folder (${escapeHtml(result.folderName || drivePath)}) ↗</a>` : '';
+            scanDriveStatus.innerHTML = `<span style="color:#1E6F3D;font-weight:700;">✓ Saved "${escapeHtml(fileName)}" to Google Drive!</span> ${fileLink} ${folderLink}`;
+          }
+        } else if(usedNoCorsFallback){
+          showToast('Sent "' + fileName + '" to Google Drive!');
+          const openFolderHref = drivePath.startsWith('http') ? drivePath : 'https://drive.google.com/drive/my-drive';
+          if(scanDriveStatus){
+            scanDriveStatus.innerHTML = `<span style="color:#1E6F3D;font-weight:700;">✓ Sent "${escapeHtml(fileName)}" to Google Drive!</span> <a href="${escapeHtml(openFolderHref)}" target="_blank" rel="noopener" style="color:var(--teal-deep);font-weight:700;text-decoration:underline;margin-left:8px;">Open Google Drive Folder ↗</a> <span style="font-size:11px;color:var(--ink-soft);margin-left:6px;">(If file doesn't appear in folder, make sure you copied the Fixed Script &amp; ran <code>authorizeDriveAccess</code> once in ⚙ Admin settings)</span>`;
+          }
+        } else {
+          throw new Error((result && result.message) ? result.message : 'Google Script returned an unexpected response.');
+        }
+      }catch(err){
+        console.error(err);
+        showToast('Google Drive upload failed: ' + err.message);
+        if(scanDriveStatus){
+          scanDriveStatus.innerHTML = `<span style="color:var(--rust);font-weight:600;">✕ Upload failed: ${escapeHtml(err.message)}</span> — <span style="text-decoration:underline;cursor:pointer;color:var(--teal-deep);font-weight:600;" onclick="document.getElementById('adminBtn').click()">Check ⚙ Admin settings</span>`;
+        }
+      }finally{
+        scanSaveDriveBtn.disabled = false;
+        scanSaveDriveBtn.textContent = '☁️ Save to Google Drive';
+      }
+    });
+  }
 
   // ── Pre-populate a sample scanned document so the full editor (Size, Light/Dark,
   //    Remove Blur, File Name & Save) is immediately visible & testable on page load ──
