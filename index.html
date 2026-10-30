@@ -34,6 +34,10 @@
     --radius:10px;
   }
   *{box-sizing:border-box;}
+  html,body{
+    max-width:100%;
+    overflow-x:hidden;
+  }
   body{
     margin:0;
     background:var(--paper);
@@ -44,7 +48,10 @@
     font-family:'Inter',sans-serif;
     min-height:100vh;
   }
-  .wrap{max-width:1180px;margin:0 auto;padding:0 22px 60px;}
+  .wrap{max-width:1180px;width:100%;margin:0 auto;padding:0 22px 60px;}
+  @media (max-width:680px){
+    .wrap{padding:0 10px 44px;}
+  }
 
   /* ---------- License gate & trial banner ---------- */
   #trialBanner{
@@ -55,28 +62,74 @@
   }
   #trialBanner a{color:#fff;text-decoration:underline;}
 
-  /* ---------- Header / folder tab ---------- */
-  header{padding:34px 0 0;}
-  .tab{
-    display:inline-block;
-    background:var(--paper-deep);
-    border:1px solid var(--kraft-line);
-    border-bottom:none;
-    border-radius:8px 8px 0 0;
-    padding:7px 18px 22px;
+  /* ---------- Header / Top Mode Switcher Tabs ---------- */
+  header{padding:24px 0 0;}
+  .mode-tabs-bar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    align-items:flex-end;
     margin-bottom:-1px;
-    font-family:'JetBrains Mono',monospace;
-    font-size:12px;
-    letter-spacing:.08em;
-    text-transform:uppercase;
+    position:relative;
+    z-index:2;
+  }
+  .mode-tab-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    background:var(--paper-deep);
+    border:1.5px solid var(--kraft-line);
+    border-bottom:1.5px solid var(--kraft-line);
+    border-radius:10px 10px 0 0;
+    padding:11px 20px 13px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+    font-weight:700;
     color:var(--ink-soft);
+    cursor:pointer;
+    transition:all .15s ease;
+    box-shadow:none;
+  }
+  .mode-tab-btn:hover{
+    background:#F3EBD8;
+    color:var(--ink);
+    transform:none;
+  }
+  .mode-tab-btn.active{
+    background:var(--card);
+    color:var(--teal-deep);
+    border-color:var(--teal);
+    border-bottom-color:var(--card);
+    box-shadow:0 -2px 8px rgba(33,31,26,.06);
+  }
+  .mode-tab-btn .mode-tab-badge{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    font-weight:700;
+    padding:2px 7px;
+    border-radius:12px;
+    background:rgba(43,111,115,.12);
+    color:var(--teal-deep);
+  }
+  .mode-tab-btn.active .mode-tab-badge{
+    background:var(--teal);
+    color:#fff;
+  }
+  @media (max-width:680px){
+    header{padding:14px 0 0;}
+    .mode-tabs-bar{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+    .mode-tab-btn{justify-content:center;padding:10px 8px;font-size:12.5px;text-align:center;}
   }
   .header-card{
     background:var(--card);
-    border:1px solid var(--kraft-line);
+    border:1.5px solid var(--kraft-line);
     border-radius:0 10px 10px 10px;
     padding:22px 26px 24px;
     box-shadow:var(--shadow);
+    max-width:100%;
+  }
+  @media (max-width:680px){
+    .header-card{border-radius:0 0 10px 10px;padding:16px 14px 18px;}
   }
   h1{
     font-family:'Fraunces',serif;
@@ -819,71 +872,202 @@
     display:flex;flex-direction:column;align-items:center;justify-content:center;
   }
   .countdown-num{font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:var(--ink);line-height:1;}
-  /* ---------- PDF Document Scanner Studio ---------- */
+  /* ---------- PDF Document Scanner Studio (Merged Workbench-Style Layout) ---------- */
   .scanner-panel{
     border:1.5px solid var(--teal);
     background:linear-gradient(180deg, #FCFAF4 0%, #F4EFE2 100%);
+    max-width:100%;
+    overflow:hidden;
+  }
+  @media (max-width:680px){
+    .scanner-panel{padding:14px 12px;}
   }
   .scanner-top-actions{
     display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px;
   }
-  .scanner-workspace{
-    display:grid;grid-template-columns:220px 1fr 290px;gap:16px;
-    border:1px solid var(--kraft-line);border-radius:10px;
-    background:var(--card);padding:14px;box-shadow:inset 0 1px 3px rgba(0,0,0,.04);
+  @media (max-width:680px){
+    .scanner-top-actions{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:8px;
+    }
+    .scanner-top-actions button{
+      width:100%;
+      justify-content:center;
+      text-align:center;
+      padding:9px 10px;
+      font-size:12.5px;
+    }
+    .scanner-top-actions #scanSelectDriveBtn{
+      grid-column:1 / -1;
+    }
+    .scanner-top-actions #scanCountBadge{
+      grid-column:1 / -1;
+      margin-left:0 !important;
+      text-align:center;
+      padding-top:2px;
+    }
   }
-  @media (max-width:960px){
-    .scanner-workspace{grid-template-columns:1fr;}
+  .scanner-workspace{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    border:1px solid var(--kraft-line);
+    border-radius:10px;
+    background:var(--card);
+    padding:16px;
+    box-shadow:inset 0 1px 3px rgba(0,0,0,.04);
+    max-width:100%;
+    width:100%;
+    overflow:hidden;
+  }
+  @media (max-width:680px){
+    .scanner-workspace{padding:10px;}
+  }
+  /* Top Split: Left = Scanned Pages Grid (Workbench style), Right = Live Preview & Crop Stage */
+  .scanner-main-split{
+    display:grid;
+    grid-template-columns:minmax(290px, 360px) minmax(0, 1fr);
+    gap:16px;
+    align-items:start;
+    width:100%;
+    max-width:100%;
+  }
+  @media (max-width:920px){
+    .scanner-main-split{
+      grid-template-columns:minmax(0, 1fr);
+      gap:14px;
+    }
   }
   .scanner-sidebar-wrap{
-    border-right:1px solid var(--kraft-line);padding-right:12px;
-    display:flex;flex-direction:column;gap:8px;
+    border:1px solid var(--kraft-line);
+    border-radius:9px;
+    background:var(--paper);
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-width:0;
+    max-width:100%;
   }
   .scanner-sidebar-header{
     display:flex;align-items:center;justify-content:space-between;gap:6px;
-    padding-bottom:6px;border-bottom:1px solid var(--kraft-line);
+    padding-bottom:8px;border-bottom:1px solid var(--kraft-line);
   }
   .scanner-sidebar-header h5{
-    margin:0;font-family:'Fraunces',serif;font-size:13.5px;color:var(--ink);
+    margin:0;font-family:'Fraunces',serif;font-size:14.5px;color:var(--ink);
   }
+  /* Workbench-style 2-column page card grid on both desktop and mobile (never overflows horizontally) */
   .scanner-sidebar{
-    max-height:460px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;
+    max-height:460px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:10px;
+    padding:2px;
+    min-width:0;
+    width:100%;
   }
-  @media (max-width:960px){
-    .scanner-sidebar-wrap{border-right:none;border-bottom:1px solid var(--kraft-line);padding-right:0;padding-bottom:10px;}
-    .scanner-sidebar{flex-direction:row;overflow-x:auto;max-height:none;padding-bottom:4px;}
+  @media (max-width:680px){
+    .scanner-sidebar{
+      max-height:360px;
+      gap:8px;
+    }
   }
   .scan-thumb-item{
-    display:flex;align-items:center;gap:8px;padding:7px 9px;
-    border:1.5px solid var(--kraft-line);border-radius:8px;
-    background:#fff;cursor:pointer;position:relative;transition:.12s ease;
-    flex-shrink:0;min-width:175px;
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    padding:8px;
+    border:1.5px solid var(--kraft-line);
+    border-radius:8px;
+    background:#fff;
+    cursor:pointer;
+    position:relative;
+    transition:.12s ease;
+    min-width:0;
+    width:100%;
+    box-shadow:0 1px 4px rgba(33,31,26,.06);
   }
   .scan-thumb-item:hover{border-color:var(--teal);background:#F8FBFB;}
   .scan-thumb-item.active{border-color:var(--teal);background:#E6F4F4;box-shadow:0 0 0 2px rgba(43,111,115,.22);}
-  .scan-thumb-item img{width:44px;height:58px;object-fit:cover;border:1px solid #ccc;border-radius:4px;background:#f8f8f8;}
-  .scan-thumb-meta{flex:1;min-width:0;font-size:11.5px;}
-  .scan-thumb-meta strong{display:block;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .scan-thumb-meta span{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--teal-deep);display:block;margin-top:2px;}
-  .scan-thumb-actions{display:flex;flex-direction:column;gap:2px;}
+  .scan-thumb-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:4px;
+    width:100%;
+  }
+  .scan-thumb-num{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    font-weight:700;
+    color:#fff;
+    background:var(--teal-deep);
+    padding:2px 6px;
+    border-radius:4px;
+  }
+  .scan-thumb-item.active .scan-thumb-num{
+    background:var(--teal);
+  }
+  .scan-thumb-item img{
+    width:100%;
+    height:115px;
+    object-fit:contain;
+    border:1px solid #ddd;
+    border-radius:5px;
+    background:#F6F1E6;
+    display:block;
+  }
+  .scan-thumb-meta{min-width:0;width:100%;font-size:11.5px;}
+  .scan-thumb-meta strong{display:block;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11.5px;}
+  .scan-thumb-meta span{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--teal-deep);display:block;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .scan-thumb-actions{display:flex;flex-direction:row;gap:3px;align-items:center;}
   .scan-mini-btn{
-    width:20px;height:20px;padding:0;font-size:10px;border-radius:4px;
+    width:22px;height:22px;padding:0;font-size:10.5px;border-radius:4px;
     display:flex;align-items:center;justify-content:center;border:1px solid var(--kraft-line);background:#fff;
   }
   .scan-mini-btn:hover{background:var(--paper-deep);}
   .scan-mini-btn.del:hover{background:var(--red);color:#fff;border-color:var(--red-deep);}
   .scan-add-page-card{
-    display:flex;align-items:center;justify-content:center;gap:6px;
-    padding:10px 12px;border:2px dashed var(--teal);border-radius:8px;
-    background:rgba(43,111,115,.07);color:var(--teal-deep);
-    font-size:12.5px;font-weight:700;cursor:pointer;transition:.12s ease;
-    flex-shrink:0;min-width:140px;text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:12px 8px;
+    border:2px dashed var(--teal);
+    border-radius:8px;
+    background:rgba(43,111,115,.07);
+    color:var(--teal-deep);
+    font-size:12px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.12s ease;
+    min-width:0;
+    width:100%;
+    min-height:130px;
+    text-align:center;
   }
   .scan-add-page-card:hover{background:var(--teal);color:#fff;}
 
   .scanner-stage-wrap{
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:#26241F;border-radius:8px;padding:14px;min-height:420px;position:relative;overflow:hidden;
+    background:#26241F;border-radius:8px;padding:12px;min-height:380px;position:relative;overflow:hidden;
+    min-width:0;max-width:100%;width:100%;
+  }
+  .scanner-stage-topbar{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:10px;
+    color:#ECE1C7;
+    font-size:12px;
+    font-family:'JetBrains Mono',monospace;
   }
   .scanner-canvas-container{
     position:relative;display:inline-block;max-width:100%;max-height:460px;
@@ -930,30 +1114,59 @@
     .scan-crop-handle.e,.scan-crop-handle.w{width:15px;height:28px;}
   }
 
-  .scanner-controls{
-    display:flex;flex-direction:column;gap:12px;
-    border-left:1px solid var(--kraft-line);padding-left:14px;
+  /* Downside Controls Section: 📐 Page Size & Quality, 🎨 Color Mode, ☀️ Light / Dark & Clarity */
+  .scanner-downside-wrap{
+    border-top:1.5px solid var(--kraft-line);
+    padding-top:14px;
+    width:100%;
+    max-width:100%;
   }
-  @media (max-width:960px){
-    .scanner-controls{border-left:none;border-top:1px solid var(--kraft-line);padding-left:0;padding-top:12px;}
+  .scanner-downside-title{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--teal-deep);
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    margin-bottom:10px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .scanner-controls{
+    display:grid;
+    grid-template-columns:repeat(3, minmax(0, 1fr));
+    gap:12px;
+    width:100%;
+    max-width:100%;
+  }
+  @media (max-width:900px){
+    .scanner-controls{
+      grid-template-columns:minmax(0, 1fr);
+      gap:10px;
+    }
   }
   .scan-ctrl-group{
-    background:var(--paper);border:1px solid var(--kraft-line);border-radius:7px;padding:10px 11px;
+    background:var(--paper);border:1px solid var(--kraft-line);border-radius:8px;padding:12px;
+    min-width:0;max-width:100%;
   }
   .scan-ctrl-group h5{
-    margin:0 0 8px;font-family:'Fraunces',serif;font-size:13.5px;color:var(--ink);
+    margin:0 0 10px;font-family:'Fraunces',serif;font-size:14px;color:var(--ink);
     display:flex;align-items:center;justify-content:space-between;
   }
   .scan-slider-row{
-    display:flex;align-items:center;gap:8px;margin-bottom:7px;font-size:12px;
+    display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:12px;min-width:0;
   }
   .scan-slider-row:last-child{margin-bottom:0;}
   .scan-slider-row label{width:76px;color:var(--ink-soft);flex-shrink:0;}
-  .scan-slider-row input[type=range]{flex:1;accent-color:var(--teal);cursor:pointer;}
-  .scan-slider-row .val{font-family:'JetBrains Mono',monospace;font-size:11px;width:36px;text-align:right;color:var(--ink);}
-  .scan-mode-pills{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .scan-slider-row input[type=range]{flex:1;min-width:0;accent-color:var(--teal);cursor:pointer;}
+  .scan-slider-row select{flex:1;min-width:0;}
+  .scan-slider-row .val{font-family:'JetBrains Mono',monospace;font-size:11px;width:38px;text-align:right;color:var(--ink);flex-shrink:0;}
+  .scan-mode-pills{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   .scan-pill{
-    padding:6px 8px;font-size:11.5px;border-radius:6px;text-align:center;
+    padding:8px 8px;font-size:12px;border-radius:6px;text-align:center;
     border:1px solid var(--kraft-line);background:#fff;cursor:pointer;font-weight:600;
   }
   .scan-pill.active{background:var(--teal);color:#fff;border-color:var(--teal-deep);}
@@ -972,6 +1185,7 @@
     background:#F0F7F7;border:1.5px solid var(--teal);border-radius:10px;
     padding:12px 14px;margin-bottom:14px;
     display:flex;flex-direction:column;gap:8px;
+    max-width:100%;
   }
   .scanner-drive-card-head{
     display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px;
@@ -1178,13 +1392,6 @@
 </div>
 
 <div class="wrap">
-  <!-- Trial / license status banner -->
-  <div id="trialBanner" style="display:none;">
-    <span id="trialBannerMsg"></span>
-    &nbsp;
-    <span id="trialBannerAction"></span>
-  </div>
-<div class="wrap">
   <!-- Trial / license status banner — non-blocking, lives at top of app -->
   <div id="trialBanner" style="display:none;">
     <span id="trialBannerMsg"></span>
@@ -1192,12 +1399,21 @@
     <span id="trialBannerAction"></span>
   </div>
   <header>
-    <div class="tab">📁 document tray</div>
+    <div class="mode-tabs-bar" role="tablist" aria-label="Select PDF Workbench or PDF Scanner">
+      <button type="button" class="mode-tab-btn active" id="tabBtnWorkbench" onclick="window.switchAppMode('workbench')" role="tab" aria-selected="true">
+        <span>📁 PDF Workbench</span>
+        <span class="mode-tab-badge" id="tabBadgeWorkbench">Merge &amp; Edit</span>
+      </button>
+      <button type="button" class="mode-tab-btn" id="tabBtnScanner" onclick="window.switchAppMode('scanner')" role="tab" aria-selected="false">
+        <span>📷 PDF Scanner</span>
+        <span class="mode-tab-badge" id="tabBadgeScanner">Scan &amp; Enhance</span>
+      </button>
+    </div>
     <div class="header-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;">
-        <div>
-          <h1>PDF Workbench</h1>
-          <p>Drop in one or more PDFs, lay the pages out like a light table, drag to reorder, stamp the ones you don't need, and merge it all into a single file. Everything happens in your browser — nothing is uploaded anywhere.</p>
+        <div style="flex:1;min-width:240px;">
+          <h1 id="mainHeaderTitle">PDF Workbench</h1>
+          <p id="mainHeaderDesc">Drop in one or more PDFs, lay the pages out like a light table, drag to reorder, stamp the ones you don't need, and merge it all into a single file. Or switch to the <strong>📷 PDF Scanner</strong> tab above to scan, crop, and enhance pages.</p>
         </div>
         <div style="flex-shrink:0;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
           <button id="accountBtn" onclick="window._auth.openAccountModal()">Sign in</button>
@@ -1207,83 +1423,87 @@
         </div>
       </div>
 
-      <div id="dropzone" class="dropzone">
-        <strong>Drop PDF files here, or choose from Local Device or Google Drive</strong>
-        <span>You can add more than one PDF file — every page lands in the same workbench below ready for editing.</span>
-        <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:12px;">
-          <button type="button" class="primary" id="browseLocalPdfBtn" style="padding:9px 16px;font-size:13.5px;">💻 Select Local PDF Files</button>
-          <button type="button" class="outline-teal" id="selectDrivePdfDropBtn" style="padding:9px 16px;font-size:13.5px;background:#fff;">☁️ Select PDF from Google Drive</button>
+      <div id="wbHeaderDropWrap">
+        <div id="dropzone" class="dropzone">
+          <strong>Drop PDF files here, or choose from Local Device or Google Drive</strong>
+          <span>You can add more than one PDF file — every page lands in the same workbench below ready for editing.</span>
+          <div style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:12px;">
+            <button type="button" class="primary" id="browseLocalPdfBtn" style="padding:9px 16px;font-size:13.5px;">💻 Select Local PDF Files</button>
+            <button type="button" class="outline-teal" id="selectDrivePdfDropBtn" style="padding:9px 16px;font-size:13.5px;background:#fff;">☁️ Select PDF from Google Drive</button>
+          </div>
+          <input id="fileInput" type="file" accept="application/pdf" multiple>
         </div>
-        <input id="fileInput" type="file" accept="application/pdf" multiple>
       </div>
     </div>
   </header>
 
-  <div class="toolbar" id="toolbar">
-    <button class="ghost" id="addMoreBtn">+ Add PDFs (Local)</button>
-    <button class="outline-teal" id="addDrivePdfToolbarBtn" title="Select and load a stored PDF from your Google Drive folder">☁️ Select from Google Drive</button>
-    <button class="ghost" id="selectAllBtn">Select all</button>
-    <button class="ghost" id="clearSelBtn">Clear selection</button>
-    <button class="ghost" id="undoBtn" disabled>↺ Undo last change</button>
-    <span class="count" id="countLabel">No pages yet</span>
-    <label class="ew-check" id="watermarkLabel" style="font-size:12px;display:none;" title="Watermark control — managed by administrator.">
-      <input type="checkbox" id="watermarkToggle" checked> 🔒 Watermark edited pages
-    </label>
-    <button class="danger" id="deleteSelBtn" disabled>Delete selected (0)</button>
-    <button id="splitBtn" disabled style="background:#A9780B;border-color:#7A5608;color:#fff;font-size:13px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;border-width:1px;border-style:solid;">✂ Split selected</button>
-    <button class="primary" id="downloadBtn" disabled>⬇ Download merged PDF</button>
-    <button class="outline-teal" id="shareWbPdfBtn" disabled title="Share merged PDF via WhatsApp, Email, or native device share">📤 Share PDF</button>
-    <button id="newProjectBtn" disabled title="Remove every file and page and start fresh" style="background:transparent;border-color:var(--red);color:var(--red);font-size:13px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;border-width:1px;border-style:solid;">🗑 New project</button>
-    <button id="scannerNavBtn" title="Scan documents with camera or photos, enhance, deblur & save as PDF"
-      style="background:var(--teal-deep);border:1px solid var(--teal);color:#fff;font-size:13px;font-weight:700;border-radius:7px;padding:8px 13px;cursor:pointer;white-space:nowrap;">
-      📷 PDF Scanner ↓
-    </button>
-    <button id="premNavBtn" title="Go to premium tools: Find & Replace, OCR, Word & Excel export"
-      style="background:linear-gradient(135deg,#A9780B,#C49A20);border:none;color:#fff;font-size:13px;font-weight:700;border-radius:7px;padding:8px 13px;cursor:pointer;white-space:nowrap;letter-spacing:.01em;">
-      ⭐ Premium Tools ↓
-    </button>
-  </div>
+  <div id="workbenchModeView">
+    <div class="toolbar" id="toolbar">
+      <button class="ghost" id="addMoreBtn">+ Add PDFs (Local)</button>
+      <button class="outline-teal" id="addDrivePdfToolbarBtn" title="Select and load a stored PDF from your Google Drive folder">☁️ Select from Google Drive</button>
+      <button class="ghost" id="selectAllBtn">Select all</button>
+      <button class="ghost" id="clearSelBtn">Clear selection</button>
+      <button class="ghost" id="undoBtn" disabled>↺ Undo last change</button>
+      <span class="count" id="countLabel">No pages yet</span>
+      <label class="ew-check" id="watermarkLabel" style="font-size:12px;display:none;" title="Watermark control — managed by administrator.">
+        <input type="checkbox" id="watermarkToggle" checked> 🔒 Watermark edited pages
+      </label>
+      <button class="danger" id="deleteSelBtn" disabled>Delete selected (0)</button>
+      <button id="splitBtn" disabled style="background:#A9780B;border-color:#7A5608;color:#fff;font-size:13px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;border-width:1px;border-style:solid;">✂ Split selected</button>
+      <button class="primary" id="downloadBtn" disabled>⬇ Download merged PDF</button>
+      <button class="outline-teal" id="shareWbPdfBtn" disabled title="Share merged PDF via WhatsApp, Email, or native device share">📤 Share PDF</button>
+      <button id="newProjectBtn" disabled title="Remove every file and page and start fresh" style="background:transparent;border-color:var(--red);color:var(--red);font-size:13px;font-weight:600;border-radius:7px;padding:8px 13px;cursor:pointer;border-width:1px;border-style:solid;">🗑 New project</button>
+      <button id="scannerNavBtn" title="Switch to PDF Scanner tab to scan documents with camera or photos, enhance, deblur & save as PDF"
+        style="background:var(--teal-deep);border:1px solid var(--teal);color:#fff;font-size:13px;font-weight:700;border-radius:7px;padding:8px 13px;cursor:pointer;white-space:nowrap;">
+        📷 Switch to PDF Scanner
+      </button>
+      <button id="premNavBtn" title="Go to premium tools: Find & Replace, OCR, Word & Excel export"
+        style="background:linear-gradient(135deg,#A9780B,#C49A20);border:none;color:#fff;font-size:13px;font-weight:700;border-radius:7px;padding:8px 13px;cursor:pointer;white-space:nowrap;letter-spacing:.01em;">
+        ⭐ Premium Tools ↓
+      </button>
+    </div>
 
-  <div class="workbench">
-    <div class="workbench-main">
-      <div class="focus-viewer" id="focusViewer" style="display:none;">
-        <div class="focus-viewer-topbar">
-          <div class="focus-caption" id="focusCaption"></div>
-          <div style="display:flex;align-items:center;gap:10px;">
-            <div class="zoom-controls">
-              <button class="zoom-btn" id="zoomOut" title="Zoom out (-)">−</button>
-              <span class="zoom-level" id="zoomLevel">100%</span>
-              <button class="zoom-btn" id="zoomIn" title="Zoom in (+)">+</button>
-              <button class="zoom-reset" id="zoomReset" title="Reset to fit">Fit</button>
+    <div class="workbench">
+      <div class="workbench-main">
+        <div class="focus-viewer" id="focusViewer" style="display:none;">
+          <div class="focus-viewer-topbar">
+            <div class="focus-caption" id="focusCaption"></div>
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="zoom-controls">
+                <button class="zoom-btn" id="zoomOut" title="Zoom out (-)">−</button>
+                <span class="zoom-level" id="zoomLevel">100%</span>
+                <button class="zoom-btn" id="zoomIn" title="Zoom in (+)">+</button>
+                <button class="zoom-reset" id="zoomReset" title="Reset to fit">Fit</button>
+              </div>
+              <button class="focus-close" id="focusClose" title="Close preview">✕</button>
             </div>
-            <button class="focus-close" id="focusClose" title="Close preview">✕</button>
+          </div>
+          <div class="focus-viewport" id="focusViewport">
+            <img id="focusImg" alt="Page preview">
           </div>
         </div>
-        <div class="focus-viewport" id="focusViewport">
-          <img id="focusImg" alt="Page preview">
+        <div id="gridArea">
+          <div class="empty-state" id="emptyState">No pages yet — add a PDF above from your device or Google Drive, or switch to the <strong>📷 PDF Scanner</strong> tab to scan pages.</div>
+          <div class="grid" id="grid" style="display:none;"></div>
         </div>
       </div>
-      <div id="gridArea">
-        <div class="empty-state" id="emptyState">No pages yet — add a PDF above from your device or Google Drive to start building your workbench.</div>
-        <div class="grid" id="grid" style="display:none;"></div>
+      <div class="workbench-nav" id="workbenchNav" style="display:none;">
+        <h4>Files in this project</h4>
+        <div id="filesList"></div>
+        <h4 style="margin-top:16px;">Page navigator</h4>
+        <div class="nav-quickactions">
+          <span id="navSelectAll">Select all</span>
+          <span id="navClearSel">Clear</span>
+        </div>
+        <div id="navList"></div>
       </div>
-    </div>
-    <div class="workbench-nav" id="workbenchNav" style="display:none;">
-      <h4>Files in this project</h4>
-      <div id="filesList"></div>
-      <h4 style="margin-top:16px;">Page navigator</h4>
-      <div class="nav-quickactions">
-        <span id="navSelectAll">Select all</span>
-        <span id="navClearSel">Clear</span>
-      </div>
-      <div id="navList"></div>
     </div>
   </div>
 
   <!-- ═══════════════════════════════════════════════════════════════════
-       PDF DOCUMENT SCANNER STUDIO
+       PDF DOCUMENT SCANNER STUDIO (Activated via Top Tab Switcher)
        ═══════════════════════════════════════════════════════════════════ -->
-  <div class="panel scanner-panel" id="scannerSection">
+  <div class="panel scanner-panel" id="scannerSection" style="display:none;margin-top:14px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
       <span style="font-size:11.5px;font-family:'JetBrains Mono',monospace;color:var(--teal-deep);font-weight:700;letter-spacing:.05em;text-transform:uppercase;">📷 Document Scanner &amp; Enhancer Studio</span>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
@@ -1292,14 +1512,14 @@
           title="Use Find & Replace, OCR Languages, Extract to Word, or Extract to Excel on your scanned pages">
           ⭐ Premium Tools (Find/Replace · OCR · Word · Excel) ↓
         </button>
-        <button onclick="window.scrollTo({top:0,behavior:'smooth'})"
-          style="background:transparent;border:1.5px solid var(--kraft-line);color:var(--ink-soft);font-size:12px;font-weight:600;border-radius:7px;padding:5px 11px;cursor:pointer;">
-          ↑ Back to workbench
+        <button type="button" onclick="window.switchAppMode('workbench')"
+          style="background:transparent;border:1.5px solid var(--teal);color:var(--teal-deep);font-size:12px;font-weight:700;border-radius:7px;padding:5px 11px;cursor:pointer;">
+          📁 Switch to PDF Workbench
         </button>
       </div>
     </div>
     <h2>PDF Scanner — Capture, Enhance &amp; Combine into One File</h2>
-    <p class="sub">Scan physical pages using your device camera or upload photos/scans. Edit each scanned page individually — adjust page size (A4, Letter, Fit), fix light/dark exposure, convert to crisp B&amp;W document mode, or remove blur (sharpen) — then save all pages together into a single named PDF file or send straight to the workbench above.</p>
+    <p class="sub">Scan physical pages using your device camera or upload photos/PDFs. All scanned pages appear in the <strong>left-side page grid</strong> alongside the live preview, and all enhancement controls (<strong>📐 Page Size &amp; Quality</strong>, <strong>🎨 Color Mode</strong>, <strong>☀️ Light / Dark &amp; Clarity</strong>) appear <strong>downside below</strong>.</p>
 
     <!-- Per-Login Google Drive Path Card (Always visible on Mobile & Desktop) -->
     <div class="scanner-drive-card" id="scannerTopDriveBar">
@@ -1322,7 +1542,7 @@
       <button class="outline-teal" id="scanUploadImgBtn">🖼️ Upload Images / PDF (Local)</button>
       <button class="outline-teal" id="scanSelectDriveBtn" style="background:#fff;" title="Select a stored PDF from your Google Drive folder to re-edit or enhance">☁️ Select PDF from Google Drive</button>
       <input type="file" id="scanImgInput" accept="image/*,application/pdf" multiple style="display:none;">
-      <button class="ghost" id="scanApplyAllBtn" style="display:none;" title="Copy current page's lighting, color, size & sharpen settings to all scanned pages">✨ Apply current filters to all scans</button>
+      <button class="ghost" id="scanApplyAllBtn" style="display:none;" title="Copy current page's lighting, color, size & sharpen settings to all scanned pages">✨ Apply filters to all scans</button>
       <button class="ghost" id="scanClearAllBtn" style="display:none;color:var(--red);">🗑 Clear all scans</button>
       <span id="scanCountBadge" style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink-soft);">0 scanned pages</span>
     </div>
@@ -1334,118 +1554,125 @@
       <span>Click <strong>"📸 Scan with Camera"</strong> to snap pages live, or drop/select photos of documents here to combine and edit them.</span>
     </div>
 
-    <!-- Active Scanner Workspace -->
+    <!-- Active Scanner Workspace (Left: Workbench-style Scanned Pages Grid | Right: Live Preview Stage | Downside: Enhancement Controls) -->
     <div id="scannerWorkspace" style="display:none;">
       <div class="scanner-workspace">
-        <!-- Left: Scanned Pages Lot & Add Page Button -->
-        <div class="scanner-sidebar-wrap">
-          <div class="scanner-sidebar-header">
-            <h5>📚 Scanned Lot</h5>
-            <button id="scanSidebarAddBtn" style="padding:4px 9px;font-size:11.5px;background:var(--teal);color:#fff;border:none;border-radius:5px;font-weight:700;cursor:pointer;" title="Open camera to scan another page into this lot">+ Add Page</button>
+        <div class="scanner-main-split">
+          <!-- Left Side: All Scanned Pages List (Workbench-style 2-column grid) -->
+          <div class="scanner-sidebar-wrap">
+            <div class="scanner-sidebar-header">
+              <h5>📚 Scanned Pages</h5>
+              <button id="scanSidebarAddBtn" style="padding:5px 10px;font-size:11.5px;background:var(--teal);color:#fff;border:none;border-radius:5px;font-weight:700;cursor:pointer;" title="Open camera to scan another page into this lot">+ Add Page</button>
+            </div>
+            <div style="font-size:11.5px;color:var(--ink-soft);line-height:1.35;">Tap any scanned page below to preview, crop, or adjust its settings downside:</div>
+            <div class="scanner-sidebar" id="scanThumbList"></div>
           </div>
-          <div style="font-size:11px;color:var(--ink-soft);line-height:1.35;">Click any page below to open it in Edit Mode (size, color, blur, crop):</div>
-          <div class="scanner-sidebar" id="scanThumbList"></div>
+
+          <!-- Right Side: Interactive Live Canvas Preview & Crop -->
+          <div class="scanner-stage-wrap">
+            <div class="scanner-stage-topbar">
+              <span id="scanStageTitle">Page 1</span>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button id="scanRotateLeftBtn" style="padding:5px 9px;font-size:11.5px;background:#3A3730;color:#fff;border:1px solid #575246;">↺ Rotate Left</button>
+                <button id="scanRotateRightBtn" style="padding:5px 9px;font-size:11.5px;background:#3A3730;color:#fff;border:1px solid #575246;">↻ Rotate Right</button>
+                <button id="scanToggleCropBtn" style="padding:5px 9px;font-size:11.5px;background:#2B6F73;color:#fff;border:1px solid #20D6C7;">✂️ Crop Area</button>
+                <button id="scanApplyCropBtn" style="padding:5px 9px;font-size:11.5px;background:#A9780B;color:#fff;border:none;display:none;">✓ Apply Crop</button>
+                <button id="scanResetCropBtn" style="padding:5px 9px;font-size:11.5px;background:#3A3730;color:#fff;border:1px solid #575246;display:none;">Reset Crop</button>
+              </div>
+            </div>
+            <div class="scanner-canvas-container" id="scanCanvasContainer">
+              <canvas id="scanPreviewCanvas"></canvas>
+              <div class="scan-crop-overlay" id="scanCropOverlay">
+                <!-- 4 draggable dashed edge bars -->
+                <div class="scan-crop-edge edge-n" data-corner="n"></div>
+                <div class="scan-crop-edge edge-s" data-corner="s"></div>
+                <div class="scan-crop-edge edge-w" data-corner="w"></div>
+                <div class="scan-crop-edge edge-e" data-corner="e"></div>
+                <!-- 8 grab handles: 4 corners + 4 midpoints -->
+                <div class="scan-crop-handle nw" data-corner="nw" style="left:0%;top:0%;"></div>
+                <div class="scan-crop-handle n"  data-corner="n"  style="left:50%;top:0%;"></div>
+                <div class="scan-crop-handle ne" data-corner="ne" style="left:100%;top:0%;"></div>
+                <div class="scan-crop-handle e"  data-corner="e"  style="left:100%;top:50%;"></div>
+                <div class="scan-crop-handle se" data-corner="se" style="left:100%;top:100%;"></div>
+                <div class="scan-crop-handle s"  data-corner="s"  style="left:50%;top:100%;"></div>
+                <div class="scan-crop-handle sw" data-corner="sw" style="left:0%;top:100%;"></div>
+                <div class="scan-crop-handle w"  data-corner="w"  style="left:0%;top:50%;"></div>
+              </div>
+            </div>
+            <div id="scanDimInfo" style="margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#B7A37D;text-align:center;"></div>
+          </div>
         </div>
 
-        <!-- Center: Interactive Live Canvas Preview & Crop -->
-        <div class="scanner-stage-wrap">
-          <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;color:#ECE1C7;font-size:12px;font-family:'JetBrains Mono',monospace;">
-            <span id="scanStageTitle">Page 1</span>
-            <div style="display:flex;gap:6px;flex-wrap:wrap;">
-              <button id="scanRotateLeftBtn" style="padding:4px 9px;font-size:11.5px;background:#3A3730;color:#fff;border:1px solid #575246;">↺ Rotate Left</button>
-              <button id="scanRotateRightBtn" style="padding:4px 9px;font-size:11.5px;background:#3A3730;color:#fff;border:1px solid #575246;">↻ Rotate Right</button>
-              <button id="scanToggleCropBtn" style="padding:4px 9px;font-size:11.5px;background:#2B6F73;color:#fff;border:1px solid #20D6C7;">✂️ Crop Area</button>
-              <button id="scanApplyCropBtn" style="padding:4px 9px;font-size:11.5px;background:#A9780B;color:#fff;border:none;display:none;">✓ Apply Crop</button>
-              <button id="scanResetCropBtn" style="padding:4px 9px;font-size:11.5px;background:#3A3730;color:#fff;border:1px solid #575246;display:none;">Reset Crop</button>
-            </div>
+        <!-- Downside: Individual Page Enhancement Controls (Page Size & Quality, Color Mode, Light/Dark & Clarity) -->
+        <div class="scanner-downside-wrap">
+          <div class="scanner-downside-title">
+            <span>🎛️ Page Enhancement Controls (Applies to Selected Scanned Page)</span>
           </div>
-          <div class="scanner-canvas-container" id="scanCanvasContainer">
-            <canvas id="scanPreviewCanvas"></canvas>
-            <div class="scan-crop-overlay" id="scanCropOverlay">
-              <!-- 4 draggable dashed edge bars -->
-              <div class="scan-crop-edge edge-n" data-corner="n"></div>
-              <div class="scan-crop-edge edge-s" data-corner="s"></div>
-              <div class="scan-crop-edge edge-w" data-corner="w"></div>
-              <div class="scan-crop-edge edge-e" data-corner="e"></div>
-              <!-- 8 grab handles: 4 corners + 4 midpoints -->
-              <div class="scan-crop-handle nw" data-corner="nw" style="left:0%;top:0%;"></div>
-              <div class="scan-crop-handle n"  data-corner="n"  style="left:50%;top:0%;"></div>
-              <div class="scan-crop-handle ne" data-corner="ne" style="left:100%;top:0%;"></div>
-              <div class="scan-crop-handle e"  data-corner="e"  style="left:100%;top:50%;"></div>
-              <div class="scan-crop-handle se" data-corner="se" style="left:100%;top:100%;"></div>
-              <div class="scan-crop-handle s"  data-corner="s"  style="left:50%;top:100%;"></div>
-              <div class="scan-crop-handle sw" data-corner="sw" style="left:0%;top:100%;"></div>
-              <div class="scan-crop-handle w"  data-corner="w"  style="left:0%;top:50%;"></div>
+          <div class="scanner-controls">
+            <!-- Page Size & Scale -->
+            <div class="scan-ctrl-group">
+              <h5><span>📐 Page Size &amp; Quality</span></h5>
+              <div class="scan-slider-row">
+                <label>Page Size</label>
+                <select id="scanPageSize" style="flex:1;padding:6px 8px;border:1px solid var(--kraft-line);border-radius:5px;font-size:12px;background:#fff;">
+                  <option value="a4-p">A4 Portrait (Standard)</option>
+                  <option value="a4-l">A4 Landscape</option>
+                  <option value="letter-p">US Letter Portrait</option>
+                  <option value="fit">Fit to Scanned Image</option>
+                </select>
+              </div>
+              <div class="scan-slider-row">
+                <label>Margin</label>
+                <select id="scanMargin" style="flex:1;padding:6px 8px;border:1px solid var(--kraft-line);border-radius:5px;font-size:12px;background:#fff;">
+                  <option value="0">No margin (Full bleed)</option>
+                  <option value="18" selected>Small margin</option>
+                  <option value="36">Standard margin</option>
+                </select>
+              </div>
+              <div class="scan-slider-row">
+                <label title="Scale image resolution to control file size">Resolution</label>
+                <input type="range" id="scanScaleSlider" min="40" max="100" step="5" value="100">
+                <span class="val" id="scanScaleVal">100%</span>
+              </div>
             </div>
-          </div>
-          <div id="scanDimInfo" style="margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:11px;color:#B7A37D;"></div>
-        </div>
 
-        <!-- Right: Individual Page Enhancement Controls -->
-        <div class="scanner-controls">
-          <!-- Page Size & Scale -->
-          <div class="scan-ctrl-group">
-            <h5><span>📐 Page Size &amp; Quality</span></h5>
-            <div class="scan-slider-row">
-              <label>Page Size</label>
-              <select id="scanPageSize" style="flex:1;padding:5px 7px;border:1px solid var(--kraft-line);border-radius:5px;font-size:12px;background:#fff;">
-                <option value="a4-p">A4 Portrait (Standard)</option>
-                <option value="a4-l">A4 Landscape</option>
-                <option value="letter-p">US Letter Portrait</option>
-                <option value="fit">Fit to Scanned Image</option>
-              </select>
+            <!-- Color Mode Preset -->
+            <div class="scan-ctrl-group">
+              <h5><span>🎨 Color Mode</span></h5>
+              <div class="scan-mode-pills" id="scanColorModes">
+                <div class="scan-pill active" data-mode="original">Original Color</div>
+                <div class="scan-pill" data-mode="magic">✨ Magic Color</div>
+                <div class="scan-pill" data-mode="grayscale">Grayscale</div>
+                <div class="scan-pill" data-mode="bw">Crisp B&amp;W Doc</div>
+              </div>
             </div>
-            <div class="scan-slider-row">
-              <label>Margin</label>
-              <select id="scanMargin" style="flex:1;padding:5px 7px;border:1px solid var(--kraft-line);border-radius:5px;font-size:12px;background:#fff;">
-                <option value="0">No margin (Full bleed)</option>
-                <option value="18" selected>Small margin</option>
-                <option value="36">Standard margin</option>
-              </select>
-            </div>
-            <div class="scan-slider-row">
-              <label title="Scale image resolution to control file size">Resolution</label>
-              <input type="range" id="scanScaleSlider" min="40" max="100" step="5" value="100">
-              <span class="val" id="scanScaleVal">100%</span>
-            </div>
-          </div>
 
-          <!-- Color Mode Preset -->
-          <div class="scan-ctrl-group">
-            <h5><span>🎨 Color Mode</span></h5>
-            <div class="scan-mode-pills" id="scanColorModes">
-              <div class="scan-pill active" data-mode="original">Original Color</div>
-              <div class="scan-pill" data-mode="magic">✨ Magic Color</div>
-              <div class="scan-pill" data-mode="grayscale">Grayscale</div>
-              <div class="scan-pill" data-mode="bw">Crisp B&amp;W Doc</div>
-            </div>
-          </div>
-
-          <!-- Light / Dark & Contrast -->
-          <div class="scan-ctrl-group">
-            <h5>
-              <span>☀️ Light / Dark &amp; Clarity</span>
-              <span id="scanResetFilters" style="font-family:'Inter',sans-serif;font-size:11px;color:var(--teal-deep);text-decoration:underline;cursor:pointer;font-weight:600;">Reset</span>
-            </h5>
-            <div class="scan-slider-row">
-              <label>Light/Dark</label>
-              <input type="range" id="scanBrightSlider" min="-80" max="80" step="2" value="0">
-              <span class="val" id="scanBrightVal">0</span>
-            </div>
-            <div class="scan-slider-row">
-              <label>Contrast</label>
-              <input type="range" id="scanContrastSlider" min="-60" max="90" step="2" value="0">
-              <span class="val" id="scanContrastVal">0</span>
-            </div>
-            <div class="scan-slider-row">
-              <label title="Unsharp mask / deconvolution filter to make blurry text crisp">Remove Blur</label>
-              <input type="range" id="scanSharpenSlider" min="0" max="100" step="5" value="0">
-              <span class="val" id="scanSharpenVal">0%</span>
-            </div>
-            <div class="scan-slider-row" id="scanThresholdRow" style="display:none;">
-              <label title="Black & White cutoff threshold">B&amp;W Cutoff</label>
-              <input type="range" id="scanThreshSlider" min="60" max="220" step="2" value="145">
-              <span class="val" id="scanThreshVal">145</span>
+            <!-- Light / Dark & Contrast -->
+            <div class="scan-ctrl-group">
+              <h5>
+                <span>☀️ Light / Dark &amp; Clarity</span>
+                <span id="scanResetFilters" style="font-family:'Inter',sans-serif;font-size:11px;color:var(--teal-deep);text-decoration:underline;cursor:pointer;font-weight:600;">Reset</span>
+              </h5>
+              <div class="scan-slider-row">
+                <label>Light/Dark</label>
+                <input type="range" id="scanBrightSlider" min="-80" max="80" step="2" value="0">
+                <span class="val" id="scanBrightVal">0</span>
+              </div>
+              <div class="scan-slider-row">
+                <label>Contrast</label>
+                <input type="range" id="scanContrastSlider" min="-60" max="90" step="2" value="0">
+                <span class="val" id="scanContrastVal">0</span>
+              </div>
+              <div class="scan-slider-row">
+                <label title="Unsharp mask / deconvolution filter to make blurry text crisp">Remove Blur</label>
+                <input type="range" id="scanSharpenSlider" min="0" max="100" step="5" value="0">
+                <span class="val" id="scanSharpenVal">0%</span>
+              </div>
+              <div class="scan-slider-row" id="scanThresholdRow" style="display:none;">
+                <label title="Black & White cutoff threshold">B&amp;W Cutoff</label>
+                <input type="range" id="scanThreshSlider" min="60" max="220" step="2" value="145">
+                <span class="val" id="scanThreshVal">145</span>
+              </div>
             </div>
           </div>
         </div>
@@ -3639,6 +3866,10 @@ function renderAll(){
 
     grid.appendChild(card);
   });
+  const tabBadgeWb = document.getElementById('tabBadgeWorkbench');
+  if(tabBadgeWb){
+    tabBadgeWb.textContent = pages.length > 0 ? (pages.length + ' page' + (pages.length === 1 ? '' : 's')) : 'Merge & Edit';
+  }
 }
 
 function escapeHtml(s){
@@ -7045,7 +7276,61 @@ window._auth = {
 // Live countdown — refreshes banner and button every minute
 setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
 
-// ── Premium Tools / Back-to-Pages Navigation ─────────────────────────
+// ── Top Tab Switcher (PDF Workbench vs PDF Scanner) & Navigation ────
+window._activeAppMode = 'workbench';
+window.switchAppMode = function(mode, opts){
+  const target = mode === 'scanner' ? 'scanner' : 'workbench';
+  window._activeAppMode = target;
+
+  const tabWb        = document.getElementById('tabBtnWorkbench');
+  const tabScan      = document.getElementById('tabBtnScanner');
+  const wbDropWrap   = document.getElementById('wbHeaderDropWrap');
+  const wbModeView   = document.getElementById('workbenchModeView');
+  const scannerSec   = document.getElementById('scannerSection');
+  const headerTitle  = document.getElementById('mainHeaderTitle');
+  const headerDesc   = document.getElementById('mainHeaderDesc');
+
+  if(tabWb){
+    tabWb.classList.toggle('active', target === 'workbench');
+    tabWb.setAttribute('aria-selected', target === 'workbench' ? 'true' : 'false');
+  }
+  if(tabScan){
+    tabScan.classList.toggle('active', target === 'scanner');
+    tabScan.setAttribute('aria-selected', target === 'scanner' ? 'true' : 'false');
+  }
+
+  if(target === 'scanner'){
+    if(wbDropWrap) wbDropWrap.style.display = 'none';
+    if(wbModeView) wbModeView.style.display = 'none';
+    if(scannerSec) scannerSec.style.display = 'block';
+    if(headerTitle) headerTitle.textContent = 'PDF Scanner — Capture, Enhance & Combine';
+    if(headerDesc){
+      headerDesc.innerHTML = 'Scan physical documents with your camera or load images/PDFs. All scanned pages appear on the <strong>left side</strong>, live preview &amp; crop on the <strong>right</strong>, and <strong>📐 Page Size &amp; Quality, 🎨 Color Mode, ☀️ Light / Dark &amp; Clarity</strong> downside below. Switch back to the <strong>📁 PDF Workbench</strong> tab anytime.';
+    }
+    if(typeof window._setAllPremiumScopes === 'function'){
+      window._setAllPremiumScopes('scanner');
+    }
+    if(typeof window._refreshScannerPreview === 'function'){
+      setTimeout(() => window._refreshScannerPreview(), 30);
+    }
+  } else {
+    if(wbDropWrap) wbDropWrap.style.display = 'block';
+    if(wbModeView) wbModeView.style.display = 'block';
+    if(scannerSec) scannerSec.style.display = 'none';
+    if(headerTitle) headerTitle.textContent = 'PDF Workbench';
+    if(headerDesc){
+      headerDesc.innerHTML = 'Drop in one or more PDFs, lay the pages out like a light table, drag to reorder, stamp the ones you don\'t need, and merge it all into a single file. Or switch to the <strong>📷 PDF Scanner</strong> tab above to scan, crop, and enhance pages.';
+    }
+    if(typeof window._setAllPremiumScopes === 'function' && typeof pages !== 'undefined' && pages.length > 0){
+      window._setAllPremiumScopes('workbench');
+    }
+  }
+
+  if(!(opts && opts.noScroll)){
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+};
+
 (function(){
   const premSec       = document.getElementById('premiumSection');
   const premNavBtn    = document.getElementById('premNavBtn');
@@ -7056,12 +7341,11 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
   const floatArrow    = document.getElementById('quickNavArrow');
   if(!premSec) return;
 
-  // Toolbar "📷 PDF Scanner ↓" → scroll to scanner section
+  // Toolbar "📷 Switch to PDF Scanner" → activate scanner tab
   const scannerNavBtn = document.getElementById('scannerNavBtn');
-  const scannerSec = document.getElementById('scannerSection');
-  if(scannerNavBtn && scannerSec){
+  if(scannerNavBtn){
     scannerNavBtn.addEventListener('click', () => {
-      scannerSec.scrollIntoView({ behavior:'smooth', block:'start' });
+      window.switchAppMode('scanner');
     });
   }
 
@@ -7702,15 +7986,18 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
       row.className = 'scan-thumb-item' + (isEditing ? ' active' : '');
       row.title = 'Click to open Page ' + (idx + 1) + ' in Edit Mode';
       row.innerHTML = `
+        <div class="scan-thumb-top">
+          <span class="scan-thumb-num">#${idx+1}</span>
+          <div class="scan-thumb-actions">
+            <button class="scan-mini-btn" data-act="up" title="Move earlier" ${idx===0?'disabled':''}>←</button>
+            <button class="scan-mini-btn" data-act="dn" title="Move later" ${idx===scannedDocs.length-1?'disabled':''}>→</button>
+            <button class="scan-mini-btn del" data-act="del" title="Remove scan">✕</button>
+          </div>
+        </div>
         <img src="${s.thumbUrl}" alt="Scan ${idx+1}">
         <div class="scan-thumb-meta">
-          <strong>Page ${idx+1}: ${escapeHtml(s.name)}</strong>
-          <span>${isEditing ? '✎ Editing now' : 'Click to edit'} · ${s.colorMode}</span>
-        </div>
-        <div class="scan-thumb-actions">
-          <button class="scan-mini-btn" data-act="up" title="Move up" ${idx===0?'disabled':''}>↑</button>
-          <button class="scan-mini-btn" data-act="dn" title="Move down" ${idx===scannedDocs.length-1?'disabled':''}>↓</button>
-          <button class="scan-mini-btn del" data-act="del" title="Remove scan">✕</button>
+          <strong>${escapeHtml(s.name)}</strong>
+          <span>${isEditing ? '✎ Editing' : 'Tap to edit'} · ${s.colorMode}</span>
         </div>
       `;
       row.addEventListener('click', e => {
@@ -7753,13 +8040,17 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
     const addCard = document.createElement('div');
     addCard.className = 'scan-add-page-card';
     addCard.title = 'Open full-screen camera to scan another page into this lot';
-    addCard.innerHTML = `📸 + Add Page (Scan Next)`;
+    addCard.innerHTML = `<span style="font-size:20px;">📸</span><span>+ Add Page</span><span style="font-size:10px;font-weight:500;opacity:.85;">Scan Next</span>`;
     addCard.addEventListener('click', openCameraModal);
     scanThumbList.appendChild(addCard);
   }
 
   function renderScannerUI(){
     scanCountBadge.textContent = scannedDocs.length + ' scanned page' + (scannedDocs.length === 1 ? '' : 's');
+    const tabBadgeScan = document.getElementById('tabBadgeScanner');
+    if(tabBadgeScan){
+      tabBadgeScan.textContent = scannedDocs.length > 0 ? (scannedDocs.length + ' page' + (scannedDocs.length === 1 ? '' : 's')) : 'Scan & Enhance';
+    }
     const hasScans = scannedDocs.length > 0;
     scannerEmpty.style.display     = hasScans ? 'none' : 'block';
     scannerWorkspace.style.display = hasScans ? 'block' : 'none';
@@ -8333,8 +8624,12 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
     scanSendToWbBtn.textContent = 'Adding to Workbench…';
     try{
       await syncScannerToWorkbench({ silent: true });
-      showToast('Added "' + fileName + '" (' + scannedDocs.length + ' page' + (scannedDocs.length===1?'':'s') + ') to Workbench!');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if(typeof window.switchAppMode === 'function'){
+        window.switchAppMode('workbench');
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      showToast('Added "' + fileName + '" (' + scannedDocs.length + ' page' + (scannedDocs.length===1?'':'s') + ') to PDF Workbench!');
     }catch(err){
       console.error(err);
       showToast('Could not add to Workbench: ' + err.message);
@@ -8970,12 +9265,17 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
     const cleanName = (fileName || 'Drive-Document.pdf').endsWith('.pdf') ? fileName : (fileName + '.pdf');
     if(targetMode === 'scanner'){
       const count = await loadPdfBytesIntoScanner(bytes, cleanName);
-      const scanSec = document.getElementById('scannerSection');
-      if(scanSec) scanSec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if(typeof window.switchAppMode === 'function'){
+        window.switchAppMode('scanner');
+      }
       showToast('Loaded "' + cleanName + '" (' + count + ' page' + (count===1?'':'s') + ') into PDF Scanner for editing!');
     } else {
       const count = await loadPdfBytesIntoWorkbench(bytes, cleanName);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      if(typeof window.switchAppMode === 'function'){
+        window.switchAppMode('workbench');
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
       showToast('Loaded "' + cleanName + '" (' + count + ' page' + (count===1?'':'s') + ') into PDF Workbench for editing!');
     }
   }
