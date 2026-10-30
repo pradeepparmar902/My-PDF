@@ -117,8 +117,126 @@
   }
   @media (max-width:680px){
     header{padding:14px 0 0;}
-    .mode-tabs-bar{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
-    .mode-tab-btn{justify-content:center;padding:10px 8px;font-size:12.5px;text-align:center;}
+    .mode-tabs-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;}
+    .mode-tab-btn{justify-content:center;padding:8px 5px;font-size:11.5px;text-align:center;flex-direction:column;gap:3px;}
+    .mode-tab-btn .mode-tab-badge{font-size:9.5px;padding:1px 5px;}
+  }
+  .usp-hero{
+    background:linear-gradient(135deg,#1D5256 0%,#2B6F73 60%,#1F5D61 100%);
+    color:#fff;
+    border-radius:10px;
+    padding:22px 24px;
+    margin-bottom:18px;
+    box-shadow:0 6px 18px rgba(29,82,86,.18);
+  }
+  .usp-hero h2{
+    font-family:'Fraunces',serif;
+    font-size:24px;
+    margin:0 0 8px;
+    color:#fff;
+  }
+  .usp-hero p{
+    margin:0 0 14px;
+    font-size:14px;
+    line-height:1.6;
+    color:rgba(255,255,255,.92);
+    max-width:860px;
+  }
+  .usp-pill-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .usp-pill{
+    background:rgba(255,255,255,.15);
+    border:1px solid rgba(255,255,255,.28);
+    color:#fff;
+    padding:5px 11px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+  }
+  .usp-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:14px;
+    margin-bottom:20px;
+  }
+  .usp-card{
+    background:#fff;
+    border:1.5px solid var(--kraft-line);
+    border-radius:10px;
+    padding:16px 18px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    box-shadow:0 2px 6px rgba(33,31,26,.05);
+    transition:transform .15s ease,border-color .15s ease;
+  }
+  .usp-card:hover{
+    border-color:var(--teal);
+    transform:translateY(-2px);
+  }
+  .usp-card-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    font-weight:700;
+    color:var(--gold);
+    background:#FDF6E4;
+    border:1px solid #EBD59D;
+    padding:3px 9px;
+    border-radius:12px;
+    align-self:flex-start;
+  }
+  .usp-card h3{
+    font-family:'Fraunces',serif;
+    font-size:17.5px;
+    margin:0;
+    color:var(--ink);
+  }
+  .usp-card p{
+    margin:0;
+    font-size:13px;
+    line-height:1.55;
+    color:var(--ink-soft);
+  }
+  .usp-benefit-list{
+    margin:4px 0 8px;
+    padding-left:18px;
+    font-size:12.5px;
+    color:var(--ink);
+    line-height:1.55;
+  }
+  .usp-benefit-list li{margin-bottom:4px;}
+  .usp-compare-wrap{
+    overflow-x:auto;
+    border:1.5px solid var(--kraft-line);
+    border-radius:10px;
+    background:#fff;
+    margin-bottom:18px;
+  }
+  .usp-compare-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13px;
+  }
+  .usp-compare-table th,.usp-compare-table td{
+    padding:10px 14px;
+    text-align:left;
+    border-bottom:1px solid #EAE2D0;
+  }
+  .usp-compare-table th{
+    background:var(--paper-deep);
+    font-weight:700;
+    color:var(--ink);
+  }
+  .usp-compare-table td.our-app{
+    background:#F2FAF9;
+    font-weight:600;
+    color:var(--teal-deep);
   }
   .header-card{
     background:var(--card);
@@ -1399,7 +1517,7 @@
     <span id="trialBannerAction"></span>
   </div>
   <header>
-    <div class="mode-tabs-bar" role="tablist" aria-label="Select PDF Workbench or PDF Scanner">
+    <div class="mode-tabs-bar" role="tablist" aria-label="Select PDF Workbench, PDF Scanner, or App USP & Benefits">
       <button type="button" class="mode-tab-btn active" id="tabBtnWorkbench" onclick="window.switchAppMode('workbench')" role="tab" aria-selected="true">
         <span>📁 PDF Workbench</span>
         <span class="mode-tab-badge" id="tabBadgeWorkbench">Merge &amp; Edit</span>
@@ -1407,6 +1525,10 @@
       <button type="button" class="mode-tab-btn" id="tabBtnScanner" onclick="window.switchAppMode('scanner')" role="tab" aria-selected="false">
         <span>📷 PDF Scanner</span>
         <span class="mode-tab-badge" id="tabBadgeScanner">Scan &amp; Enhance</span>
+      </button>
+      <button type="button" class="mode-tab-btn" id="tabBtnUsp" onclick="window.switchAppMode('usp')" role="tab" aria-selected="false">
+        <span>🌟 Why This App (USP)</span>
+        <span class="mode-tab-badge" id="tabBadgeUsp">Key Benefits</span>
       </button>
     </div>
     <div class="header-card">
@@ -1749,6 +1871,187 @@
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════════════════════════════════
+       3. WHY THIS APP (USP) — UNIQUE FUNCTIONS, KEY BENEFITS & COMPARISON
+       ═══════════════════════════════════════════════════════════════════ -->
+  <div class="panel" id="uspSection" style="display:none;margin-top:10px;padding-top:16px;">
+    <div class="usp-hero">
+      <div style="display:inline-block;background:rgba(255,255,255,.18);padding:4px 12px;border-radius:99px;font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;margin-bottom:8px;">
+        🌟 Unique Selling Proposition (USP) · Why PDF Workbench &amp; Scanner Stands Apart
+      </div>
+      <h2>One Private Document Studio — Scan, Merge, Edit Scanned Text &amp; Extract Gujarati / Hindi / English to Word &amp; Excel</h2>
+      <p>
+        Most PDF websites force you to upload confidential documents to external cloud servers and split basic tasks across 6 different apps.
+        <strong>PDF Workbench</strong> runs <strong>100% locally inside your browser</strong> — combining a Visual Light-Table PDF Editor, a Studio Mobile Document Scanner, In-Place Scanned Text Replacement, Multi-Column Indic OCR, and Separate/Combined Photo + Text Extraction in one place.
+      </p>
+      <div class="usp-pill-row">
+        <span class="usp-pill">🔒 100% Local Browser Privacy (Zero Server Uploads)</span>
+        <span class="usp-pill">🇮🇳 Gujarati (ગુજરાતી), Hindi (हिन्दी) &amp; English Neural OCR</span>
+        <span class="usp-pill">📝 + 🖼️ Extract Text Only, Images Only, or Both</span>
+        <span class="usp-pill">🔎 Edit Words Directly Inside Scanned Images</span>
+        <span class="usp-pill">☁️ Direct Google Drive Save &amp; Re-Open</span>
+        <span class="usp-pill">📱 Works Seamlessly on Mobile &amp; Desktop</span>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+      <h3 style="font-family:'Fraunces',serif;font-size:20px;margin:0;color:var(--ink);">🚀 6 Core Power Functions &amp; Real-World Benefits</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" class="primary" onclick="window.switchAppMode('workbench')" style="padding:7px 14px;font-size:12.5px;">📁 Go to PDF Workbench</button>
+        <button type="button" class="outline-teal" onclick="window.switchAppMode('scanner')" style="padding:7px 14px;font-size:12.5px;">📷 Go to PDF Scanner</button>
+      </div>
+    </div>
+
+    <div class="usp-grid">
+      <!-- USP 1 -->
+      <div class="usp-card">
+        <span class="usp-card-badge">1 · VISUAL LIGHT-TABLE</span>
+        <h3>📁 Multi-PDF Merge, Reorder, Split &amp; Page Stamping</h3>
+        <p>Drop multiple PDFs from your computer, phone, or Google Drive and see every page laid out like a physical light table.</p>
+        <ul class="usp-benefit-list">
+          <li><strong>Drag &amp; Drop Across Files:</strong> Interleave pages from different PDFs in any order.</li>
+          <li><strong>Visual "DELETE" Stamp:</strong> Mark unwanted pages before deleting or merging, with instant <strong>Undo</strong>.</li>
+          <li><strong>One-Click Split &amp; Share:</strong> Extract selected pages into a separate PDF or share directly via WhatsApp/Email.</li>
+        </ul>
+        <button type="button" class="outline-teal" onclick="window.switchAppMode('workbench')" style="margin-top:auto;padding:7px 12px;font-size:12px;">📁 Open PDF Workbench →</button>
+      </div>
+
+      <!-- USP 2 -->
+      <div class="usp-card">
+        <span class="usp-card-badge">2 · STUDIO CAMERA SCANNER</span>
+        <h3>📷 Smart Document Scanner with 8-Point Crop &amp; Deblur</h3>
+        <p>Turn mobile camera photos or WhatsApp document images into clean, professional multi-page A4 PDFs.</p>
+        <ul class="usp-benefit-list">
+          <li><strong>8-Handle Interactive Crop:</strong> Drag any corner or side edge to trim desk backgrounds accurately.</li>
+          <li><strong>4 Studio Color Modes:</strong> <em>Original Color</em>, <em>Magic Color (Vivid Text)</em>, <em>B&amp;W Document</em>, and <em>Grayscale</em>.</li>
+          <li><strong>Clarity &amp; Deblur Engine:</strong> Unsharp-mask sharpening + Brightness/Contrast controls make blurry text crisp.</li>
+        </ul>
+        <button type="button" class="outline-teal" onclick="window.switchAppMode('scanner')" style="margin-top:auto;padding:7px 12px;font-size:12px;">📷 Open PDF Scanner →</button>
+      </div>
+
+      <!-- USP 3 -->
+      <div class="usp-card">
+        <span class="usp-card-badge">3 · EDIT SCANNED DOCUMENTS</span>
+        <h3>🔎 In-Place Find &amp; Replace on Scanned &amp; Digital PDFs</h3>
+        <p>Need to correct a name, date, amount, or typo inside a flat scanned image or camera document? No need to re-type the whole page.</p>
+        <ul class="usp-benefit-list">
+          <li><strong>Works on Camera Scans:</strong> Uses OCR word bounding boxes to locate words inside flat images.</li>
+          <li><strong>Smart Background &amp; Ink Sampling:</strong> Automatically samples the paper shade and ink color so the replacement blends naturally.</li>
+          <li><strong>Click-Anything Box Editor:</strong> Also lets you click any spot on a page to place a custom text patch.</li>
+        </ul>
+        <button type="button" class="outline-teal" onclick="document.getElementById('premiumSection').scrollIntoView({behavior:'smooth'})" style="margin-top:auto;padding:7px 12px;font-size:12px;">🔎 Try Find &amp; Replace ↓</button>
+      </div>
+
+      <!-- USP 4 -->
+      <div class="usp-card">
+        <span class="usp-card-badge">4 · INDIC &amp; NEWSPAPER OCR</span>
+        <h3>🇮🇳 High-Accuracy Gujarati (ગુજરાતી), Hindi &amp; Multi-Column OCR</h3>
+        <p>Specially engineered for Indian regional documents, government forms, and multi-column newspaper clippings.</p>
+        <ul class="usp-benefit-list">
+          <li><strong>Photo &amp; Border Masking:</strong> Automatically masks embedded article photos and divider rules so they never bleed garbage into text lines.</li>
+          <li><strong>True 2-Column Reading Order:</strong> Separates full-width headlines, left columns, and right columns so sentences never mix across columns.</li>
+          <li><strong>Crisp Matra Recognition:</strong> Preserves delicate Gujarati &amp; Hindi vowel matras (િ, ી, ુ, ૂ, ે, ૈ, ો, ૌ, ં) and conjuncts.</li>
+        </ul>
+        <button type="button" class="outline-teal" onclick="document.getElementById('ocrLangPanel').scrollIntoView({behavior:'smooth'})" style="margin-top:auto;padding:7px 12px;font-size:12px;">🌐 Configure OCR Languages ↓</button>
+      </div>
+
+      <!-- USP 5 -->
+      <div class="usp-card">
+        <span class="usp-card-badge">5 · TEXT + IMAGE EXTRACTOR</span>
+        <h3>📝 + 🖼️ Extract Text Only, Images Only, or Both to Word (<code>.docx</code>)</h3>
+        <p>Complete flexibility when extracting content from scanned newspapers, magazines, reports, and ID documents:</p>
+        <ul class="usp-benefit-list">
+          <li><strong>Auto-Cropped Embedded Photos:</strong> Automatically detects and crops portraits, figures, and photos from scanned pages.</li>
+          <li><strong>Use Separately or Together:</strong> Download individual photos as <code>.png</code>, copy images (<code>Ctrl+V</code>), download Text-Only Word, Images-Only Word, or Combined Word (Text + Photos).</li>
+          <li><strong>Custom Drag-Crop Tool:</strong> Manually drag a box over any signature, stamp, or diagram to extract it as an image.</li>
+        </ul>
+        <button type="button" class="outline-teal" onclick="document.getElementById('wordExtractPanel').scrollIntoView({behavior:'smooth'})" style="margin-top:auto;padding:7px 12px;font-size:12px;">📝 Open Word &amp; Image Extractor ↓</button>
+      </div>
+
+      <!-- USP 6 -->
+      <div class="usp-card">
+        <span class="usp-card-badge">6 · TABLE-TO-EXCEL + CLOUD</span>
+        <h3>📊 Smart Excel (<code>.xlsx</code>) Table Extractor &amp; Google Drive Sync</h3>
+        <p>Turn financial schedules, invoices, and tabular scans into structured Excel spreadsheets and manage files with Google Drive.</p>
+        <ul class="usp-benefit-list">
+          <li><strong>Automatic Column Clustering:</strong> Detects aligned columns in digital or scanned tables and maps them into real Excel cells.</li>
+          <li><strong>Separate or Combined Sheets:</strong> Export one worksheet per PDF page or combine all pages into a single master sheet.</li>
+          <li><strong>Google Drive Round-Trip:</strong> Save scanned PDFs to your Google Drive folder and re-open them anytime via Folder Picker or Link.</li>
+        </ul>
+        <button type="button" class="outline-teal" onclick="document.getElementById('excelExtractPanel').scrollIntoView({behavior:'smooth'})" style="margin-top:auto;padding:7px 12px;font-size:12px;">📊 Open Excel Extractor ↓</button>
+      </div>
+    </div>
+
+    <!-- Comparison Table: Why Choose PDF Workbench over Ordinary Tools -->
+    <h3 style="font-family:'Fraunces',serif;font-size:19px;margin:0 0 10px;color:var(--ink);">⚖️ At a Glance: Why Choose This App Over Typical Online PDF Websites?</h3>
+    <div class="usp-compare-wrap">
+      <table class="usp-compare-table">
+        <thead>
+          <tr>
+            <th style="width:28%;">Capability / Benefit</th>
+            <th style="width:42%;background:#E2F3F2;color:var(--teal-deep);">🌟 Our App (PDF Workbench &amp; Scanner)</th>
+            <th style="width:30%;">Typical Online PDF Websites</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>🔒 Document Privacy &amp; Security</strong></td>
+            <td class="our-app">✅ 100% Local Browser Processing — files never leave your device</td>
+            <td>❌ Files uploaded to external third-party servers</td>
+          </tr>
+          <tr>
+            <td><strong>🇮🇳 Gujarati &amp; Hindi Newspaper OCR</strong></td>
+            <td class="our-app">✅ Auto Photo-Masking + 2-Column Reading Order + Indic LSTM Model</td>
+            <td>❌ Mixes columns &amp; turns photos into random garbage symbols</td>
+          </tr>
+          <tr>
+            <td><strong>🖼️ Extract Text, Images, or Both</strong></td>
+            <td class="our-app">✅ Auto-crops embedded photos + Custom Drag-Crop + Combined or Separate Word/PNG</td>
+            <td>❌ Dumps unformatted plain text only; loses or scrambles photos</td>
+          </tr>
+          <tr>
+            <td><strong>🔎 Replace Words on Scanned Images</strong></td>
+            <td class="our-app">✅ Built-in OCR Find &amp; Replace with auto paper-color &amp; ink matching</td>
+            <td>❌ Cannot edit text inside scanned/camera PDFs</td>
+          </tr>
+          <tr>
+            <td><strong>📷 Camera Scanner + Workbench</strong></td>
+            <td class="our-app">✅ Unified in one tab bar — scan, deblur, crop &amp; immediately edit or extract</td>
+            <td>❌ Requires installing a separate mobile scanner app</td>
+          </tr>
+          <tr>
+            <td><strong>☁️ Google Drive Workflow</strong></td>
+            <td class="our-app">✅ Save scans to Drive &amp; re-open from Drive folder or share link anytime</td>
+            <td>❌ Manual download and re-upload required every time</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Target User Personas -->
+    <div style="background:var(--paper);border:1.5px solid var(--kraft-line);border-radius:10px;padding:16px 18px;">
+      <h4 style="font-family:'Fraunces',serif;font-size:16.5px;margin:0 0 10px;color:var(--teal-deep);">👥 Who Benefits Most from PDF Workbench?</h4>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;font-size:12.5px;line-height:1.5;">
+        <div style="background:#fff;padding:10px 12px;border-radius:8px;border:1px solid #E5DCC8;">
+          <strong>📰 Journalists, Writers &amp; Publishers</strong><br>
+          Scan Gujarati, Hindi, or English newspaper clippings and extract both editable article text and cropped photographs in seconds.
+        </div>
+        <div style="background:#fff;padding:10px 12px;border-radius:8px;border:1px solid #E5DCC8;">
+          <strong>⚖️ Advocates, CAs &amp; Tax Consultants</strong><br>
+          Merge client annexures, scan physical deeds, update dates/clauses on scanned copies, and convert financial tables to Excel with 100% client confidentiality.
+        </div>
+        <div style="background:#fff;padding:10px 12px;border-radius:8px;border:1px solid #E5DCC8;">
+          <strong>🏢 Corporate, Banking &amp; Admin Teams</strong><br>
+          Process KYC documents, invoices, and signed agreements entirely inside the browser without violating corporate data-privacy policies.
+        </div>
+        <div style="background:#fff;padding:10px 12px;border-radius:8px;border:1px solid #E5DCC8;">
+          <strong>🎓 Teachers, Researchers &amp; Students</strong><br>
+          Capture textbook pages with a phone camera, crop diagrams as PNG images, and compile clean study notes into Word (<code>.docx</code>).
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="panel" id="premiumSection">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
@@ -1818,16 +2121,24 @@
   </div>
 
   <div class="panel" id="wordExtractPanel">
-    <h2>Extract text to a Word document</h2>
-    <p class="sub">Works directly with <strong>1. PDF Workbench</strong> or <strong>2. PDF Scanner</strong> pages. Uses high-resolution illumination normalization, automatic photograph/border masking, and multi-column newspaper reading order so Gujarati, Hindi, and English scans convert cleanly into an editable Word (<code>.docx</code>) file.</p>
+    <h2>Extract Text &amp; Images (Word <code>.docx</code> / Separate Images)</h2>
+    <p class="sub">Works directly with <strong>1. PDF Workbench</strong> or <strong>2. PDF Scanner</strong> pages. Choose whether to extract <strong>Text Only</strong>, <strong>Images Only</strong>, or <strong>Both (Text + Embedded Photos)</strong>. Automatically detects and crops embedded photographs/figures from scanned documents so you can use images separately, text separately, or both together in Word.</p>
     <div class="ew-row">
       <label class="ew-field">
-        <span>Pages to convert (Workbench or Scanner)</span>
+        <span>Pages to extract from (Workbench or Scanner)</span>
         <select id="ewScope">
           <option value="all">All pages (1. PDF Workbench + 2. PDF Scanner)</option>
           <option value="wb-all">1. PDF Workbench — All pages</option>
           <option value="selected">1. PDF Workbench — Selected pages only</option>
           <option value="scanner">2. PDF Scanner — All scanned pages</option>
+        </select>
+      </label>
+      <label class="ew-field" style="min-width:250px;">
+        <span>What to extract (Extraction Mode)</span>
+        <select id="ewExtractMode" style="font-weight:600;color:var(--teal-deep);">
+          <option value="both" selected>📝 + 🖼️ Both (Text + Cropped Images in Word)</option>
+          <option value="text">📝 Text Only (Clean OCR / PDF Text)</option>
+          <option value="images">🖼️ Images Only (Extract Photos / Figures Only)</option>
         </select>
       </label>
       <label class="ew-check"><input type="checkbox" id="ewUseOcr" checked> Use OCR for scanned/image pages</label>
@@ -1840,14 +2151,36 @@
       <label class="ew-check" style="margin:0;"><input type="checkbox" id="ewLangEn" checked onchange="window._syncOcrLangCheckboxes && window._syncOcrLangCheckboxes('ew')"> English</label>
       <span style="font-size:11.5px;color:var(--ink-soft);">(Select <b>ગુજરાતી</b> for Gujarati newspapers/scans)</span>
     </div>
-    <button class="primary" id="ewExtractBtn" style="margin-top:14px;">📝 Extract &amp; download Word file</button>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:14px;">
+      <button class="primary" id="ewExtractBtn">📝 Extract &amp; Download</button>
+      <button type="button" class="outline-teal" id="ewQuickImagesOnlyBtn" title="Quickly extract all embedded photos and page images without waiting for OCR">🖼️ Extract Images Only (Fast)</button>
+      <button type="button" class="outline-teal" id="ewCustomCropBtn" title="Manually drag-crop any photo, diagram, or signature from a page">✂️ Custom Crop Image from Page</button>
+    </div>
     <div class="ew-progress" id="ewProgress" style="display:none;"></div>
+
+    <!-- Extracted Images Gallery (Separate Image Download / Copy / Toggle for Word) -->
+    <div id="ewImagesWrap" style="display:none;margin-top:14px;border:1.5px solid var(--gold);border-radius:9px;background:#FFFDF7;padding:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+        <div>
+          <strong style="font-size:13.5px;color:var(--ink);">🖼️ Extracted Images (<span id="ewImagesCount">0</span> found)</strong>
+          <span style="font-size:11.5px;color:var(--ink-soft);margin-left:6px;">Download or copy individual photos, or tick checkboxes to include them in Word (<code>.docx</code>)</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="outline-teal" id="ewDownloadAllPngBtn" style="padding:5px 10px;font-size:12px;">⬇ Download Selected PNGs</button>
+          <button type="button" class="outline-teal" id="ewDownloadImagesDocxBtn" style="padding:5px 10px;font-size:12px;">🖼️ Download Images-Only Word (.docx)</button>
+        </div>
+      </div>
+      <div id="ewImagesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;"></div>
+    </div>
+
+    <!-- Extracted Text Preview (Editable before Copy / Text-Only Word / Combined Word) -->
     <div id="ewPreviewWrap" style="display:none;margin-top:12px;border:1.5px solid var(--teal);border-radius:9px;background:#fff;padding:12px;">
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
-        <strong style="font-size:13px;color:var(--teal-deep);">📄 Extracted Text Preview (Editable before Copy / Re-Download):</strong>
+        <strong style="font-size:13px;color:var(--teal-deep);">📄 Extracted Text Preview (Editable):</strong>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
           <button type="button" class="outline-teal" id="ewCopyPreviewBtn" style="padding:5px 11px;font-size:12px;">📋 Copy Text</button>
-          <button type="button" class="primary" id="ewRedownloadWordBtn" style="padding:5px 11px;font-size:12px;">⬇ Download Edited Word (.docx)</button>
+          <button type="button" class="outline-teal" id="ewDownloadTextOnlyWordBtn" style="padding:5px 11px;font-size:12px;">📝 Download Text-Only Word (.docx)</button>
+          <button type="button" class="primary" id="ewRedownloadWordBtn" style="padding:5px 11px;font-size:12px;">📝 + 🖼️ Download Combined Word (Text + Images)</button>
         </div>
       </div>
       <textarea id="ewPreviewTextarea" rows="10" style="width:100%;padding:10px;border:1px solid var(--kraft-line);border-radius:7px;font-family:'Nirmala UI','Shruti','Noto Sans Gujarati','Inter',sans-serif;font-size:14px;line-height:1.65;color:var(--ink);resize:vertical;"></textarea>
@@ -5967,17 +6300,23 @@ function prepareDocumentCanvasForLayoutOcr(srcCanvas){
   }
 
   // Connected-component filtering on photo cells: keep components of >= 4 cells (photographs/badges)
-  // and dilate by 1 cell only into adjacent high-midtone/color cells so text next to photos stays intact
+  // and record bounding boxes of true photographs (>= 6 cells) for separate/combined image extraction
   const visited = new Uint8Array(gw * gh);
   const confirmedPhoto = new Uint8Array(gw * gh);
+  const rawPhotoBoxes = [];
   for(let i = 0; i < gw * gh; i++){
     if(!isPhotoCell[i] || visited[i]) continue;
     const comp = [i];
     visited[i] = 1;
     let head = 0;
+    let minGx = gw, maxGx = 0, minGy = gh, maxGy = 0;
     while(head < comp.length){
       const cur = comp[head++];
       const cy = Math.floor(cur / gw), cx = cur % gw;
+      if(cx < minGx) minGx = cx;
+      if(cx > maxGx) maxGx = cx;
+      if(cy < minGy) minGy = cy;
+      if(cy > maxGy) maxGy = cy;
       const nbrs = [
         cy > 0 ? (cy - 1) * gw + cx : -1,
         cy + 1 < gh ? (cy + 1) * gw + cx : -1,
@@ -5992,12 +6331,104 @@ function prepareDocumentCanvasForLayoutOcr(srcCanvas){
         }
       }
     }
-    // Keep photo components >= 3 cells (or >= 2 cells if strongly colored like red "PoV" badge)
     const avgColor = comp.reduce((s, cIdx) => s + cellColorFrac[cIdx], 0) / comp.length;
     if(comp.length >= 4 || (comp.length >= 2 && avgColor > 0.40)){
       comp.forEach(cIdx => { confirmedPhoto[cIdx] = 1; });
     }
+    // Candidate embedded photograph/illustration for image extraction (>= 6 grid cells)
+    if(comp.length >= 6){
+      rawPhotoBoxes.push({
+        x0: Math.max(0, minGx * cell),
+        y0: Math.max(0, minGy * cell),
+        x1: Math.min(w, (maxGx + 1) * cell),
+        y1: Math.min(h, (maxGy + 1) * cell),
+        cells: comp.length
+      });
+    }
   }
+
+  // Merge nearby/overlapping photo bounding boxes (e.g. if a bright shirt or phone splits one photo)
+  const mergedPhotoBoxes = [];
+  const mergeGap = Math.round(cell * 1.6);
+  for(let i = 0; i < rawPhotoBoxes.length; i++){
+    let b = Object.assign({}, rawPhotoBoxes[i]);
+    let mergedAny = true;
+    while(mergedAny){
+      mergedAny = false;
+      for(let j = mergedPhotoBoxes.length - 1; j >= 0; j--){
+        const m = mergedPhotoBoxes[j];
+        const overlapX = !(b.x1 + mergeGap < m.x0 || b.x0 - mergeGap > m.x1);
+        const overlapY = !(b.y1 + mergeGap < m.y0 || b.y0 - mergeGap > m.y1);
+        if(overlapX && overlapY){
+          b.x0 = Math.min(b.x0, m.x0);
+          b.y0 = Math.min(b.y0, m.y0);
+          b.x1 = Math.max(b.x1, m.x1);
+          b.y1 = Math.max(b.y1, m.y1);
+          b.cells += m.cells;
+          mergedPhotoBoxes.splice(j, 1);
+          mergedAny = true;
+        }
+      }
+    }
+    mergedPhotoBoxes.push(b);
+  }
+
+  // Filter & tightly trim valid embedded photo boxes
+  const detectedPhotoBoxes = [];
+  for(let i = 0; i < mergedPhotoBoxes.length; i++){
+    const b = mergedPhotoBoxes[i];
+    const bw = b.x1 - b.x0;
+    const bh = b.y1 - b.y0;
+    const areaFrac = (bw * bh) / (w * h || 1);
+    const aspect = bw / Math.max(1, bh);
+    // Keep genuine photos/figures (at least 7% width & 5% height, area >= 1.1% of page, reasonable aspect)
+    if(bw >= Math.max(64, w * 0.07) && bh >= Math.max(64, h * 0.05) && areaFrac >= 0.011 && areaFrac <= 0.88 && aspect >= 0.18 && aspect <= 5.5){
+      // Trim outer paper-white rows/columns so the cropped photo has crisp edges
+      let tx0 = b.x0, ty0 = b.y0, tx1 = b.x1, ty1 = b.y1;
+      const isPaperPix = (px, py) => {
+        const pIdx = py * w + px;
+        const bgVal = smoothBg[Math.min(gh - 1, Math.floor(py / cell)) * gw + Math.min(gw - 1, Math.floor(px / cell))];
+        return lum[pIdx] >= bgVal - 22 && sat[pIdx] < 36;
+      };
+      while(ty0 < ty1 - 32){
+        let nonPaper = 0, tot = 0;
+        for(let x = tx0; x < tx1; x += 3){ tot++; if(!isPaperPix(x, ty0)) nonPaper++; }
+        if(nonPaper / (tot || 1) > 0.18) break;
+        ty0 += 2;
+      }
+      while(ty1 > ty0 + 32){
+        let nonPaper = 0, tot = 0;
+        for(let x = tx0; x < tx1; x += 3){ tot++; if(!isPaperPix(x, ty1 - 1)) nonPaper++; }
+        if(nonPaper / (tot || 1) > 0.18) break;
+        ty1 -= 2;
+      }
+      while(tx0 < tx1 - 32){
+        let nonPaper = 0, tot = 0;
+        for(let y = ty0; y < ty1; y += 3){ tot++; if(!isPaperPix(tx0, y)) nonPaper++; }
+        if(nonPaper / (tot || 1) > 0.18) break;
+        tx0 += 2;
+      }
+      while(tx1 > tx0 + 32){
+        let nonPaper = 0, tot = 0;
+        for(let y = ty0; y < ty1; y += 3){ tot++; if(!isPaperPix(tx1 - 1, y)) nonPaper++; }
+        if(nonPaper / (tot || 1) > 0.18) break;
+        tx1 -= 2;
+      }
+      if((tx1 - tx0) >= 48 && (ty1 - ty0) >= 48){
+        detectedPhotoBoxes.push({
+          x0: tx0,
+          y0: ty0,
+          x1: tx1,
+          y1: ty1,
+          w: tx1 - tx0,
+          h: ty1 - ty0,
+          yPct: ty0 / h,
+          xPct: tx0 / w
+        });
+      }
+    }
+  }
+  detectedPhotoBoxes.sort((a, b) => a.y0 - b.y0);
 
   // Fill interior holes inside confirmed photo blocks (e.g. white phone screen inside woman photo)
   for(let gy = 1; gy < gh - 1; gy++){
@@ -6099,7 +6530,202 @@ function prepareDocumentCanvasForLayoutOcr(srcCanvas){
   }
 
   ctx.putImageData(imgData, 0, 0);
+  srcCanvas._detectedPhotoBoxes = detectedPhotoBoxes;
+  out._detectedPhotoBoxes = detectedPhotoBoxes;
   return out;
+}
+
+// Helper: Convert dataURL to Uint8Array for docx.ImageRun
+function dataUrlToUint8Array(dataUrl){
+  const parts = (dataUrl || '').split(',');
+  const b64 = parts.length > 1 ? parts[1] : '';
+  if(!b64) return new Uint8Array(0);
+  const bin = atob(b64);
+  const arr = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+  return arr;
+}
+
+// Crops a rectangular region from a source canvas into an extracted image object
+function cropRegionFromCanvasToImageObj(srcCanvas, rect, meta){
+  const sx = Math.max(0, Math.round(rect.x0));
+  const sy = Math.max(0, Math.round(rect.y0));
+  const sw = Math.max(16, Math.min(srcCanvas.width - sx, Math.round(rect.w || (rect.x1 - rect.x0))));
+  const sh = Math.max(16, Math.min(srcCanvas.height - sy, Math.round(rect.h || (rect.y1 - rect.y0))));
+
+  const maxOutDim = meta && meta.isFullPage ? 1400 : 1000;
+  const curMax = Math.max(sw, sh);
+  const scale = curMax > maxOutDim ? (maxOutDim / curMax) : 1;
+  const outW = Math.max(16, Math.round(sw * scale));
+  const outH = Math.max(16, Math.round(sh * scale));
+
+  const c = document.createElement('canvas');
+  c.width = outW;
+  c.height = outH;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  ctx.drawImage(srcCanvas, sx, sy, sw, sh, 0, 0, outW, outH);
+
+  const dataUrl = c.toDataURL('image/png');
+  return {
+    id: 'extimg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+    pageNum: meta.pageNum || 1,
+    label: meta.label || ('Page ' + (meta.pageNum || 1) + ' · Image'),
+    dataUrl,
+    bytes: dataUrlToUint8Array(dataUrl),
+    width: outW,
+    height: outH,
+    y0: sy,
+    yPct: sy / Math.max(1, srcCanvas.height),
+    xPct: sx / Math.max(1, srcCanvas.width),
+    isFullPage: !!meta.isFullPage,
+    includedInWord: meta.includedInWord !== false
+  };
+}
+
+// Extracts all detected embedded photos + full page snapshot from a page canvas
+function extractImagesFromPageCanvas(srcCanvas, globalIdx, extractMode){
+  if(!srcCanvas._detectedPhotoBoxes){
+    prepareDocumentCanvasForLayoutOcr(srcCanvas);
+  }
+  const boxes = srcCanvas._detectedPhotoBoxes || [];
+  const results = [];
+
+  for(let i = 0; i < boxes.length; i++){
+    const b = boxes[i];
+    results.push(cropRegionFromCanvasToImageObj(srcCanvas, b, {
+      pageNum: globalIdx,
+      label: 'Page ' + globalIdx + ' · Photo ' + (i + 1),
+      isFullPage: false,
+      includedInWord: extractMode !== 'text'
+    }));
+  }
+
+  // Also provide the Full Page Image in the gallery so user can always use/download the full page as an image
+  const includeFullByDefault = (extractMode === 'images' && boxes.length === 0);
+  results.push(cropRegionFromCanvasToImageObj(srcCanvas, {
+    x0: 0, y0: 0, w: srcCanvas.width, h: srcCanvas.height
+  }, {
+    pageNum: globalIdx,
+    label: 'Page ' + globalIdx + ' · Full Page Image',
+    isFullPage: true,
+    includedInWord: includeFullByDefault
+  }));
+
+  return results;
+}
+
+window._extractedImagesStore = [];
+window._lastExtractedPageData = [];
+
+function renderExtractedImagesGallery(){
+  const wrap = document.getElementById('ewImagesWrap');
+  const grid = document.getElementById('ewImagesGrid');
+  const countEl = document.getElementById('ewImagesCount');
+  if(!wrap || !grid) return;
+
+  const imgs = window._extractedImagesStore || [];
+  if(countEl) countEl.textContent = String(imgs.length);
+
+  if(imgs.length === 0){
+    wrap.style.display = 'none';
+    grid.innerHTML = '';
+    return;
+  }
+
+  wrap.style.display = 'block';
+  grid.innerHTML = '';
+
+  imgs.forEach((imgItem, idx) => {
+    const card = document.createElement('div');
+    card.style.cssText = 'border:1px solid var(--kraft-line);border-radius:8px;background:#fff;padding:8px;display:flex;flex-direction:column;gap:6px;box-shadow:0 1px 4px rgba(0,0,0,.05);';
+
+    const topBar = document.createElement('div');
+    topBar.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:4px;font-size:11.5px;';
+
+    const chkLabel = document.createElement('label');
+    chkLabel.style.cssText = 'display:flex;align-items:center;gap:5px;cursor:pointer;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;';
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.checked = !!imgItem.includedInWord;
+    chk.title = 'Include this image when downloading Combined or Images-Only Word (.docx)';
+    chk.addEventListener('change', () => {
+      imgItem.includedInWord = chk.checked;
+    });
+    const titleSpan = document.createElement('span');
+    titleSpan.textContent = imgItem.label;
+    chkLabel.appendChild(chk);
+    chkLabel.appendChild(titleSpan);
+
+    const delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.textContent = '✕';
+    delBtn.title = 'Remove from gallery';
+    delBtn.style.cssText = 'border:none;background:transparent;color:var(--ink-soft);cursor:pointer;font-size:12px;padding:2px 5px;';
+    delBtn.addEventListener('click', () => {
+      window._extractedImagesStore.splice(idx, 1);
+      renderExtractedImagesGallery();
+    });
+
+    topBar.appendChild(chkLabel);
+    topBar.appendChild(delBtn);
+
+    const thumbWrap = document.createElement('div');
+    thumbWrap.style.cssText = 'height:125px;background:#F4EFE4;border-radius:6px;display:flex;align-items:center;justify-content:center;overflow:hidden;border:1px solid #E6DEC8;';
+    const imgEl = document.createElement('img');
+    imgEl.src = imgItem.dataUrl;
+    imgEl.alt = imgItem.label;
+    imgEl.style.cssText = 'max-width:100%;max-height:100%;object-fit:contain;';
+    thumbWrap.appendChild(imgEl);
+
+    const metaRow = document.createElement('div');
+    metaRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;font-size:10.5px;color:var(--ink-soft);';
+    metaRow.innerHTML = '<span>' + imgItem.width + '×' + imgItem.height + ' px</span><span>' + (imgItem.isFullPage ? 'Full Page' : 'Cropped Photo') + '</span>';
+
+    const btnRow = document.createElement('div');
+    btnRow.style.cssText = 'display:flex;gap:6px;margin-top:auto;';
+
+    const dlBtn = document.createElement('button');
+    dlBtn.type = 'button';
+    dlBtn.className = 'outline-teal';
+    dlBtn.style.cssText = 'flex:1;padding:4px 6px;font-size:11.5px;';
+    dlBtn.textContent = '⬇ PNG';
+    dlBtn.addEventListener('click', () => {
+      const a = document.createElement('a');
+      a.href = imgItem.dataUrl;
+      a.download = imgItem.label.replace(/[^A-Za-z0-9_-]+/g, '-') + '.png';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast('Downloaded ' + imgItem.label + ' (.png)');
+    });
+
+    const cpBtn = document.createElement('button');
+    cpBtn.type = 'button';
+    cpBtn.className = 'outline-teal';
+    cpBtn.style.cssText = 'flex:1;padding:4px 6px;font-size:11.5px;';
+    cpBtn.textContent = '📋 Copy';
+    cpBtn.addEventListener('click', async () => {
+      try{
+        const res = await fetch(imgItem.dataUrl);
+        const blob = await res.blob();
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        showToast('Copied "' + imgItem.label + '" to clipboard! Paste (Ctrl+V) anywhere.');
+      }catch(e){
+        showToast('Clipboard image copy not supported in this browser — use ⬇ PNG instead.');
+      }
+    });
+
+    btnRow.appendChild(dlBtn);
+    btnRow.appendChild(cpBtn);
+
+    card.appendChild(topBar);
+    card.appendChild(thumbWrap);
+    card.appendChild(metaRow);
+    card.appendChild(btnRow);
+    grid.appendChild(card);
+  });
 }
 
 /**
@@ -6155,10 +6781,8 @@ function extractStructuredOcrBlocks(ocrData, canvasW, canvasH, langs){
     const lineW = bbox.x1 - bbox.x0;
     const lineH = bbox.y1 - bbox.y0;
     if(lineW < 8 || lineH < 6) continue;
-    // Ignore tiny clipped fragments on the extreme right/left 2% edge
     if(bbox.x0 > canvasW * 0.94 || bbox.x1 < canvasW * 0.04) continue;
 
-    // Filter words in the line to drop photo/border garbage tokens
     let lineWords = Array.isArray(ln.words) && ln.words.length > 0 ? ln.words : null;
     let lineStr = '';
     if(lineWords){
@@ -6175,7 +6799,6 @@ function extractStructuredOcrBlocks(ocrData, canvasW, canvasH, langs){
         const hasAlphaNum = /[A-Za-z0-9\u0900-\u097F\u0A80-\u0AFF]/.test(wText);
         if(!hasAlphaNum) continue;
 
-        // Drop low-confidence non-Indic single-char or punctuation noise
         if(!hasIndic && wConf < 42 && wText.length <= 3) continue;
         if(wConf < 24) continue;
 
@@ -6194,7 +6817,6 @@ function extractStructuredOcrBlocks(ocrData, canvasW, canvasH, langs){
 
     lineStr = cleanIndicOcrLineText(lineStr, langs);
     if(!lineStr) continue;
-    // Skip lines that are just a single stray digit or symbol
     if(lineStr.length <= 2 && !/[\u0900-\u097F\u0A80-\u0AFFA-Za-z]/.test(lineStr)) continue;
 
     cleanedLines.push({
@@ -6222,8 +6844,6 @@ function extractStructuredOcrBlocks(ocrData, canvasW, canvasH, langs){
   const heights = cleanedLines.map(l => l.h);
   const medH = median(heights) || 24;
 
-  // Detect if there is a vertical 2-column split (common in newspapers, magazines & forms)
-  // Find candidate split X in 35%..65% of canvasW that minimizes lines crossing it
   const minX = Math.min(...cleanedLines.map(l => l.x0));
   const maxX = Math.max(...cleanedLines.map(l => l.x1));
   const contentSpanW = Math.max(1, maxX - minX);
@@ -6235,7 +6855,6 @@ function extractStructuredOcrBlocks(ocrData, canvasW, canvasH, langs){
     let crosses = 0, leftCnt = 0, rightCnt = 0;
     for(let i = 0; i < cleanedLines.length; i++){
       const l = cleanedLines[i];
-      // Ignore very wide headline lines when testing the body column gutter
       if(l.w > contentSpanW * 0.62) continue;
       if(l.x1 <= candX + medH * 0.6) leftCnt++;
       else if(l.x0 >= candX - medH * 0.6) rightCnt++;
@@ -6253,7 +6872,6 @@ function extractStructuredOcrBlocks(ocrData, canvasW, canvasH, langs){
   const isTwoColumn = leftCandidates.length >= 3 && rightCandidates.length >= 3 &&
                       bestCrossCount <= Math.max(2, Math.floor(narrowLines.length * 0.12));
 
-  // Helper to group a sorted list of single-column lines into natural paragraphs
   function groupColumnLinesIntoBlocks(colLines, colIndex){
     if(colLines.length === 0) return [];
     const sorted = colLines.slice().sort((a, b) => a.y0 - b.y0);
@@ -6270,9 +6888,7 @@ function extractStructuredOcrBlocks(ocrData, canvasW, canvasH, langs){
       const vGap = cur.y0 - prev.y1;
       const prevIsHeading = prev.h >= medH * 1.38;
       const curIsHeading = cur.h >= medH * 1.38;
-      // Check if previous line ended well before the right edge of this column (sentence end)
       const prevShortRight = (colMaxX - prev.x1) > colSpanW * 0.22 && /[।\.!\?\"”'’]$/.test(prev.text);
-      // Check if current line has a paragraph first-line indent
       const curIndented = (cur.x0 - colMinX) > Math.max(medH * 1.1, colSpanW * 0.06);
 
       if(prevIsHeading || curIsHeading || vGap > medH * 0.85 || (vGap > medH * 0.35 && (prevShortRight || curIndented))){
@@ -6292,7 +6908,6 @@ function extractStructuredOcrBlocks(ocrData, canvasW, canvasH, langs){
     if(avgH >= medH * 1.55) role = 'title';
     else if(avgH >= medH * 1.32) role = 'subheading';
 
-    // Join hyphenated line breaks cleanly
     let joined = '';
     for(let i = 0; i < linesArr.length; i++){
       const t = linesArr[i].text.trim();
@@ -6309,7 +6924,8 @@ function extractStructuredOcrBlocks(ocrData, canvasW, canvasH, langs){
       role,
       text: joined.replace(/\s+/g, ' ').trim(),
       column: colIndex,
-      y0: linesArr[0].y0
+      y0: linesArr[0].y0,
+      yPct: linesArr[0].y0 / Math.max(1, canvasH)
     };
   }
 
@@ -6320,7 +6936,6 @@ function extractStructuredOcrBlocks(ocrData, canvasW, canvasH, langs){
     const rightCol = [];
     const bottomFullWidth = [];
 
-    // Find vertical range of the 2-column body
     const colStartY = Math.min(
       Math.min(...leftCandidates.map(l => l.y0)),
       Math.min(...rightCandidates.map(l => l.y0))
@@ -6355,17 +6970,49 @@ function extractStructuredOcrBlocks(ocrData, canvasW, canvasH, langs){
   return { blocks: finalBlocks, plainText, avgConfidence, isTwoColumn };
 }
 
+// Helper: Creates a Word Paragraph containing an embedded docx.ImageRun
+function createWordImageParagraph(imgObj){
+  const { Paragraph, ImageRun, AlignmentType } = docx;
+  if(!imgObj || !imgObj.bytes || imgObj.bytes.length === 0 || !ImageRun) return null;
+  const maxW = imgObj.isFullPage ? 520 : 340;
+  const maxH = imgObj.isFullPage ? 680 : 360;
+  const scale = Math.min(1, maxW / Math.max(1, imgObj.width), maxH / Math.max(1, imgObj.height));
+  const dispW = Math.max(40, Math.round(imgObj.width * scale));
+  const dispH = Math.max(40, Math.round(imgObj.height * scale));
+
+  return new Paragraph({
+    alignment: AlignmentType ? AlignmentType.CENTER : undefined,
+    spacing: { before: 140, after: 160 },
+    children: [
+      new ImageRun({
+        data: imgObj.bytes,
+        transformation: { width: dispW, height: dispH }
+      })
+    ]
+  });
+}
+
 /**
- * Builds and downloads a clean Word (.docx) file from an array of paragraphs/blocks,
+ * Builds and downloads a clean Word (.docx) file from an array of paragraphs/blocks/images,
  * using 'Nirmala UI' (Windows/Mac/Office Indic standard font supporting Gujarati, Hindi & English).
  */
-async function buildAndDownloadWordDocx(blocksOrParagraphs, filename){
+async function buildAndDownloadWordDocx(blocksOrParagraphs, filename, includeSelectedImages){
   const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
-  const docParagraphs = blocksOrParagraphs.map(item => {
-    if(item instanceof Paragraph) return item;
+  const docParagraphs = [];
+
+  blocksOrParagraphs.forEach(item => {
+    if(item instanceof Paragraph){
+      docParagraphs.push(item);
+      return;
+    }
+    if(item && item.role === 'image' && item.imgObj){
+      const imgPara = createWordImageParagraph(item.imgObj);
+      if(imgPara) docParagraphs.push(imgPara);
+      return;
+    }
     const isTitle = item.role === 'title';
     const isSub = item.role === 'subheading';
-    return new Paragraph({
+    docParagraphs.push(new Paragraph({
       heading: isTitle ? HeadingLevel.HEADING_1 : (isSub ? HeadingLevel.HEADING_2 : undefined),
       spacing: {
         before: isTitle ? 180 : (isSub ? 140 : 80),
@@ -6379,12 +7026,24 @@ async function buildAndDownloadWordDocx(blocksOrParagraphs, filename){
           font: 'Nirmala UI',
           bold: isTitle || isSub || !!item.bold,
           italics: !!item.italics,
-          size: isTitle ? 32 : (isSub ? 27 : 24), // 16pt title, 13.5pt subheading, 12pt body
+          size: isTitle ? 32 : (isSub ? 27 : 24),
           color: item.color || undefined
         })
       ]
-    });
+    }));
   });
+
+  if(includeSelectedImages){
+    const checkedImgs = (window._extractedImagesStore || []).filter(im => im.includedInWord);
+    checkedImgs.forEach(im => {
+      const imgPara = createWordImageParagraph(im);
+      if(imgPara) docParagraphs.push(imgPara);
+    });
+  }
+
+  if(docParagraphs.length === 0){
+    docParagraphs.push(new Paragraph({ children: [new TextRun({ text: ' ', font: 'Nirmala UI', size: 24 })] }));
+  }
 
   const doc = new Document({ sections: [{ children: docParagraphs }] });
   const blob = await Packer.toBlob(doc);
@@ -6398,11 +7057,173 @@ async function buildAndDownloadWordDocx(blocksOrParagraphs, filename){
   setTimeout(() => URL.revokeObjectURL(url), 4000);
 }
 
-// Wire up live preview Copy & Re-download buttons inside the Extract to Word panel
+// Interactive Modal to Drag-Crop any custom image/diagram/photo from any page
+async function openCustomImageCropModal(){
+  const scope = ewScope ? ewScope.value : 'all';
+  const targetPages = await resolveTargetPagesForTool(scope);
+  if(!targetPages || targetPages.length === 0) return;
+
+  const backdrop = document.createElement('div');
+  backdrop.className = 'modal-backdrop';
+  backdrop.innerHTML = `
+    <div class="modal-card" style="max-width:780px;width:96%;">
+      <div class="modal-head">
+        <h3>✂️ Crop Image / Figure from Page</h3>
+        <button class="modal-close" type="button">✕</button>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+        <label style="font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;">
+          <span>Select Page:</span>
+          <select id="customCropPageSelect" style="padding:6px 10px;border:1px solid var(--kraft-line);border-radius:6px;font-size:13px;"></select>
+        </label>
+        <span style="font-size:12px;color:var(--ink-soft);">🖱️ Drag a rectangle over any photo, diagram, signature, or section to extract it as an image</span>
+      </div>
+      <div id="customCropStage" style="position:relative;max-height:62vh;overflow:auto;background:#26231E;border-radius:8px;padding:12px;display:flex;justify-content:center;align-items:flex-start;user-select:none;touch-action:none;">
+        <div id="customCropCanvasWrap" style="position:relative;display:inline-block;cursor:crosshair;">
+          <canvas id="customCropCanvas" style="max-width:100%;height:auto;display:block;border-radius:4px;"></canvas>
+          <div id="customCropSelectionBox" style="position:absolute;border:2.5px dashed #20D6C7;background:rgba(32,214,199,0.18);pointer-events:none;display:none;"></div>
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top:12px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+        <button type="button" class="outline-teal" id="customCropFullPageBtn">🖼️ Add Full Page as Image</button>
+        <div style="display:flex;gap:8px;">
+          <button type="button" id="customCropCancelBtn">Cancel</button>
+          <button type="button" class="primary" id="customCropConfirmBtn">✅ Extract Selected Region as Image</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+
+  const close = () => backdrop.remove();
+  backdrop.querySelector('.modal-close').addEventListener('click', close);
+  backdrop.querySelector('#customCropCancelBtn').addEventListener('click', close);
+
+  const pageSel = backdrop.querySelector('#customCropPageSelect');
+  targetPages.forEach((p, idx) => {
+    const gIdx = pages.findIndex(x => x.uid === p.uid) + 1;
+    const opt = document.createElement('option');
+    opt.value = String(idx);
+    opt.textContent = 'Page ' + gIdx;
+    pageSel.appendChild(opt);
+  });
+
+  const canvasEl = backdrop.querySelector('#customCropCanvas');
+  const selBox = backdrop.querySelector('#customCropSelectionBox');
+  let curHighResCanvas = null;
+  let curGlobalIdx = 1;
+  let dragStart = null;
+  let selRectPct = { x0: 0.15, y0: 0.15, x1: 0.85, y1: 0.65 };
+
+  function updateSelBoxDom(){
+    const rect = canvasEl.getBoundingClientRect();
+    if(!rect.width || !rect.height) return;
+    selBox.style.display = 'block';
+    selBox.style.left = (selRectPct.x0 * 100) + '%';
+    selBox.style.top = (selRectPct.y0 * 100) + '%';
+    selBox.style.width = ((selRectPct.x1 - selRectPct.x0) * 100) + '%';
+    selBox.style.height = ((selRectPct.y1 - selRectPct.y0) * 100) + '%';
+  }
+
+  async function loadPageForCrop(idx){
+    const p = targetPages[idx] || targetPages[0];
+    curGlobalIdx = pages.findIndex(x => x.uid === p.uid) + 1;
+    curHighResCanvas = await getHighResPageCanvasForOcr(p.fileId, p.pageIndex);
+    const maxDisp = 900;
+    const scale = Math.min(1, maxDisp / Math.max(1, curHighResCanvas.width, curHighResCanvas.height));
+    canvasEl.width = Math.round(curHighResCanvas.width * scale);
+    canvasEl.height = Math.round(curHighResCanvas.height * scale);
+    const ctx = canvasEl.getContext('2d');
+    ctx.drawImage(curHighResCanvas, 0, 0, canvasEl.width, canvasEl.height);
+    selRectPct = { x0: 0.15, y0: 0.15, x1: 0.85, y1: 0.65 };
+    updateSelBoxDom();
+  }
+
+  pageSel.addEventListener('change', () => loadPageForCrop(Number(pageSel.value) || 0));
+
+  function getRelPct(clientX, clientY){
+    const r = canvasEl.getBoundingClientRect();
+    return {
+      x: Math.max(0, Math.min(1, (clientX - r.left) / Math.max(1, r.width))),
+      y: Math.max(0, Math.min(1, (clientY - r.top) / Math.max(1, r.height)))
+    };
+  }
+
+  canvasEl.addEventListener('pointerdown', e => {
+    const pt = getRelPct(e.clientX, e.clientY);
+    dragStart = pt;
+    selRectPct = { x0: pt.x, y0: pt.y, x1: pt.x, y1: pt.y };
+    updateSelBoxDom();
+    canvasEl.setPointerCapture(e.pointerId);
+  });
+  canvasEl.addEventListener('pointermove', e => {
+    if(!dragStart) return;
+    const pt = getRelPct(e.clientX, e.clientY);
+    selRectPct = {
+      x0: Math.min(dragStart.x, pt.x),
+      y0: Math.min(dragStart.y, pt.y),
+      x1: Math.max(dragStart.x, pt.x),
+      y1: Math.max(dragStart.y, pt.y)
+    };
+    updateSelBoxDom();
+  });
+  canvasEl.addEventListener('pointerup', () => {
+    dragStart = null;
+  });
+
+  backdrop.querySelector('#customCropConfirmBtn').addEventListener('click', () => {
+    if(!curHighResCanvas) return;
+    const w = curHighResCanvas.width, h = curHighResCanvas.height;
+    const rx0 = selRectPct.x0 * w, ry0 = selRectPct.y0 * h;
+    const rw = (selRectPct.x1 - selRectPct.x0) * w, rh = (selRectPct.y1 - selRectPct.y0) * h;
+    if(rw < 16 || rh < 16){
+      showToast('Please drag a larger rectangle on the page to crop.');
+      return;
+    }
+    const customCount = (window._extractedImagesStore || []).filter(x => x.label.includes('Custom Crop')).length + 1;
+    const imgObj = cropRegionFromCanvasToImageObj(curHighResCanvas, {
+      x0: rx0, y0: ry0, w: rw, h: rh
+    }, {
+      pageNum: curGlobalIdx,
+      label: 'Page ' + curGlobalIdx + ' · Custom Crop ' + customCount,
+      isFullPage: false,
+      includedInWord: true
+    });
+    window._extractedImagesStore.unshift(imgObj);
+    renderExtractedImagesGallery();
+    close();
+    showToast('Added "' + imgObj.label + '" to Extracted Images Gallery!');
+  });
+
+  backdrop.querySelector('#customCropFullPageBtn').addEventListener('click', () => {
+    if(!curHighResCanvas) return;
+    const imgObj = cropRegionFromCanvasToImageObj(curHighResCanvas, {
+      x0: 0, y0: 0, w: curHighResCanvas.width, h: curHighResCanvas.height
+    }, {
+      pageNum: curGlobalIdx,
+      label: 'Page ' + curGlobalIdx + ' · Full Page Image',
+      isFullPage: true,
+      includedInWord: true
+    });
+    window._extractedImagesStore.unshift(imgObj);
+    renderExtractedImagesGallery();
+    close();
+    showToast('Added Full Page Image to Gallery!');
+  });
+
+  await loadPageForCrop(0);
+}
+
+// Wire up live preview Copy, Text-Only Word, Combined Word, Images-Only Word & PNG buttons
 (function initEwPreviewActions(){
   const copyBtn = document.getElementById('ewCopyPreviewBtn');
+  const textOnlyWordBtn = document.getElementById('ewDownloadTextOnlyWordBtn');
   const redownloadBtn = document.getElementById('ewRedownloadWordBtn');
   const previewTa = document.getElementById('ewPreviewTextarea');
+  const quickImagesBtn = document.getElementById('ewQuickImagesOnlyBtn');
+  const customCropBtn = document.getElementById('ewCustomCropBtn');
+  const dlAllPngBtn = document.getElementById('ewDownloadAllPngBtn');
+  const dlImagesDocxBtn = document.getElementById('ewDownloadImagesDocxBtn');
 
   if(copyBtn && previewTa){
     copyBtn.addEventListener('click', async () => {
@@ -6419,17 +7240,79 @@ async function buildAndDownloadWordDocx(blocksOrParagraphs, filename){
     });
   }
 
+  function parsePreviewTextBlocks(){
+    const txt = (previewTa && previewTa.value ? previewTa.value : '').trim();
+    if(!txt) return [];
+    const paras = txt.split(/\n\s*\n/).map(p => p.trim()).filter(p => p && !/^─+$/.test(p));
+    return paras.map((p, idx) => ({
+      role: idx === 0 && p.length < 140 ? 'title' : 'body',
+      text: p.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim()
+    }));
+  }
+
+  if(textOnlyWordBtn && previewTa){
+    textOnlyWordBtn.addEventListener('click', async () => {
+      const blocks = parsePreviewTextBlocks();
+      if(blocks.length === 0){ showToast('Preview text is empty.'); return; }
+      await buildAndDownloadWordDocx(blocks, 'extracted-text-only.docx', false);
+      showToast('Downloaded Text-Only Word document (.docx)!');
+    });
+  }
+
   if(redownloadBtn && previewTa){
     redownloadBtn.addEventListener('click', async () => {
-      const txt = (previewTa.value || '').trim();
-      if(!txt){ showToast('Preview text is empty.'); return; }
-      const paras = txt.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
-      const blocks = paras.map((p, idx) => ({
-        role: idx === 0 && p.length < 140 ? 'title' : 'body',
-        text: p.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim()
-      }));
-      await buildAndDownloadWordDocx(blocks, 'extracted-document-edited.docx');
-      showToast('Edited Word document downloaded!');
+      const blocks = parsePreviewTextBlocks();
+      const checkedImgs = (window._extractedImagesStore || []).filter(im => im.includedInWord);
+      if(blocks.length === 0 && checkedImgs.length === 0){
+        showToast('No text or selected images to export.');
+        return;
+      }
+      await buildAndDownloadWordDocx(blocks, 'extracted-text-and-images.docx', true);
+      showToast('Downloaded Combined Word document (Text + Selected Images)!');
+    });
+  }
+
+  if(quickImagesBtn){
+    quickImagesBtn.addEventListener('click', () => {
+      const modeSel = document.getElementById('ewExtractMode');
+      if(modeSel) modeSel.value = 'images';
+      window._auth.premiumGate('extract images from your document', extractToWord);
+    });
+  }
+
+  if(customCropBtn){
+    customCropBtn.addEventListener('click', () => {
+      window._auth.premiumGate('crop and extract images from your document', openCustomImageCropModal);
+    });
+  }
+
+  if(dlAllPngBtn){
+    dlAllPngBtn.addEventListener('click', () => {
+      const checked = (window._extractedImagesStore || []).filter(im => im.includedInWord);
+      const list = checked.length > 0 ? checked : (window._extractedImagesStore || []);
+      if(list.length === 0){ showToast('No extracted images to download.'); return; }
+      list.forEach((im, idx) => {
+        setTimeout(() => {
+          const a = document.createElement('a');
+          a.href = im.dataUrl;
+          a.download = im.label.replace(/[^A-Za-z0-9_-]+/g, '-') + '.png';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        }, idx * 180);
+      });
+      showToast('Downloading ' + list.length + ' PNG image' + (list.length === 1 ? '' : 's') + '…');
+    });
+  }
+
+  if(dlImagesDocxBtn){
+    dlImagesDocxBtn.addEventListener('click', async () => {
+      const checked = (window._extractedImagesStore || []).filter(im => im.includedInWord);
+      const list = checked.length > 0 ? checked : (window._extractedImagesStore || []);
+      if(list.length === 0){ showToast('No images selected for Word export.'); return; }
+      const imgBlocks = list.map(im => ({ role: 'image', imgObj: im }));
+      await buildAndDownloadWordDocx(imgBlocks, 'extracted-images-only.docx', false);
+      showToast('Downloaded Images-Only Word (.docx)!');
     });
   }
 })();
@@ -6442,14 +7325,16 @@ async function extractToWord(){
   if(!targetPages || targetPages.length === 0) return;
 
   const { Document, Packer, Paragraph, TextRun, HeadingLevel, PageBreak, Table, TableRow, TableCell, WidthType, BorderStyle } = docx;
-  const useOcr = ewUseOcr.checked;
+  const modeSel = document.getElementById('ewExtractMode');
+  const extractMode = modeSel ? modeSel.value : 'both'; // 'both' | 'text' | 'images'
+  const useOcr = ewUseOcr.checked && extractMode !== 'images';
   const insertBreaks = ewPageBreaks.checked;
 
   ewProgress.innerHTML = '';
   ewProgress.style.display = 'block';
   ewExtractBtn.disabled = true;
   ewExtractBtn.textContent = 'Extracting…';
-  ewLog('Starting extraction of ' + targetPages.length + ' page' + (targetPages.length===1?'':'s') + '…');
+  ewLog('Starting extraction (' + (extractMode === 'images' ? 'Images Only' : (extractMode === 'text' ? 'Text Only' : 'Both Text + Images')) + ') of ' + targetPages.length + ' page' + (targetPages.length===1?'':'s') + '…');
 
   let ocrWorker = null;
   let activeLangs = getSelectedOcrLangs();
@@ -6457,30 +7342,41 @@ async function extractToWord(){
   const pageData = [];
   const allFontSizes = [];
   const previewPagesText = [];
+  const allExtractedImages = [];
 
   try{
     for(let i = 0; i < targetPages.length; i++){
       const p = targetPages[i];
       const globalIdx = pages.findIndex(x => x.uid === p.uid) + 1;
+
+      // Always render high-res page canvas so we can detect & crop embedded photographs/figures
+      const rawCanvas = await getHighResPageCanvasForOcr(p.fileId, p.pageIndex);
+      const cleanCanvas = prepareDocumentCanvasForLayoutOcr(rawCanvas);
+      const pageImages = extractImagesFromPageCanvas(rawCanvas, globalIdx, extractMode);
+      allExtractedImages.push(...pageImages);
+      const croppedPhotoCount = pageImages.filter(im => !im.isFullPage).length;
+
+      if(extractMode === 'images'){
+        pageData.push({ p, globalIdx, mode: 'images_only', pageImages });
+        ewLog('Page ' + globalIdx + ': extracted ' + (croppedPhotoCount > 0 ? (croppedPhotoCount + ' embedded photo' + (croppedPhotoCount===1?'':'s') + ' + full page image') : 'full page image') + '.', 'done');
+        continue;
+      }
+
       const content = await getTextContentCached(p.fileId, p.pageIndex);
       const totalChars = (content.items || []).reduce((s, it) => s + (it.str || '').trim().length, 0);
       const isLikelyImage = totalChars < 12;
 
       if(isLikelyImage && useOcr && !ocrUnavailable){
-        ewLog('Page ' + globalIdx + ': scanned/image page detected — running high-accuracy OCR (' + activeLangs.join(' + ') + ')…');
+        ewLog('Page ' + globalIdx + ': scanned page (' + (croppedPhotoCount ? (croppedPhotoCount + ' embedded photo' + (croppedPhotoCount===1?'':'s') + ' cropped, ') : '') + 'running ' + activeLangs.join(' + ') + ' OCR)…');
         try{
           if(!ocrWorker){
             ewLog('Loading neural OCR engine (' + activeLangs.join(' + ') + ')…');
             ocrWorker = await createConfiguredOcrWorker(activeLangs, '3');
           }
-          const rawCanvas = await getHighResPageCanvasForOcr(p.fileId, p.pageIndex);
-          const cleanCanvas = prepareDocumentCanvasForLayoutOcr(rawCanvas);
           let { data } = await ocrWorker.recognize(cleanCanvas);
           let structured = extractStructuredOcrBlocks(data, cleanCanvas.width, cleanCanvas.height, activeLangs);
 
           // Smart Indic Auto-Detection Fallback:
-          // If the user forgot to tick Gujarati/Hindi (only 'eng' was active) and OCR confidence is low (< 70%),
-          // automatically switch on Gujarati + Hindi + English and re-recognize so Gujarati text is never garbled!
           if(activeLangs.length === 1 && activeLangs[0] === 'eng' && structured.avgConfidence < 70){
             ewLog('Page ' + globalIdx + ': detected non-English / Indic script (confidence ' + Math.round(structured.avgConfidence) + '% with English-only) — auto-enabling Gujarati (ગુજરાતી) + Hindi OCR…');
             const guCb = document.getElementById('ocrLangGu');
@@ -6500,18 +7396,20 @@ async function extractToWord(){
               globalIdx,
               mode: 'ocr_structured',
               blocks: structured.blocks,
-              isTwoColumn: structured.isTwoColumn
+              isTwoColumn: structured.isTwoColumn,
+              pageImages
             });
             previewPagesText.push(structured.plainText);
             ewLog(
               'Page ' + globalIdx + ': OCR complete (' +
               structured.blocks.length + ' paragraph' + (structured.blocks.length === 1 ? '' : 's') +
+              (croppedPhotoCount ? ', ' + croppedPhotoCount + ' photo' + (croppedPhotoCount===1?'':'s') + ' extracted' : '') +
               (structured.isTwoColumn ? ', 2-column reading order preserved' : '') + ').',
               'done'
             );
           } else {
             const fallbackTxt = cleanIndicOcrLineText(data && data.text ? data.text : '', activeLangs);
-            pageData.push({ p, globalIdx, mode: 'ocr', text: fallbackTxt });
+            pageData.push({ p, globalIdx, mode: 'ocr', text: fallbackTxt, pageImages });
             if(fallbackTxt) previewPagesText.push(fallbackTxt);
             ewLog('Page ' + globalIdx + ': OCR complete.', 'done');
           }
@@ -6527,13 +7425,13 @@ async function extractToWord(){
               : ('OCR failed to start: ' + errMsg + ' — continuing without OCR.'),
             'warn'
           );
-          pageData.push({ p, globalIdx, mode: 'skip' });
+          pageData.push({ p, globalIdx, mode: 'skip', pageImages });
         }
       } else if(isLikelyImage && useOcr && ocrUnavailable){
-        pageData.push({ p, globalIdx, mode: 'skip' });
+        pageData.push({ p, globalIdx, mode: 'skip', pageImages });
       } else if(isLikelyImage && !useOcr){
-        ewLog('Page ' + globalIdx + ': image page, OCR is off — skipping text for this page.', 'warn');
-        pageData.push({ p, globalIdx, mode: 'skip' });
+        ewLog('Page ' + globalIdx + ': image page, OCR is off — keeping extracted images for this page.', 'warn');
+        pageData.push({ p, globalIdx, mode: 'skip', pageImages });
       } else {
         const pageWidthPts = await getPageWidthPts(p.fileId, p.pageIndex);
         const lines = extractLines(content);
@@ -6550,12 +7448,16 @@ async function extractToWord(){
         });
         if(pagePlain.length > 0) previewPagesText.push(pagePlain.join('\n\n'));
         const colBlockCount = elements.filter(el => el.type === 'columns').length;
-        pageData.push({ p, globalIdx, mode: 'text', elements });
-        ewLog('Page ' + globalIdx + ': extracted ' + elements.length + ' block' + (elements.length===1?'':'s') + (colBlockCount ? ' (' + colBlockCount + ' multi-column region' + (colBlockCount===1?'':'s') + ' detected)' : '') + '.', 'done');
+        pageData.push({ p, globalIdx, mode: 'text', elements, pageImages });
+        ewLog('Page ' + globalIdx + ': extracted ' + elements.length + ' block' + (elements.length===1?'':'s') + (croppedPhotoCount ? ' + ' + croppedPhotoCount + ' photo' + (croppedPhotoCount===1?'':'s') : '') + (colBlockCount ? ' (' + colBlockCount + ' multi-column region' + (colBlockCount===1?'':'s') + ' detected)' : '') + '.', 'done');
       }
     }
 
     if(ocrWorker){ await ocrWorker.terminate(); ocrWorker = null; }
+
+    // Update Extracted Images Gallery on screen
+    window._extractedImagesStore = allExtractedImages;
+    renderExtractedImagesGallery();
 
     const bodySize = median(allFontSizes) || 11;
     const docParagraphs = [];
@@ -6617,8 +7519,20 @@ async function extractToWord(){
         docParagraphs.push(new Paragraph({ children: [ new PageBreak() ] }));
       }
 
+      const checkedPageImages = (pd.pageImages || []).filter(im => im.includedInWord);
+
+      if(pd.mode === 'images_only'){
+        checkedPageImages.forEach(im => {
+          const imgPara = createWordImageParagraph(im);
+          if(imgPara) docParagraphs.push(imgPara);
+        });
+        return;
+      }
+
       if(pd.mode === 'ocr_structured'){
-        pd.blocks.forEach(blk => {
+        // If extractMode is 'both', interleave embedded photos right after the title/heading or at their vertical reading order
+        const usedImgs = new Set();
+        pd.blocks.forEach((blk, bIdx) => {
           const isTitle = blk.role === 'title';
           const isSub = blk.role === 'subheading';
           docParagraphs.push(new Paragraph({
@@ -6638,9 +7552,30 @@ async function extractToWord(){
               })
             ]
           }));
+
+          // Place embedded photos after the headline or when their vertical position matches
+          if(extractMode === 'both' && bIdx === 0 && isTitle){
+            checkedPageImages.forEach(im => {
+              if(!im.isFullPage && im.yPct < 0.55 && !usedImgs.has(im.id)){
+                usedImgs.add(im.id);
+                const imgPara = createWordImageParagraph(im);
+                if(imgPara) docParagraphs.push(imgPara);
+              }
+            });
+          }
         });
+
+        if(extractMode === 'both'){
+          checkedPageImages.forEach(im => {
+            if(!usedImgs.has(im.id)){
+              usedImgs.add(im.id);
+              const imgPara = createWordImageParagraph(im);
+              if(imgPara) docParagraphs.push(imgPara);
+            }
+          });
+        }
       } else if(pd.mode === 'text'){
-        if(pd.elements.length === 0){
+        if(pd.elements.length === 0 && checkedPageImages.length === 0){
           docParagraphs.push(new Paragraph({ children: [ new TextRun({ text: '[Page ' + pd.globalIdx + ' had no readable text.]', italics: true, color: '8A8270' }) ] }));
         }
         pd.elements.forEach(el => {
@@ -6661,6 +7596,12 @@ async function extractToWord(){
             }
           }
         });
+        if(extractMode === 'both'){
+          checkedPageImages.forEach(im => {
+            const imgPara = createWordImageParagraph(im);
+            if(imgPara) docParagraphs.push(imgPara);
+          });
+        }
       } else if(pd.mode === 'ocr'){
         const text = (pd.text || '').trim();
         const blocks = text.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
@@ -6671,35 +7612,59 @@ async function extractToWord(){
             children: [ new TextRun({ text: b.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim(), font: 'Nirmala UI', size: 24 }) ]
           }));
         });
+        if(extractMode === 'both'){
+          checkedPageImages.forEach(im => {
+            const imgPara = createWordImageParagraph(im);
+            if(imgPara) docParagraphs.push(imgPara);
+          });
+        }
       } else if(pd.mode === 'skip'){
-        docParagraphs.push(new Paragraph({
-          children: [ new TextRun({ text: '[Page ' + pd.globalIdx + ' appears to be a scanned image with no extractable text — turn on "Use OCR" to include it.]', italics: true, color: '8A8270' }) ]
-        }));
+        if(extractMode === 'both' && checkedPageImages.length > 0){
+          checkedPageImages.forEach(im => {
+            const imgPara = createWordImageParagraph(im);
+            if(imgPara) docParagraphs.push(imgPara);
+          });
+        } else {
+          docParagraphs.push(new Paragraph({
+            children: [ new TextRun({ text: '[Page ' + pd.globalIdx + ' appears to be a scanned image with no extractable text — turn on "Use OCR" to include it.]', italics: true, color: '8A8270' }) ]
+          }));
+        }
       }
     });
 
     // Populate the live editable Extracted Text Preview box
     const previewWrap = document.getElementById('ewPreviewWrap');
     const previewTa = document.getElementById('ewPreviewTextarea');
-    if(previewWrap && previewTa && previewPagesText.length > 0){
-      previewTa.value = previewPagesText.join('\n\n────────────────────────\n\n');
-      previewWrap.style.display = 'block';
+    if(previewWrap && previewTa){
+      if(previewPagesText.length > 0){
+        previewTa.value = previewPagesText.join('\n\n────────────────────────\n\n');
+        previewWrap.style.display = 'block';
+      } else if(extractMode === 'images'){
+        previewWrap.style.display = 'none';
+      }
     }
 
-    ewLog('Building Word document…');
+    const outFileName = extractMode === 'images'
+      ? 'extracted-images.docx'
+      : (extractMode === 'text' ? 'extracted-text.docx' : 'extracted-text-and-images.docx');
+
+    ewLog('Building Word document (' + outFileName + ')…');
+    if(docParagraphs.length === 0){
+      docParagraphs.push(new Paragraph({ children: [new TextRun({ text: ' ', font: 'Nirmala UI', size: 24 })] }));
+    }
     const doc = new Document({ sections: [ { children: docParagraphs } ] });
     const blob = await Packer.toBlob(doc);
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'extracted-document.docx';
+    a.download = outFileName;
     document.body.appendChild(a);
     a.click();
     a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 4000);
 
-    ewLog('Done — downloaded extracted-document.docx', 'done');
-    showToast('Word document downloaded.');
+    ewLog('Done — downloaded ' + outFileName, 'done');
+    showToast('Downloaded ' + outFileName + '!');
   }catch(err){
     console.error(err);
     if(ocrWorker){ try{ await ocrWorker.terminate(); }catch(e){} }
@@ -6707,7 +7672,7 @@ async function extractToWord(){
     showToast('Extraction failed: ' + err.message);
   }finally{
     ewExtractBtn.disabled = false;
-    ewExtractBtn.textContent = '📝 Extract & download Word file';
+    ewExtractBtn.textContent = '📝 Extract & Download';
   }
 }
 
@@ -8006,14 +8971,16 @@ window.toggleScannerInfoPanel = function(forceOpen){
 };
 
 window.switchAppMode = function(mode, opts){
-  const target = mode === 'scanner' ? 'scanner' : 'workbench';
+  const target = (mode === 'scanner' || mode === 'usp') ? mode : 'workbench';
   window._activeAppMode = target;
 
   const tabWb        = document.getElementById('tabBtnWorkbench');
   const tabScan      = document.getElementById('tabBtnScanner');
+  const tabUsp       = document.getElementById('tabBtnUsp');
   const wbDropWrap   = document.getElementById('wbHeaderDropWrap');
   const wbModeView   = document.getElementById('workbenchModeView');
   const scannerSec   = document.getElementById('scannerSection');
+  const uspSec       = document.getElementById('uspSection');
   const headerTitle  = document.getElementById('mainHeaderTitle');
   const headerDesc   = document.getElementById('mainHeaderDesc');
   const headerCard   = document.querySelector('.header-card');
@@ -8026,10 +8993,15 @@ window.switchAppMode = function(mode, opts){
     tabScan.classList.toggle('active', target === 'scanner');
     tabScan.setAttribute('aria-selected', target === 'scanner' ? 'true' : 'false');
   }
+  if(tabUsp){
+    tabUsp.classList.toggle('active', target === 'usp');
+    tabUsp.setAttribute('aria-selected', target === 'usp' ? 'true' : 'false');
+  }
 
   if(target === 'scanner'){
     if(wbDropWrap) wbDropWrap.style.display = 'none';
     if(wbModeView) wbModeView.style.display = 'none';
+    if(uspSec)     uspSec.style.display     = 'none';
     if(scannerSec) scannerSec.style.display = 'block';
     if(headerTitle){
       headerTitle.textContent = '📷 PDF Scanner';
@@ -8048,10 +9020,27 @@ window.switchAppMode = function(mode, opts){
     if(typeof window._refreshScannerPreview === 'function'){
       setTimeout(() => window._refreshScannerPreview(), 30);
     }
+  } else if(target === 'usp'){
+    if(wbDropWrap) wbDropWrap.style.display = 'none';
+    if(wbModeView) wbModeView.style.display = 'none';
+    if(scannerSec) scannerSec.style.display = 'none';
+    if(uspSec)     uspSec.style.display     = 'block';
+    if(headerTitle){
+      headerTitle.textContent = '🌟 Why PDF Workbench & Scanner';
+      headerTitle.style.fontSize = '22px';
+      headerTitle.style.margin = '0';
+    }
+    if(headerDesc){
+      headerDesc.style.display = 'none';
+    }
+    if(headerCard){
+      headerCard.style.padding = '12px 16px';
+    }
   } else {
     if(wbDropWrap) wbDropWrap.style.display = 'block';
     if(wbModeView) wbModeView.style.display = 'block';
     if(scannerSec) scannerSec.style.display = 'none';
+    if(uspSec)     uspSec.style.display     = 'none';
     if(headerTitle){
       headerTitle.textContent = 'PDF Workbench';
       headerTitle.style.fontSize = '';
