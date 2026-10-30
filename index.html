@@ -1503,42 +1503,57 @@
   <!-- ═══════════════════════════════════════════════════════════════════
        PDF DOCUMENT SCANNER STUDIO (Activated via Top Tab Switcher)
        ═══════════════════════════════════════════════════════════════════ -->
-  <div class="panel scanner-panel" id="scannerSection" style="display:none;margin-top:14px;">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;">
-      <span style="font-size:11.5px;font-family:'JetBrains Mono',monospace;color:var(--teal-deep);font-weight:700;letter-spacing:.05em;text-transform:uppercase;">📷 Document Scanner &amp; Enhancer Studio</span>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+  <div class="panel scanner-panel" id="scannerSection" style="display:none;margin-top:10px;padding-top:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+        <button type="button" id="toggleScannerHeaderBtn" onclick="window.toggleScannerInfoPanel()"
+          style="background:#E6F4F4;border:1.5px solid var(--teal);color:var(--teal-deep);font-size:12px;font-weight:700;border-radius:7px;padding:6px 12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;"
+          title="Expand or collapse Google Drive Storage Path settings and Scanner info">
+          <span>📁 Google Drive Path &amp; Info</span>
+          <span id="toggleScannerHeaderIcon" style="font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--teal);color:#fff;padding:1px 6px;border-radius:4px;">▼ Expand</span>
+        </button>
+        <button type="button" class="outline-teal" id="scanOpenDriveQuickTopBtn" onclick="document.getElementById('scanOpenDriveTopBtn') && document.getElementById('scanOpenDriveTopBtn').click()"
+          style="padding:6px 10px;font-size:12px;white-space:nowrap;" title="Open your saved Google Drive folder in a new tab">
+          📂 Go to Drive ↗
+        </button>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
         <button type="button" id="scannerToPremTopBtn"
-          style="background:linear-gradient(135deg,#A9780B,#C49A20);border:none;color:#fff;font-size:12px;font-weight:700;border-radius:7px;padding:6px 12px;cursor:pointer;white-space:nowrap;"
+          style="background:linear-gradient(135deg,#A9780B,#C49A20);border:none;color:#fff;font-size:11.5px;font-weight:700;border-radius:7px;padding:6px 11px;cursor:pointer;white-space:nowrap;"
           title="Use Find & Replace, OCR Languages, Extract to Word, or Extract to Excel on your scanned pages">
-          ⭐ Premium Tools (Find/Replace · OCR · Word · Excel) ↓
+          ⭐ Premium Tools ↓
         </button>
         <button type="button" onclick="window.switchAppMode('workbench')"
-          style="background:transparent;border:1.5px solid var(--teal);color:var(--teal-deep);font-size:12px;font-weight:700;border-radius:7px;padding:5px 11px;cursor:pointer;">
-          📁 Switch to PDF Workbench
+          style="background:transparent;border:1.5px solid var(--teal);color:var(--teal-deep);font-size:11.5px;font-weight:700;border-radius:7px;padding:5px 10px;cursor:pointer;white-space:nowrap;">
+          📁 PDF Workbench
         </button>
       </div>
     </div>
-    <h2>PDF Scanner — Capture, Enhance &amp; Combine into One File</h2>
-    <p class="sub">Scan physical pages using your device camera or upload photos/PDFs. All scanned pages appear in the <strong>left-side page grid</strong> alongside the live preview, and all enhancement controls (<strong>📐 Page Size &amp; Quality</strong>, <strong>🎨 Color Mode</strong>, <strong>☀️ Light / Dark &amp; Clarity</strong>) appear <strong>downside below</strong>.</p>
 
-    <!-- Per-Login Google Drive Path Card (Always visible on Mobile & Desktop) -->
-    <div class="scanner-drive-card" id="scannerTopDriveBar">
-      <div class="scanner-drive-card-head">
-        <span>📁 <strong>My Google Drive Storage Path</strong> <span style="font-size:11.5px;font-weight:500;color:var(--ink-soft);">(Saved individually for your login)</span></span>
-        <span class="scan-drive-user-badge" id="scanDriveUserBadge">👤 Not signed in</span>
-      </div>
-      <div class="scanner-drive-card-row">
-        <input type="text" id="scanDrivePathTopInput" placeholder="Paste your Google Drive Folder URL or type folder name (e.g. My Scans/2026)">
-        <button type="button" class="primary" id="scanSavePathTopBtn" style="padding:9px 14px;font-size:12.5px;white-space:nowrap;background:var(--teal-deep);">☁️ Save My Path</button>
-        <button type="button" class="outline-teal" id="scanOpenDriveTopBtn" style="padding:9px 14px;font-size:12.5px;white-space:nowrap;" title="Open your saved Google Drive folder in a new tab">📂 Go to Google Drive ↗</button>
-      </div>
-      <div id="scanDriveTopStatus" style="font-size:11.5px;color:var(--ink-soft);line-height:1.4;">
-        Each logged-in email/mobile user stores their own personal Google Drive folder path across mobile &amp; desktop.
+    <!-- Collapsible Info & Per-Login Google Drive Storage Path (Collapsed by default so Camera button is immediately visible without scrolling) -->
+    <div id="scannerCollapsibleHeader" style="display:none;margin-bottom:14px;padding-bottom:12px;border-bottom:1px dashed var(--kraft-line);">
+      <h2 style="font-size:20px;margin:0 0 4px;">PDF Scanner — Capture, Enhance &amp; Combine into One File</h2>
+      <p class="sub" style="margin-bottom:10px;">Scan physical pages using your device camera or upload photos/PDFs. All scanned pages appear in the <strong>left-side page grid</strong> alongside the live preview, and all enhancement controls (<strong>📐 Page Size &amp; Quality</strong>, <strong>🎨 Color Mode</strong>, <strong>☀️ Light / Dark &amp; Clarity</strong>) appear <strong>downside below</strong>.</p>
+
+      <!-- Per-Login Google Drive Path Card -->
+      <div class="scanner-drive-card" id="scannerTopDriveBar" style="margin-bottom:0;">
+        <div class="scanner-drive-card-head">
+          <span>📁 <strong>My Google Drive Storage Path</strong> <span style="font-size:11.5px;font-weight:500;color:var(--ink-soft);">(Saved individually for your login)</span></span>
+          <span class="scan-drive-user-badge" id="scanDriveUserBadge">👤 Not signed in</span>
+        </div>
+        <div class="scanner-drive-card-row">
+          <input type="text" id="scanDrivePathTopInput" placeholder="Paste your Google Drive Folder URL or type folder name (e.g. My Scans/2026)">
+          <button type="button" class="primary" id="scanSavePathTopBtn" style="padding:9px 14px;font-size:12.5px;white-space:nowrap;background:var(--teal-deep);">☁️ Save My Path</button>
+          <button type="button" class="outline-teal" id="scanOpenDriveTopBtn" style="padding:9px 14px;font-size:12.5px;white-space:nowrap;" title="Open your saved Google Drive folder in a new tab">📂 Go to Google Drive ↗</button>
+        </div>
+        <div id="scanDriveTopStatus" style="font-size:11.5px;color:var(--ink-soft);line-height:1.4;">
+          Each logged-in email/mobile user stores their own personal Google Drive folder path across mobile &amp; desktop.
+        </div>
       </div>
     </div>
 
-    <div class="scanner-top-actions">
-      <button class="primary" id="scanOpenCamBtn">📸 Scan with Camera</button>
+    <div class="scanner-top-actions" style="margin-bottom:12px;">
+      <button class="primary" id="scanOpenCamBtn" style="font-size:14px;padding:10px 16px;">📸 Scan with Camera</button>
       <button class="outline-teal" id="scanUploadImgBtn">🖼️ Upload Images / PDF (Local)</button>
       <button class="outline-teal" id="scanSelectDriveBtn" style="background:#fff;" title="Select a stored PDF from your Google Drive folder to re-edit or enhance">☁️ Select PDF from Google Drive</button>
       <input type="file" id="scanImgInput" accept="image/*,application/pdf" multiple style="display:none;">
@@ -1790,11 +1805,11 @@
 
   <div class="panel" id="ocrLangPanel">
     <h2>OCR language (for scanned or handwritten pages)</h2>
-    <p class="sub">Tell the OCR engine which language(s) might appear on a scanned page (from <strong>1. PDF Workbench</strong> or <strong>2. PDF Scanner</strong>) before running Find &amp; Replace, Word extraction, or Excel extraction. Reading printed/typed text is reasonably reliable. Treat OCR'd handwriting as a rough first draft to proofread.</p>
+    <p class="sub">Tell the OCR engine which language(s) appear on your scanned page (from <strong>1. PDF Workbench</strong> or <strong>2. PDF Scanner</strong>). When <strong>Gujarati (ગુજરાતી)</strong> or <strong>Hindi (हिन्दी)</strong> is checked, the OCR engine automatically prioritizes that script as primary so matras and conjuncts are recognized accurately.</p>
     <div class="ew-row">
-      <label class="ew-check"><input type="checkbox" id="ocrLangEn" checked> English</label>
-      <label class="ew-check"><input type="checkbox" id="ocrLangHi"> Hindi (हिन्दी)</label>
-      <label class="ew-check"><input type="checkbox" id="ocrLangGu"> Gujarati (ગુજરાતી)</label>
+      <label class="ew-check"><input type="checkbox" id="ocrLangGu" onchange="window._syncOcrLangCheckboxes && window._syncOcrLangCheckboxes('main')"> <strong>Gujarati (ગુજરાતી)</strong></label>
+      <label class="ew-check"><input type="checkbox" id="ocrLangHi" onchange="window._syncOcrLangCheckboxes && window._syncOcrLangCheckboxes('main')"> <strong>Hindi (हिन्दी)</strong></label>
+      <label class="ew-check"><input type="checkbox" id="ocrLangEn" checked onchange="window._syncOcrLangCheckboxes && window._syncOcrLangCheckboxes('main')"> English</label>
       <label class="ew-field" style="min-width:200px;">
         <span>Other language (Tesseract code, optional)</span>
         <input type="text" id="ocrLangOther" placeholder="e.g. mar, ben, tam" style="padding:8px 10px;border:1px solid var(--kraft-line);border-radius:7px;font-family:'Inter',sans-serif;font-size:13.5px;background:#fff;color:var(--ink);">
@@ -1804,7 +1819,7 @@
 
   <div class="panel" id="wordExtractPanel">
     <h2>Extract text to a Word document</h2>
-    <p class="sub">Works directly with <strong>1. PDF Workbench</strong> or <strong>2. PDF Scanner</strong> pages. Pulls real text out of normal PDF pages — keeping paragraphs, bold, rough heading sizes, and side-by-side columns where it detects them — and runs OCR automatically on any scanned/camera page so even scanned documents convert into an editable Word (<code>.docx</code>) file.</p>
+    <p class="sub">Works directly with <strong>1. PDF Workbench</strong> or <strong>2. PDF Scanner</strong> pages. Uses high-resolution illumination normalization, automatic photograph/border masking, and multi-column newspaper reading order so Gujarati, Hindi, and English scans convert cleanly into an editable Word (<code>.docx</code>) file.</p>
     <div class="ew-row">
       <label class="ew-field">
         <span>Pages to convert (Workbench or Scanner)</span>
@@ -1818,8 +1833,25 @@
       <label class="ew-check"><input type="checkbox" id="ewUseOcr" checked> Use OCR for scanned/image pages</label>
       <label class="ew-check"><input type="checkbox" id="ewPageBreaks" checked> Start a new Word page for each PDF page</label>
     </div>
+    <div style="margin-top:10px;padding:9px 12px;background:var(--paper);border:1px solid var(--kraft-line);border-radius:8px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:12.5px;">
+      <strong style="color:var(--teal-deep);">🌐 Document OCR Language:</strong>
+      <label class="ew-check" style="margin:0;"><input type="checkbox" id="ewLangGu" onchange="window._syncOcrLangCheckboxes && window._syncOcrLangCheckboxes('ew')"> <strong>ગુજરાતી (Gujarati)</strong></label>
+      <label class="ew-check" style="margin:0;"><input type="checkbox" id="ewLangHi" onchange="window._syncOcrLangCheckboxes && window._syncOcrLangCheckboxes('ew')"> <strong>हिन्दी (Hindi)</strong></label>
+      <label class="ew-check" style="margin:0;"><input type="checkbox" id="ewLangEn" checked onchange="window._syncOcrLangCheckboxes && window._syncOcrLangCheckboxes('ew')"> English</label>
+      <span style="font-size:11.5px;color:var(--ink-soft);">(Select <b>ગુજરાતી</b> for Gujarati newspapers/scans)</span>
+    </div>
     <button class="primary" id="ewExtractBtn" style="margin-top:14px;">📝 Extract &amp; download Word file</button>
     <div class="ew-progress" id="ewProgress" style="display:none;"></div>
+    <div id="ewPreviewWrap" style="display:none;margin-top:12px;border:1.5px solid var(--teal);border-radius:9px;background:#fff;padding:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:8px;">
+        <strong style="font-size:13px;color:var(--teal-deep);">📄 Extracted Text Preview (Editable before Copy / Re-Download):</strong>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" class="outline-teal" id="ewCopyPreviewBtn" style="padding:5px 11px;font-size:12px;">📋 Copy Text</button>
+          <button type="button" class="primary" id="ewRedownloadWordBtn" style="padding:5px 11px;font-size:12px;">⬇ Download Edited Word (.docx)</button>
+        </div>
+      </div>
+      <textarea id="ewPreviewTextarea" rows="10" style="width:100%;padding:10px;border:1px solid var(--kraft-line);border-radius:7px;font-family:'Nirmala UI','Shruti','Noto Sans Gujarati','Inter',sans-serif;font-size:14px;line-height:1.65;color:var(--ink);resize:vertical;"></textarea>
+    </div>
   </div>
 
   <div class="panel" id="excelExtractPanel">
@@ -1843,6 +1875,12 @@
         </select>
       </label>
       <label class="ew-check"><input type="checkbox" id="xlUseOcr" checked> Use OCR for scanned/image pages</label>
+    </div>
+    <div style="margin-top:10px;padding:9px 12px;background:var(--paper);border:1px solid var(--kraft-line);border-radius:8px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;font-size:12.5px;">
+      <strong style="color:var(--teal-deep);">🌐 Document OCR Language:</strong>
+      <label class="ew-check" style="margin:0;"><input type="checkbox" id="xlLangGu" onchange="window._syncOcrLangCheckboxes && window._syncOcrLangCheckboxes('xl')"> <strong>ગુજરાતી (Gujarati)</strong></label>
+      <label class="ew-check" style="margin:0;"><input type="checkbox" id="xlLangHi" onchange="window._syncOcrLangCheckboxes && window._syncOcrLangCheckboxes('xl')"> <strong>हिन्दी (Hindi)</strong></label>
+      <label class="ew-check" style="margin:0;"><input type="checkbox" id="xlLangEn" checked onchange="window._syncOcrLangCheckboxes && window._syncOcrLangCheckboxes('xl')"> English</label>
     </div>
     <button class="primary" id="xlExtractBtn" style="margin-top:14px;">📊 Extract &amp; download Excel file</button>
     <div class="ew-progress" id="xlProgress" style="display:none;"></div>
@@ -2432,17 +2470,82 @@ window.addEventListener('afterprint', () => {
   if(printArea) printArea.innerHTML = '';
 });
 
-// Reads the shared OCR language checkboxes (English/Hindi/Gujarati/custom)
-// used by both the Word and Excel extraction tools. Falls back to English
-// alone if nothing is selected, so OCR never silently does nothing.
+// Synchronizes OCR language checkboxes across the main OCR panel, Word panel, and Excel panel
+window._syncOcrLangCheckboxes = function(sourcePrefix){
+  const prefixMap = {
+    main: { gu: 'ocrLangGu', hi: 'ocrLangHi', en: 'ocrLangEn' },
+    ew:   { gu: 'ewLangGu',  hi: 'ewLangHi',  en: 'ewLangEn'  },
+    xl:   { gu: 'xlLangGu',  hi: 'xlLangHi',  en: 'xlLangEn'  }
+  };
+  const src = prefixMap[sourcePrefix] || prefixMap.main;
+  const guEl = document.getElementById(src.gu);
+  const hiEl = document.getElementById(src.hi);
+  const enEl = document.getElementById(src.en);
+  if(!guEl || !hiEl || !enEl) return;
+
+  const guVal = guEl.checked;
+  const hiVal = hiEl.checked;
+  const enVal = enEl.checked;
+
+  Object.values(prefixMap).forEach(ids => {
+    const g = document.getElementById(ids.gu); if(g) g.checked = guVal;
+    const h = document.getElementById(ids.hi); if(h) h.checked = hiVal;
+    const e = document.getElementById(ids.en); if(e) e.checked = enVal;
+  });
+
+  // Invalidate cached OCR results when user changes OCR languages so next run uses the new language
+  if(typeof fileStore !== 'undefined'){
+    Object.values(fileStore).forEach(fs => { if(fs && fs.ocrCache) fs.ocrCache = {}; });
+  }
+};
+
+// Reads the shared OCR language checkboxes (Gujarati/Hindi/English/custom).
+// Places Indic/non-Latin scripts (guj, hin, custom) BEFORE 'eng' so Tesseract v5 LSTM
+// uses the Gujarati/Hindi model as the primary script & dictionary (preventing Gujarati
+// characters from being misclassified as English digits like 04, 2, 53, 7).
 function getSelectedOcrLangs(){
   const langs = [];
-  if(document.getElementById('ocrLangEn').checked) langs.push('eng');
-  if(document.getElementById('ocrLangHi').checked) langs.push('hin');
-  if(document.getElementById('ocrLangGu').checked) langs.push('guj');
-  const other = document.getElementById('ocrLangOther').value.trim();
-  if(other) other.split(/[,\s+]+/).forEach(code => { if(code) langs.push(code.toLowerCase()); });
+  const guChecked = (document.getElementById('ocrLangGu') && document.getElementById('ocrLangGu').checked)
+    || (document.getElementById('ewLangGu') && document.getElementById('ewLangGu').checked)
+    || (document.getElementById('xlLangGu') && document.getElementById('xlLangGu').checked);
+  const hiChecked = (document.getElementById('ocrLangHi') && document.getElementById('ocrLangHi').checked)
+    || (document.getElementById('ewLangHi') && document.getElementById('ewLangHi').checked)
+    || (document.getElementById('xlLangHi') && document.getElementById('xlLangHi').checked);
+  const enChecked = document.getElementById('ocrLangEn') ? document.getElementById('ocrLangEn').checked : true;
+
+  if(guChecked) langs.push('guj');
+  if(hiChecked) langs.push('hin');
+  const otherEl = document.getElementById('ocrLangOther');
+  const other = otherEl ? otherEl.value.trim() : '';
+  if(other){
+    other.split(/[,\s+]+/).forEach(code => {
+      const c = code.toLowerCase();
+      if(c && !langs.includes(c)) langs.push(c);
+    });
+  }
+  if(enChecked && !langs.includes('eng')) langs.push('eng');
   return langs.length ? langs : ['eng'];
+}
+
+// Creates a Tesseract v5 worker using the full-precision 4.0.0 neural LSTM model
+// (much higher accuracy on Gujarati/Hindi matras and conjuncts than default 4.0.0_fast)
+async function createConfiguredOcrWorker(langsArr, psmMode){
+  const langStr = (Array.isArray(langsArr) && langsArr.length ? langsArr : ['eng']).join('+');
+  let worker = null;
+  try{
+    worker = await Tesseract.createWorker(langStr, 1, {
+      langPath: 'https://tessdata.projectnaptha.com/4.0.0'
+    });
+  }catch(e){
+    worker = await Tesseract.createWorker(langStr);
+  }
+  try{
+    await worker.setParameters({
+      tessedit_pageseg_mode: String(psmMode || '3'),
+      preserve_interword_spaces: '1'
+    });
+  }catch(pe){}
+  return worker;
 }
 
 // ---------- Privacy Policy ----------
@@ -4936,11 +5039,7 @@ async function scanDocument(){
             } else if(typeof Tesseract !== 'undefined'){
               if(!ocrWorker){
                 const langs = getSelectedOcrLangs();
-                ocrWorker = await Tesseract.createWorker(langs.join('+'));
-                try{
-                  // PSM 11 (sparse/variable-size text) finds both large 28px titles and small 14px body/footer text
-                  await ocrWorker.setParameters({ tessedit_pageseg_mode: '11' });
-                }catch(pe){}
+                ocrWorker = await createConfiguredOcrWorker(langs, '11');
               }
               const ocrCanvas = prepareCanvasForOcr(canvas);
               const res = await ocrWorker.recognize(ocrCanvas);
@@ -5734,6 +5833,607 @@ function buildPageElements(lines, pageWidthPts){
   return elements;
 }
 
+// ── High-Accuracy OCR Preprocessing, Photo/Border Masking & Multi-Column Layout Engine ──
+async function getHighResPageCanvasForOcr(fileId, pageIndex){
+  const fs = fileStore[fileId];
+  if(fs && fs.isScannerSource && window._scannerBridge && typeof window._scannerBridge.getHighResScanCanvas === 'function'){
+    const rawScanCanvas = window._scannerBridge.getHighResScanCanvas(pageIndex, 2400);
+    if(rawScanCanvas) return rawScanCanvas;
+  }
+  return await renderEditorCanvas(fileId, pageIndex, 2400);
+}
+
+/**
+ * Prepares a scanned document/newspaper canvas for layout-aware OCR (Gujarati, Hindi, English):
+ *  1. Normalizes uneven lighting/paper tint via a 32x32 local paper-white background grid.
+ *  2. Detects and masks continuous-tone photographs (e.g. embedded article photos, portraits)
+ *     and solid colored badges (e.g. red "PoV" circle) to pure white so Tesseract's line
+ *     segmenter never bleeds across photos into adjacent text columns.
+ *  3. Detects long vertical divider rules near the left/right edges (like a cut-off adjacent
+ *     newspaper column) and masks the rule + any narrow clipped strip outside it.
+ *  4. Applies smooth anti-aliased contrast stretching + gentle 3x3 unsharp mask to keep
+ *     delicate Gujarati vowel matras (િ, ી, ુ, ૂ, ે, ૈ, ો, ૌ, ં) and conjuncts crisp.
+ */
+function prepareDocumentCanvasForLayoutOcr(srcCanvas){
+  const w = srcCanvas.width || 1;
+  const h = srcCanvas.height || 1;
+  const out = document.createElement('canvas');
+  out.width = w;
+  out.height = h;
+  const ctx = out.getContext('2d');
+  ctx.drawImage(srcCanvas, 0, 0);
+
+  const imgData = ctx.getImageData(0, 0, w, h);
+  const d = imgData.data;
+
+  // Step 1: Compute per-pixel luminance & saturation
+  const lum = new Uint8Array(w * h);
+  const sat = new Uint8Array(w * h);
+  for(let i = 0, p = 0; i < d.length; i += 4, p++){
+    const r = d[i], g = d[i + 1], b = d[i + 2];
+    lum[p] = (r * 77 + g * 150 + b * 29) >> 8;
+    const mx = r > g ? (r > b ? r : b) : (g > b ? g : b);
+    const mn = r < g ? (r < b ? r : b) : (g < b ? g : b);
+    sat[p] = mx - mn;
+  }
+
+  // Step 2: Estimate local paper background luminance on a 32px grid (82nd percentile)
+  const cell = Math.max(24, Math.round(Math.min(w, h) / 42));
+  const gw = Math.ceil(w / cell);
+  const gh = Math.ceil(h / cell);
+  const bgGrid = new Uint8Array(gw * gh);
+  const cellPaperFrac = new Float32Array(gw * gh);
+  const cellMidToneFrac = new Float32Array(gw * gh);
+  const cellColorFrac = new Float32Array(gw * gh);
+  const hist = new Int32Array(256);
+
+  for(let gy = 0; gy < gh; gy++){
+    const y0 = gy * cell, y1 = Math.min(h, y0 + cell);
+    for(let gx = 0; gx < gw; gx++){
+      const x0 = gx * cell, x1 = Math.min(w, x0 + cell);
+      hist.fill(0);
+      let count = 0;
+      for(let y = y0; y < y1; y += 2){
+        let rowIdx = y * w + x0;
+        for(let x = x0; x < x1; x += 2, rowIdx += 2){
+          hist[lum[rowIdx]]++;
+          count++;
+        }
+      }
+      const target = Math.floor(count * 0.82);
+      let acc = 0, bgVal = 235;
+      for(let v = 255; v >= 0; v--){
+        acc += hist[v];
+        if(acc >= count - target){ bgVal = Math.max(150, v); break; }
+      }
+      bgGrid[gy * gw + gx] = bgVal;
+    }
+  }
+
+  // Smooth background grid so dark photos don't pull down local paper estimate
+  const smoothBg = new Uint8Array(gw * gh);
+  for(let gy = 0; gy < gh; gy++){
+    for(let gx = 0; gx < gw; gx++){
+      let maxNeighborBg = bgGrid[gy * gw + gx];
+      for(let dy = -2; dy <= 2; dy++){
+        const ny = gy + dy;
+        if(ny < 0 || ny >= gh) continue;
+        for(let dx = -2; dx <= 2; dx++){
+          const nx = gx + dx;
+          if(nx < 0 || nx >= gw) continue;
+          const v = bgGrid[ny * gw + nx];
+          if(v > maxNeighborBg) maxNeighborBg = v;
+        }
+      }
+      smoothBg[gy * gw + gx] = maxNeighborBg;
+    }
+  }
+
+  // Step 3: Classify each grid cell to detect continuous-tone photographs & solid color badges
+  // Text cells always have a strong paper-white background (> 42% of pixels close to paper white)
+  // and bimodal luminance (white paper + dark ink). Photograph cells have low paper-white fraction
+  // or high mid-tone/color saturation across connected multi-cell regions.
+  const isPhotoCell = new Uint8Array(gw * gh);
+  for(let gy = 0; gy < gh; gy++){
+    const y0 = gy * cell, y1 = Math.min(h, y0 + cell);
+    for(let gx = 0; gx < gw; gx++){
+      const x0 = gx * cell, x1 = Math.min(w, x0 + cell);
+      const idx = gy * gw + gx;
+      const localPaper = smoothBg[idx];
+      let total = 0, paperCnt = 0, midCnt = 0, colorCnt = 0;
+      for(let y = y0; y < y1; y += 2){
+        let p = y * w + x0;
+        for(let x = x0; x < x1; x += 2, p += 2){
+          const l = lum[p];
+          const s = sat[p];
+          total++;
+          if(l >= localPaper - 24 && s < 38) paperCnt++;
+          if(l >= 48 && l <= localPaper - 30) midCnt++;
+          if(s >= 42) colorCnt++;
+        }
+      }
+      const pFrac = paperCnt / (total || 1);
+      const mFrac = midCnt / (total || 1);
+      const cFrac = colorCnt / (total || 1);
+      cellPaperFrac[idx] = pFrac;
+      cellMidToneFrac[idx] = mFrac;
+      cellColorFrac[idx] = cFrac;
+
+      // Candidate photo/graphic cell: very little white paper OR heavy color/halftone fill
+      if(pFrac < 0.34 || (pFrac < 0.48 && (mFrac > 0.44 || cFrac > 0.35)) || cFrac > 0.52){
+        isPhotoCell[idx] = 1;
+      }
+    }
+  }
+
+  // Connected-component filtering on photo cells: keep components of >= 4 cells (photographs/badges)
+  // and dilate by 1 cell only into adjacent high-midtone/color cells so text next to photos stays intact
+  const visited = new Uint8Array(gw * gh);
+  const confirmedPhoto = new Uint8Array(gw * gh);
+  for(let i = 0; i < gw * gh; i++){
+    if(!isPhotoCell[i] || visited[i]) continue;
+    const comp = [i];
+    visited[i] = 1;
+    let head = 0;
+    while(head < comp.length){
+      const cur = comp[head++];
+      const cy = Math.floor(cur / gw), cx = cur % gw;
+      const nbrs = [
+        cy > 0 ? (cy - 1) * gw + cx : -1,
+        cy + 1 < gh ? (cy + 1) * gw + cx : -1,
+        cx > 0 ? cy * gw + (cx - 1) : -1,
+        cx + 1 < gw ? cy * gw + (cx + 1) : -1
+      ];
+      for(let k = 0; k < 4; k++){
+        const nb = nbrs[k];
+        if(nb >= 0 && isPhotoCell[nb] && !visited[nb]){
+          visited[nb] = 1;
+          comp.push(nb);
+        }
+      }
+    }
+    // Keep photo components >= 3 cells (or >= 2 cells if strongly colored like red "PoV" badge)
+    const avgColor = comp.reduce((s, cIdx) => s + cellColorFrac[cIdx], 0) / comp.length;
+    if(comp.length >= 4 || (comp.length >= 2 && avgColor > 0.40)){
+      comp.forEach(cIdx => { confirmedPhoto[cIdx] = 1; });
+    }
+  }
+
+  // Fill interior holes inside confirmed photo blocks (e.g. white phone screen inside woman photo)
+  for(let gy = 1; gy < gh - 1; gy++){
+    for(let gx = 1; gx < gw - 1; gx++){
+      const idx = gy * gw + gx;
+      if(confirmedPhoto[idx]) continue;
+      const nCount = confirmedPhoto[(gy - 1) * gw + gx] + confirmedPhoto[(gy + 1) * gw + gx] +
+                     confirmedPhoto[gy * gw + (gx - 1)] + confirmedPhoto[gy * gw + (gx + 1)];
+      if(nCount >= 3){
+        confirmedPhoto[idx] = 1;
+      }
+    }
+  }
+
+  // Step 4: Detect long vertical divider line near right edge (82%..97% width) or left edge (3%..15% width)
+  // Newspaper clippings often have a vertical rule separating an adjacent cut-off column on the far right.
+  let rightClipX = Math.round(w * 0.985);
+  const scanStartX = Math.round(w * 0.84);
+  const scanEndX = Math.round(w * 0.975);
+  for(let x = scanStartX; x < scanEndX; x++){
+    let darkRun = 0, maxRun = 0, totalDark = 0;
+    for(let y = Math.round(h * 0.08); y < Math.round(h * 0.92); y += 2){
+      const p = y * w + x;
+      if(lum[p] < smoothBg[Math.floor(y / cell) * gw + Math.floor(x / cell)] - 38){
+        darkRun += 2;
+        totalDark += 2;
+        if(darkRun > maxRun) maxRun = darkRun;
+      } else {
+        darkRun = 0;
+      }
+    }
+    // If a vertical rule spans > 32% of page height near the right edge, clip everything to its right
+    if(maxRun > h * 0.28 || totalDark > h * 0.42){
+      rightClipX = Math.max(Math.round(w * 0.82), x - 4);
+      break;
+    }
+  }
+
+  const edgeMarginX = Math.max(6, Math.round(w * 0.012));
+  const edgeMarginY = Math.max(6, Math.round(h * 0.010));
+
+  // Step 5: Normalize illumination, mask photo cells & clipped borders to pure white
+  const normGray = new Uint8Array(w * h);
+  for(let y = 0; y < h; y++){
+    const gy = Math.min(gh - 1, Math.floor(y / cell));
+    const rowOff = y * w;
+    for(let x = 0; x < w; x++){
+      const p = rowOff + x;
+      if(x < edgeMarginX || x >= rightClipX || y < edgeMarginY || y >= h - edgeMarginY){
+        normGray[p] = 255;
+        continue;
+      }
+      const gx = Math.min(gw - 1, Math.floor(x / cell));
+      const cIdx = gy * gw + gx;
+      if(confirmedPhoto[cIdx]){
+        normGray[p] = 255;
+        continue;
+      }
+      const bg = Math.max(140, smoothBg[cIdx]);
+      const l = lum[p];
+      // Normalize against local paper background with smooth anti-aliased curve
+      let v = Math.round((l / bg) * 255);
+      if(v >= 224){
+        v = 255;
+      } else if(v <= 65){
+        v = Math.max(0, Math.round(v * 0.55));
+      } else {
+        // S-curve contrast stretch between 65 and 224
+        const t = (v - 65) / (224 - 65);
+        v = Math.round(36 + t * t * (3 - 2 * t) * 219);
+      }
+      normGray[p] = v;
+    }
+  }
+
+  // Step 6: Gentle 3x3 unsharp mask to sharpen Gujarati shirorekha, matras & conjunct strokes
+  for(let y = 1; y < h - 1; y++){
+    const rowOff = y * w;
+    for(let x = 1; x < w - 1; x++){
+      const p = rowOff + x;
+      const c = normGray[p];
+      if(c === 255){
+        const idx4 = p * 4;
+        d[idx4] = 255; d[idx4 + 1] = 255; d[idx4 + 2] = 255; d[idx4 + 3] = 255;
+        continue;
+      }
+      const blur = (
+        normGray[p - w - 1] + normGray[p - w] * 2 + normGray[p - w + 1] +
+        normGray[p - 1] * 2 + c * 4 + normGray[p + 1] * 2 +
+        normGray[p + w - 1] + normGray[p + w] * 2 + normGray[p + w + 1]
+      ) >> 4;
+      const sharpened = Math.max(0, Math.min(255, Math.round(c + (c - blur) * 0.65)));
+      const idx4 = p * 4;
+      d[idx4] = sharpened;
+      d[idx4 + 1] = sharpened;
+      d[idx4 + 2] = sharpened;
+      d[idx4 + 3] = 255;
+    }
+  }
+
+  ctx.putImageData(imgData, 0, 0);
+  return out;
+}
+
+/**
+ * Cleans an OCR line for Gujarati / Hindi / English documents:
+ *  - Strips stray vertical bar / border / halftone symbols (|, ¦, «, »)
+ *  - Removes low-confidence 1-character noise tokens at line edges
+ *  - Repairs Latin digit lookalikes (0 -> ૦, 4 -> ૪, 2 -> ૨, etc.) when directly attached
+ *    to Gujarati characters where Tesseract confused a Gujarati glyph or matra with a digit.
+ */
+function cleanIndicOcrLineText(rawText, langs){
+  if(!rawText) return '';
+  const hasGuj = Array.isArray(langs) && langs.includes('guj');
+  let t = rawText
+    .replace(/[|¦│┃┆┊]+/g, ' ')
+    .replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if(hasGuj){
+    // Remove isolated 1-2 char Latin/digit noise at the very start or end of a predominantly Gujarati line
+    const gujChars = (t.match(/[\u0A80-\u0AFF]/g) || []).length;
+    if(gujChars >= 4){
+      // Strip leading/trailing border noise like "00\" | " or " 2 2" or "04." when followed/preceded by Gujarati
+      t = t.replace(/^(?:[0-9]{1,2}[.,"”']?\s+)+(?=[\u0A80-\u0AFF])/, '');
+      t = t.replace(/([\u0A80-\u0AFF।.])\s+(?:[0-9]{1,2}\s*)+$/, '$1');
+      // Convert Latin digits directly adjacent to Gujarati letters into Gujarati digits (૦-૯)
+      const latToGujDigit = { '0':'૦', '1':'૧', '2':'૨', '3':'૩', '4':'૪', '5':'૫', '6':'૬', '7':'૭', '8':'૮', '9':'૯' };
+      t = t.replace(/([\u0A80-\u0AFF])([0-9])/g, (_, g1, d1) => g1 + (latToGujDigit[d1] || d1));
+      t = t.replace(/([0-9])([\u0A80-\u0AFF])/g, (_, d1, g1) => (latToGujDigit[d1] || d1) + g1);
+    }
+  }
+  return t.replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Extracts structured, reading-order paragraphs from Tesseract OCR output:
+ *  - Filters word boxes by confidence & valid script characters
+ *  - Separates Full-Width Headlines at the top from Multi-Column body text (e.g. 2-column newspaper)
+ *  - Sorts and merges lines within each column top-to-bottom so Left Column and Right Column
+ *    lines are NEVER interleaved across the column gutter.
+ */
+function extractStructuredOcrBlocks(ocrData, canvasW, canvasH, langs){
+  if(!ocrData) return { blocks: [], plainText: '', avgConfidence: 0 };
+
+  const rawLines = Array.isArray(ocrData.lines) ? ocrData.lines : [];
+  let confSum = 0, confCount = 0;
+
+  const cleanedLines = [];
+  for(let i = 0; i < rawLines.length; i++){
+    const ln = rawLines[i];
+    const bbox = ln.bbox || { x0: 0, y0: 0, x1: 0, y1: 0 };
+    const lineW = bbox.x1 - bbox.x0;
+    const lineH = bbox.y1 - bbox.y0;
+    if(lineW < 8 || lineH < 6) continue;
+    // Ignore tiny clipped fragments on the extreme right/left 2% edge
+    if(bbox.x0 > canvasW * 0.94 || bbox.x1 < canvasW * 0.04) continue;
+
+    // Filter words in the line to drop photo/border garbage tokens
+    let lineWords = Array.isArray(ln.words) && ln.words.length > 0 ? ln.words : null;
+    let lineStr = '';
+    if(lineWords){
+      const keptWords = [];
+      for(let wIdx = 0; wIdx < lineWords.length; wIdx++){
+        const wObj = lineWords[wIdx];
+        const wText = (wObj.text || '').trim();
+        if(!wText) continue;
+        const wConf = typeof wObj.confidence === 'number' ? wObj.confidence : 75;
+        const wBox = wObj.bbox || bbox;
+        if(wBox.x0 > canvasW * 0.945) continue;
+
+        const hasIndic = /[\u0900-\u097F\u0A80-\u0AFF]/.test(wText);
+        const hasAlphaNum = /[A-Za-z0-9\u0900-\u097F\u0A80-\u0AFF]/.test(wText);
+        if(!hasAlphaNum) continue;
+
+        // Drop low-confidence non-Indic single-char or punctuation noise
+        if(!hasIndic && wConf < 42 && wText.length <= 3) continue;
+        if(wConf < 24) continue;
+
+        confSum += wConf;
+        confCount++;
+        keptWords.push(wText);
+      }
+      lineStr = keptWords.join(' ');
+    } else {
+      lineStr = (ln.text || '').trim();
+      if(typeof ln.confidence === 'number'){
+        confSum += ln.confidence;
+        confCount++;
+      }
+    }
+
+    lineStr = cleanIndicOcrLineText(lineStr, langs);
+    if(!lineStr) continue;
+    // Skip lines that are just a single stray digit or symbol
+    if(lineStr.length <= 2 && !/[\u0900-\u097F\u0A80-\u0AFFA-Za-z]/.test(lineStr)) continue;
+
+    cleanedLines.push({
+      text: lineStr,
+      x0: bbox.x0,
+      y0: bbox.y0,
+      x1: bbox.x1,
+      y1: bbox.y1,
+      w: lineW,
+      h: lineH,
+      cx: (bbox.x0 + bbox.x1) / 2
+    });
+  }
+
+  const avgConfidence = confCount > 0 ? (confSum / confCount) : (ocrData.confidence || 0);
+  if(cleanedLines.length === 0){
+    const fallbackText = cleanIndicOcrLineText(ocrData.text || '', langs);
+    return {
+      blocks: fallbackText ? [{ role: 'body', text: fallbackText, column: 0 }] : [],
+      plainText: fallbackText,
+      avgConfidence
+    };
+  }
+
+  const heights = cleanedLines.map(l => l.h);
+  const medH = median(heights) || 24;
+
+  // Detect if there is a vertical 2-column split (common in newspapers, magazines & forms)
+  // Find candidate split X in 35%..65% of canvasW that minimizes lines crossing it
+  const minX = Math.min(...cleanedLines.map(l => l.x0));
+  const maxX = Math.max(...cleanedLines.map(l => l.x1));
+  const contentSpanW = Math.max(1, maxX - minX);
+
+  let bestSplitX = minX + contentSpanW * 0.5;
+  let bestCrossCount = Infinity;
+  for(let frac = 0.36; frac <= 0.64; frac += 0.02){
+    const candX = minX + contentSpanW * frac;
+    let crosses = 0, leftCnt = 0, rightCnt = 0;
+    for(let i = 0; i < cleanedLines.length; i++){
+      const l = cleanedLines[i];
+      // Ignore very wide headline lines when testing the body column gutter
+      if(l.w > contentSpanW * 0.62) continue;
+      if(l.x1 <= candX + medH * 0.6) leftCnt++;
+      else if(l.x0 >= candX - medH * 0.6) rightCnt++;
+      else crosses++;
+    }
+    if(leftCnt >= 3 && rightCnt >= 3 && crosses < bestCrossCount){
+      bestCrossCount = crosses;
+      bestSplitX = candX;
+    }
+  }
+
+  const narrowLines = cleanedLines.filter(l => l.w <= contentSpanW * 0.62);
+  const leftCandidates = narrowLines.filter(l => l.x1 <= bestSplitX + medH * 0.75);
+  const rightCandidates = narrowLines.filter(l => l.x0 >= bestSplitX - medH * 0.75);
+  const isTwoColumn = leftCandidates.length >= 3 && rightCandidates.length >= 3 &&
+                      bestCrossCount <= Math.max(2, Math.floor(narrowLines.length * 0.12));
+
+  // Helper to group a sorted list of single-column lines into natural paragraphs
+  function groupColumnLinesIntoBlocks(colLines, colIndex){
+    if(colLines.length === 0) return [];
+    const sorted = colLines.slice().sort((a, b) => a.y0 - b.y0);
+    const colMinX = Math.min(...sorted.map(l => l.x0));
+    const colMaxX = Math.max(...sorted.map(l => l.x1));
+    const colSpanW = Math.max(1, colMaxX - colMinX);
+
+    const blocks = [];
+    let curLines = [sorted[0]];
+
+    for(let i = 1; i < sorted.length; i++){
+      const prev = sorted[i - 1];
+      const cur = sorted[i];
+      const vGap = cur.y0 - prev.y1;
+      const prevIsHeading = prev.h >= medH * 1.38;
+      const curIsHeading = cur.h >= medH * 1.38;
+      // Check if previous line ended well before the right edge of this column (sentence end)
+      const prevShortRight = (colMaxX - prev.x1) > colSpanW * 0.22 && /[।\.!\?\"”'’]$/.test(prev.text);
+      // Check if current line has a paragraph first-line indent
+      const curIndented = (cur.x0 - colMinX) > Math.max(medH * 1.1, colSpanW * 0.06);
+
+      if(prevIsHeading || curIsHeading || vGap > medH * 0.85 || (vGap > medH * 0.35 && (prevShortRight || curIndented))){
+        blocks.push(finalizeBlock(curLines, colIndex));
+        curLines = [cur];
+      } else {
+        curLines.push(cur);
+      }
+    }
+    if(curLines.length > 0) blocks.push(finalizeBlock(curLines, colIndex));
+    return blocks;
+  }
+
+  function finalizeBlock(linesArr, colIndex){
+    const avgH = linesArr.reduce((s, l) => s + l.h, 0) / linesArr.length;
+    let role = 'body';
+    if(avgH >= medH * 1.55) role = 'title';
+    else if(avgH >= medH * 1.32) role = 'subheading';
+
+    // Join hyphenated line breaks cleanly
+    let joined = '';
+    for(let i = 0; i < linesArr.length; i++){
+      const t = linesArr[i].text.trim();
+      if(!t) continue;
+      if(!joined){
+        joined = t;
+      } else if(joined.endsWith('-') && joined.length > 2){
+        joined = joined.slice(0, -1) + t;
+      } else {
+        joined += ' ' + t;
+      }
+    }
+    return {
+      role,
+      text: joined.replace(/\s+/g, ' ').trim(),
+      column: colIndex,
+      y0: linesArr[0].y0
+    };
+  }
+
+  let finalBlocks = [];
+  if(isTwoColumn){
+    const topFullWidth = [];
+    const leftCol = [];
+    const rightCol = [];
+    const bottomFullWidth = [];
+
+    // Find vertical range of the 2-column body
+    const colStartY = Math.min(
+      Math.min(...leftCandidates.map(l => l.y0)),
+      Math.min(...rightCandidates.map(l => l.y0))
+    );
+
+    for(let i = 0; i < cleanedLines.length; i++){
+      const l = cleanedLines[i];
+      const spansBoth = l.x0 < bestSplitX - medH && l.x1 > bestSplitX + medH && l.w > contentSpanW * 0.55;
+      if(spansBoth || (l.y1 <= colStartY + medH * 0.5 && l.h >= medH * 1.25)){
+        if(l.y0 <= colStartY + medH * 2.2){
+          topFullWidth.push(l);
+        } else {
+          bottomFullWidth.push(l);
+        }
+      } else if(l.cx <= bestSplitX){
+        leftCol.push(l);
+      } else {
+        rightCol.push(l);
+      }
+    }
+
+    finalBlocks.push(...groupColumnLinesIntoBlocks(topFullWidth, 0));
+    finalBlocks.push(...groupColumnLinesIntoBlocks(leftCol, 1));
+    finalBlocks.push(...groupColumnLinesIntoBlocks(rightCol, 2));
+    finalBlocks.push(...groupColumnLinesIntoBlocks(bottomFullWidth, 0));
+  } else {
+    finalBlocks = groupColumnLinesIntoBlocks(cleanedLines, 0);
+  }
+
+  finalBlocks = finalBlocks.filter(b => b.text && b.text.length > 0);
+  const plainText = finalBlocks.map(b => b.text).join('\n\n');
+  return { blocks: finalBlocks, plainText, avgConfidence, isTwoColumn };
+}
+
+/**
+ * Builds and downloads a clean Word (.docx) file from an array of paragraphs/blocks,
+ * using 'Nirmala UI' (Windows/Mac/Office Indic standard font supporting Gujarati, Hindi & English).
+ */
+async function buildAndDownloadWordDocx(blocksOrParagraphs, filename){
+  const { Document, Packer, Paragraph, TextRun, HeadingLevel } = docx;
+  const docParagraphs = blocksOrParagraphs.map(item => {
+    if(item instanceof Paragraph) return item;
+    const isTitle = item.role === 'title';
+    const isSub = item.role === 'subheading';
+    return new Paragraph({
+      heading: isTitle ? HeadingLevel.HEADING_1 : (isSub ? HeadingLevel.HEADING_2 : undefined),
+      spacing: {
+        before: isTitle ? 180 : (isSub ? 140 : 80),
+        after: isTitle ? 180 : 140,
+        line: 300,
+        lineRule: 'auto'
+      },
+      children: [
+        new TextRun({
+          text: item.text || '',
+          font: 'Nirmala UI',
+          bold: isTitle || isSub || !!item.bold,
+          italics: !!item.italics,
+          size: isTitle ? 32 : (isSub ? 27 : 24), // 16pt title, 13.5pt subheading, 12pt body
+          color: item.color || undefined
+        })
+      ]
+    });
+  });
+
+  const doc = new Document({ sections: [{ children: docParagraphs }] });
+  const blob = await Packer.toBlob(doc);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename || 'extracted-document.docx';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+
+// Wire up live preview Copy & Re-download buttons inside the Extract to Word panel
+(function initEwPreviewActions(){
+  const copyBtn = document.getElementById('ewCopyPreviewBtn');
+  const redownloadBtn = document.getElementById('ewRedownloadWordBtn');
+  const previewTa = document.getElementById('ewPreviewTextarea');
+
+  if(copyBtn && previewTa){
+    copyBtn.addEventListener('click', async () => {
+      const txt = previewTa.value || '';
+      if(!txt.trim()){ showToast('No extracted text to copy.'); return; }
+      try{
+        await navigator.clipboard.writeText(txt);
+        showToast('Extracted text copied to clipboard!');
+      }catch(e){
+        previewTa.select();
+        document.execCommand('copy');
+        showToast('Extracted text copied!');
+      }
+    });
+  }
+
+  if(redownloadBtn && previewTa){
+    redownloadBtn.addEventListener('click', async () => {
+      const txt = (previewTa.value || '').trim();
+      if(!txt){ showToast('Preview text is empty.'); return; }
+      const paras = txt.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
+      const blocks = paras.map((p, idx) => ({
+        role: idx === 0 && p.length < 140 ? 'title' : 'body',
+        text: p.replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim()
+      }));
+      await buildAndDownloadWordDocx(blocks, 'extracted-document-edited.docx');
+      showToast('Edited Word document downloaded!');
+    });
+  }
+})();
+
 ewExtractBtn.addEventListener('click', () => window._auth.premiumGate('extract your PDF to a Word document', extractToWord));
 
 async function extractToWord(){
@@ -5752,9 +6452,11 @@ async function extractToWord(){
   ewLog('Starting extraction of ' + targetPages.length + ' page' + (targetPages.length===1?'':'s') + '…');
 
   let ocrWorker = null;
+  let activeLangs = getSelectedOcrLangs();
   let ocrUnavailable = false;
   const pageData = [];
   const allFontSizes = [];
+  const previewPagesText = [];
 
   try{
     for(let i = 0; i < targetPages.length; i++){
@@ -5765,52 +6467,58 @@ async function extractToWord(){
       const isLikelyImage = totalChars < 12;
 
       if(isLikelyImage && useOcr && !ocrUnavailable){
-        ewLog('Page ' + globalIdx + ': no real text found — running OCR (this can take a while)…');
+        ewLog('Page ' + globalIdx + ': scanned/image page detected — running high-accuracy OCR (' + activeLangs.join(' + ') + ')…');
         try{
           if(!ocrWorker){
-            const langs = getSelectedOcrLangs();
-            ewLog('Loading OCR engine (' + langs.join(' + ') + ', first time only)…');
-            ocrWorker = await Tesseract.createWorker(langs.join('+'));
+            ewLog('Loading neural OCR engine (' + activeLangs.join(' + ') + ')…');
+            ocrWorker = await createConfiguredOcrWorker(activeLangs, '3');
           }
-          const canvas = await renderEditorCanvas(p.fileId, p.pageIndex, 1500);
-          const { data } = await ocrWorker.recognize(canvas);
-          if(data && data.lines && data.lines.length > 0){
-            const items = data.lines.map(line => {
-              const bbox = line.bbox || { x0: 0, y0: 0, x1: 0, y1: 0 };
-              const fontSize = bbox.y1 - bbox.y0;
-              return {
-                str: (line.text || '').trim(),
-                transform: [
-                  fontSize,
-                  0,
-                  0,
-                  fontSize,
-                  bbox.x0,
-                  canvas.height - bbox.y1
-                ],
-                width: bbox.x1 - bbox.x0,
-                fontName: null
-              };
-            }).filter(it => it.str.length > 0);
-            const mockContent = { items };
-            const lines = extractLines(mockContent);
-            const elements = buildPageElements(lines, canvas.width);
-            elements.forEach(el => {
-              if(el.type === 'para') allFontSizes.push(el.par.fontSize);
-              else { el.left.forEach(par => allFontSizes.push(par.fontSize)); el.right.forEach(par => allFontSizes.push(par.fontSize)); }
+          const rawCanvas = await getHighResPageCanvasForOcr(p.fileId, p.pageIndex);
+          const cleanCanvas = prepareDocumentCanvasForLayoutOcr(rawCanvas);
+          let { data } = await ocrWorker.recognize(cleanCanvas);
+          let structured = extractStructuredOcrBlocks(data, cleanCanvas.width, cleanCanvas.height, activeLangs);
+
+          // Smart Indic Auto-Detection Fallback:
+          // If the user forgot to tick Gujarati/Hindi (only 'eng' was active) and OCR confidence is low (< 70%),
+          // automatically switch on Gujarati + Hindi + English and re-recognize so Gujarati text is never garbled!
+          if(activeLangs.length === 1 && activeLangs[0] === 'eng' && structured.avgConfidence < 70){
+            ewLog('Page ' + globalIdx + ': detected non-English / Indic script (confidence ' + Math.round(structured.avgConfidence) + '% with English-only) — auto-enabling Gujarati (ગુજરાતી) + Hindi OCR…');
+            const guCb = document.getElementById('ocrLangGu');
+            if(guCb){ guCb.checked = true; if(typeof window._syncOcrLangCheckboxes === 'function') window._syncOcrLangCheckboxes('main'); }
+            activeLangs = getSelectedOcrLangs();
+            if(!activeLangs.includes('guj')) activeLangs.unshift('guj');
+            try{ await ocrWorker.terminate(); }catch(e){}
+            ocrWorker = await createConfiguredOcrWorker(activeLangs, '3');
+            const retryRes = await ocrWorker.recognize(cleanCanvas);
+            data = retryRes.data;
+            structured = extractStructuredOcrBlocks(data, cleanCanvas.width, cleanCanvas.height, activeLangs);
+          }
+
+          if(structured.blocks && structured.blocks.length > 0){
+            pageData.push({
+              p,
+              globalIdx,
+              mode: 'ocr_structured',
+              blocks: structured.blocks,
+              isTwoColumn: structured.isTwoColumn
             });
-            const colBlockCount = elements.filter(el => el.type === 'columns').length;
-            pageData.push({ p, globalIdx, mode: 'text', elements, isOcr: true });
-            ewLog('Page ' + globalIdx + ': OCR complete. Extracted ' + elements.length + ' block' + (elements.length===1?'':'s') + (colBlockCount ? ' (' + colBlockCount + ' multi-column region' + (colBlockCount===1?'':'s') + ' detected)' : '') + '.', 'done');
+            previewPagesText.push(structured.plainText);
+            ewLog(
+              'Page ' + globalIdx + ': OCR complete (' +
+              structured.blocks.length + ' paragraph' + (structured.blocks.length === 1 ? '' : 's') +
+              (structured.isTwoColumn ? ', 2-column reading order preserved' : '') + ').',
+              'done'
+            );
           } else {
-            pageData.push({ p, globalIdx, mode: 'ocr', text: data.text || '' });
+            const fallbackTxt = cleanIndicOcrLineText(data && data.text ? data.text : '', activeLangs);
+            pageData.push({ p, globalIdx, mode: 'ocr', text: fallbackTxt });
+            if(fallbackTxt) previewPagesText.push(fallbackTxt);
             ewLog('Page ' + globalIdx + ': OCR complete.', 'done');
           }
         }catch(ocrErr){
           console.error(ocrErr);
           ocrUnavailable = true;
           ocrWorker = null;
-          // Safely extract message — iOS Safari can pass undefined as the caught value
           const errMsg = ocrErr && ocrErr.message ? ocrErr.message : (ocrErr ? String(ocrErr) : 'Unknown error');
           const blocked = /worker|blob|security/i.test(errMsg);
           ewLog(
@@ -5830,10 +6538,17 @@ async function extractToWord(){
         const pageWidthPts = await getPageWidthPts(p.fileId, p.pageIndex);
         const lines = extractLines(content);
         const elements = buildPageElements(lines, pageWidthPts);
+        const pagePlain = [];
         elements.forEach(el => {
-          if(el.type === 'para') allFontSizes.push(el.par.fontSize);
-          else { el.left.forEach(par => allFontSizes.push(par.fontSize)); el.right.forEach(par => allFontSizes.push(par.fontSize)); }
+          if(el.type === 'para'){
+            allFontSizes.push(el.par.fontSize);
+            pagePlain.push(el.par.lines.map(lineText).filter(Boolean).join(' '));
+          } else {
+            el.left.forEach(par => { allFontSizes.push(par.fontSize); pagePlain.push(par.lines.map(lineText).filter(Boolean).join(' ')); });
+            el.right.forEach(par => { allFontSizes.push(par.fontSize); pagePlain.push(par.lines.map(lineText).filter(Boolean).join(' ')); });
+          }
         });
+        if(pagePlain.length > 0) previewPagesText.push(pagePlain.join('\n\n'));
         const colBlockCount = elements.filter(el => el.type === 'columns').length;
         pageData.push({ p, globalIdx, mode: 'text', elements });
         ewLog('Page ' + globalIdx + ': extracted ' + elements.length + ' block' + (elements.length===1?'':'s') + (colBlockCount ? ' (' + colBlockCount + ' multi-column region' + (colBlockCount===1?'':'s') + ' detected)' : '') + '.', 'done');
@@ -5845,11 +6560,6 @@ async function extractToWord(){
     const bodySize = median(allFontSizes) || 11;
     const docParagraphs = [];
 
-    // Builds a Word paragraph from a paragraph object, preserving:
-    //  • Per-line bold/italic (mixed runs within a paragraph)
-    //  • Heading levels based on font-size ratio to body text
-    //  • Space-before (blank line gap detected above this paragraph)
-    //  • Consistent font size proportional to original
     function buildRunParagraph(par, forceBodySize){
       const textLines = par.lines.map(lineText).filter(Boolean);
       const text = textLines.join(' ').replace(/\s+/g, ' ').trim();
@@ -5859,21 +6569,16 @@ async function extractToWord(){
       const isBold   = par.lines.some(lineBold);
       const isItalic = par.lines.some(lineItalic);
 
-      // Heading thresholds: H1 ≥ 1.5× body, H2 ≥ 1.25×, H3 ≥ 1.1×
       let heading = undefined;
       if     (fsRatio >= 1.5)  heading = HeadingLevel.HEADING_1;
       else if(fsRatio >= 1.25) heading = HeadingLevel.HEADING_2;
       else if(fsRatio >= 1.1 && isBold) heading = HeadingLevel.HEADING_3;
 
-      // Font size in half-points (docx unit) — clamp to readable range
       const halfPts = forceBodySize
         ? Math.round(bodySize * 2)
         : Math.max(16, Math.min(72, Math.round(par.fontSize * 2)));
 
-      // Space before: if a visible blank line gap was detected above this para
       const spaceBefore = par.spaceBefore ? 200 : 0;
-
-      // After-spacing: headings get more breathing room than body text
       const spaceAfter = heading === HeadingLevel.HEADING_1 ? 240
                        : heading === HeadingLevel.HEADING_2 ? 200
                        : heading === HeadingLevel.HEADING_3 ? 160
@@ -5885,6 +6590,7 @@ async function extractToWord(){
         children: [
           new TextRun({
             text,
+            font:    'Nirmala UI',
             bold:    heading ? true : isBold,
             italics: isItalic,
             size:    heading ? undefined : halfPts,
@@ -5911,13 +6617,29 @@ async function extractToWord(){
         docParagraphs.push(new Paragraph({ children: [ new PageBreak() ] }));
       }
 
-      if(pd.mode === 'text'){
-        if(pd.isOcr){
+      if(pd.mode === 'ocr_structured'){
+        pd.blocks.forEach(blk => {
+          const isTitle = blk.role === 'title';
+          const isSub = blk.role === 'subheading';
           docParagraphs.push(new Paragraph({
-            spacing: { after: 100 },
-            children: [ new TextRun({ text: '[Page ' + pd.globalIdx + ' — text extracted via OCR; layout is approximate]', italics: true, size: 16, color: '8A8270' }) ]
+            heading: isTitle ? HeadingLevel.HEADING_1 : (isSub ? HeadingLevel.HEADING_2 : undefined),
+            spacing: {
+              before: isTitle ? 180 : (isSub ? 140 : 80),
+              after: isTitle ? 180 : 140,
+              line: 300,
+              lineRule: 'auto'
+            },
+            children: [
+              new TextRun({
+                text: blk.text,
+                font: 'Nirmala UI',
+                bold: isTitle || isSub,
+                size: isTitle ? 32 : (isSub ? 27 : 24)
+              })
+            ]
           }));
-        }
+        });
+      } else if(pd.mode === 'text'){
         if(pd.elements.length === 0){
           docParagraphs.push(new Paragraph({ children: [ new TextRun({ text: '[Page ' + pd.globalIdx + ' had no readable text.]', italics: true, color: '8A8270' }) ] }));
         }
@@ -5934,24 +6656,19 @@ async function extractToWord(){
               }));
               docParagraphs.push(new Paragraph({ children: [], spacing: { after: 120 } }));
             }catch(tableErr){
-              // Fallback if the Table API differs: print left column fully, then right column.
               el.left.map(buildRunParagraph).filter(Boolean).forEach(p => docParagraphs.push(p));
               el.right.map(buildRunParagraph).filter(Boolean).forEach(p => docParagraphs.push(p));
             }
           }
         });
       } else if(pd.mode === 'ocr'){
-        docParagraphs.push(new Paragraph({
-          spacing: { after: 100 },
-          children: [ new TextRun({ text: '[Page ' + pd.globalIdx + ' — text extracted via OCR; layout is approximate]', italics: true, size: 16, color: '8A8270' }) ]
-        }));
         const text = (pd.text || '').trim();
         const blocks = text.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
         if(blocks.length === 0 && text) blocks.push(text);
         blocks.forEach(b => {
           docParagraphs.push(new Paragraph({
-            spacing: { after: 160 },
-            children: [ new TextRun(b.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim()) ]
+            spacing: { after: 150, line: 300, lineRule: 'auto' },
+            children: [ new TextRun({ text: b.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim(), font: 'Nirmala UI', size: 24 }) ]
           }));
         });
       } else if(pd.mode === 'skip'){
@@ -5960,6 +6677,14 @@ async function extractToWord(){
         }));
       }
     });
+
+    // Populate the live editable Extracted Text Preview box
+    const previewWrap = document.getElementById('ewPreviewWrap');
+    const previewTa = document.getElementById('ewPreviewTextarea');
+    if(previewWrap && previewTa && previewPagesText.length > 0){
+      previewTa.value = previewPagesText.join('\n\n────────────────────────\n\n');
+      previewWrap.style.display = 'block';
+    }
 
     ewLog('Building Word document…');
     const doc = new Document({ sections: [ { children: docParagraphs } ] });
@@ -6002,10 +6727,6 @@ function xlLog(msg, cls){
   xlProgress.scrollTop = xlProgress.scrollHeight;
 }
 
-// Splits one line's items into "cells" wherever the horizontal gap between
-// items is wider than ordinary word-spacing — a smaller threshold than the
-// Word export's column-gutter check, since table columns sit closer together
-// than full prose columns.
 function splitLineIntoSegments(line){
   const items = line.items;
   if(items.length === 0) return [];
@@ -6026,10 +6747,6 @@ function splitLineIntoSegments(line){
   return groups.map(g => ({ x: g[0].transform[4], text: itemsToText(g) }));
 }
 
-// Builds a 2D grid (array of row arrays) from a page's lines. If enough lines
-// share a multi-cell pattern, their cell x-positions are clustered into
-// column anchors and every line is laid out against those columns. Otherwise
-// falls back to one plain-text row per line.
 function buildTableFromLines(lines){
   const lineSegs = lines.map(line => ({ line, segments: splitLineIntoSegments(line) }));
   const candidateLines = lineSegs.filter(ls => ls.segments.length >= 2);
@@ -6111,6 +6828,7 @@ async function extractToExcel(){
   }
 
   let ocrWorker = null;
+  let activeLangs = getSelectedOcrLangs();
   let ocrUnavailable = false;
   const combinedRows = [];
 
@@ -6124,42 +6842,37 @@ async function extractToExcel(){
       let rows = [];
 
       if(isLikelyImage && useOcr && !ocrUnavailable){
-        xlLog('Page ' + globalIdx + ': no real text found — running OCR (this can take a while)…');
+        xlLog('Page ' + globalIdx + ': scanned/image page — running high-accuracy OCR (' + activeLangs.join(' + ') + ')…');
         try{
           if(!ocrWorker){
-            const langs = getSelectedOcrLangs();
-            xlLog('Loading OCR engine (' + langs.join(' + ') + ', first time only)…');
-            ocrWorker = await Tesseract.createWorker(langs.join('+'));
+            xlLog('Loading neural OCR engine (' + activeLangs.join(' + ') + ')…');
+            ocrWorker = await createConfiguredOcrWorker(activeLangs, '3');
           }
-          const canvas = await renderEditorCanvas(p.fileId, p.pageIndex, 1500);
-          const { data } = await ocrWorker.recognize(canvas);
-          if(data && data.lines && data.lines.length > 0){
-            const items = data.lines.map(line => {
-              const bbox = line.bbox || { x0: 0, y0: 0, x1: 0, y1: 0 };
-              const fontSize = bbox.y1 - bbox.y0;
-              return {
-                str: (line.text || '').trim(),
-                transform: [
-                  fontSize,
-                  0,
-                  0,
-                  fontSize,
-                  bbox.x0,
-                  canvas.height - bbox.y1
-                ],
-                width: bbox.x1 - bbox.x0,
-                fontName: null
-              };
-            }).filter(it => it.str.length > 0);
-            const mockContent = { items };
-            const linesList = extractLines(mockContent);
-            const result = buildTableFromLines(linesList);
-            rows = [ [ 'OCR extracted — page ' + globalIdx + ', text approximate' ], ...result.rows ];
+          const rawCanvas = await getHighResPageCanvasForOcr(p.fileId, p.pageIndex);
+          const cleanCanvas = prepareDocumentCanvasForLayoutOcr(rawCanvas);
+          let { data } = await ocrWorker.recognize(cleanCanvas);
+          let structured = extractStructuredOcrBlocks(data, cleanCanvas.width, cleanCanvas.height, activeLangs);
+
+          if(activeLangs.length === 1 && activeLangs[0] === 'eng' && structured.avgConfidence < 70){
+            xlLog('Page ' + globalIdx + ': detected Indic script — auto-enabling Gujarati (ગુજરાતી) + Hindi OCR…');
+            const guCb = document.getElementById('ocrLangGu');
+            if(guCb){ guCb.checked = true; if(typeof window._syncOcrLangCheckboxes === 'function') window._syncOcrLangCheckboxes('main'); }
+            activeLangs = getSelectedOcrLangs();
+            if(!activeLangs.includes('guj')) activeLangs.unshift('guj');
+            try{ await ocrWorker.terminate(); }catch(e){}
+            ocrWorker = await createConfiguredOcrWorker(activeLangs, '3');
+            const retryRes = await ocrWorker.recognize(cleanCanvas);
+            data = retryRes.data;
+            structured = extractStructuredOcrBlocks(data, cleanCanvas.width, cleanCanvas.height, activeLangs);
+          }
+
+          if(structured.blocks && structured.blocks.length > 0){
+            rows = structured.blocks.map(b => [ b.text ]);
           } else {
-            const rawLines = (data.text || '').split('\n').map(l => l.trim()).filter(Boolean);
-            rows = [ [ 'OCR extracted — page ' + globalIdx + ', text approximate' ], ...rawLines.map(l => [l]) ];
+            const rawLines = (data.text || '').split('\n').map(l => cleanIndicOcrLineText(l, activeLangs)).filter(Boolean);
+            rows = rawLines.map(l => [l]);
           }
-          xlLog('Page ' + globalIdx + ': OCR complete.', 'done');
+          xlLog('Page ' + globalIdx + ': OCR complete (' + rows.length + ' row' + (rows.length === 1 ? '' : 's') + ').', 'done');
         }catch(ocrErr){
           console.error(ocrErr);
           ocrUnavailable = true;
@@ -7278,6 +7991,20 @@ setInterval(()=>{ updateAccountButton(); updateLicenseBanner(); }, 60000);
 
 // ── Top Tab Switcher (PDF Workbench vs PDF Scanner) & Navigation ────
 window._activeAppMode = 'workbench';
+window.toggleScannerInfoPanel = function(forceOpen){
+  const box  = document.getElementById('scannerCollapsibleHeader');
+  const icon = document.getElementById('toggleScannerHeaderIcon');
+  if(!box) return;
+  const isOpen = forceOpen !== undefined ? !forceOpen : (box.style.display !== 'none');
+  if(isOpen){
+    box.style.display = 'none';
+    if(icon) icon.textContent = '▼ Expand';
+  } else {
+    box.style.display = 'block';
+    if(icon) icon.textContent = '▲ Collapse';
+  }
+};
+
 window.switchAppMode = function(mode, opts){
   const target = mode === 'scanner' ? 'scanner' : 'workbench';
   window._activeAppMode = target;
@@ -7289,6 +8016,7 @@ window.switchAppMode = function(mode, opts){
   const scannerSec   = document.getElementById('scannerSection');
   const headerTitle  = document.getElementById('mainHeaderTitle');
   const headerDesc   = document.getElementById('mainHeaderDesc');
+  const headerCard   = document.querySelector('.header-card');
 
   if(tabWb){
     tabWb.classList.toggle('active', target === 'workbench');
@@ -7303,9 +8031,16 @@ window.switchAppMode = function(mode, opts){
     if(wbDropWrap) wbDropWrap.style.display = 'none';
     if(wbModeView) wbModeView.style.display = 'none';
     if(scannerSec) scannerSec.style.display = 'block';
-    if(headerTitle) headerTitle.textContent = 'PDF Scanner — Capture, Enhance & Combine';
+    if(headerTitle){
+      headerTitle.textContent = '📷 PDF Scanner';
+      headerTitle.style.fontSize = '22px';
+      headerTitle.style.margin = '0';
+    }
     if(headerDesc){
-      headerDesc.innerHTML = 'Scan physical documents with your camera or load images/PDFs. All scanned pages appear on the <strong>left side</strong>, live preview &amp; crop on the <strong>right</strong>, and <strong>📐 Page Size &amp; Quality, 🎨 Color Mode, ☀️ Light / Dark &amp; Clarity</strong> downside below. Switch back to the <strong>📁 PDF Workbench</strong> tab anytime.';
+      headerDesc.style.display = 'none';
+    }
+    if(headerCard){
+      headerCard.style.padding = '12px 16px';
     }
     if(typeof window._setAllPremiumScopes === 'function'){
       window._setAllPremiumScopes('scanner');
@@ -7317,9 +8052,17 @@ window.switchAppMode = function(mode, opts){
     if(wbDropWrap) wbDropWrap.style.display = 'block';
     if(wbModeView) wbModeView.style.display = 'block';
     if(scannerSec) scannerSec.style.display = 'none';
-    if(headerTitle) headerTitle.textContent = 'PDF Workbench';
+    if(headerTitle){
+      headerTitle.textContent = 'PDF Workbench';
+      headerTitle.style.fontSize = '';
+      headerTitle.style.margin = '';
+    }
     if(headerDesc){
+      headerDesc.style.display = 'block';
       headerDesc.innerHTML = 'Drop in one or more PDFs, lay the pages out like a light table, drag to reorder, stamp the ones you don\'t need, and merge it all into a single file. Or switch to the <strong>📷 PDF Scanner</strong> tab above to scan, crop, and enhance pages.';
+    }
+    if(headerCard){
+      headerCard.style.padding = '';
     }
     if(typeof window._setAllPremiumScopes === 'function' && typeof pages !== 'undefined' && pages.length > 0){
       window._setAllPremiumScopes('workbench');
@@ -8487,6 +9230,48 @@ window.switchAppMode = function(mode, opts){
     getCount: () => scannedDocs.length,
     getFileName: getCleanScanFileName,
     getScanItemByPageIndex: (pageIdx) => scannedDocs[(pageIdx || 1) - 1] || null,
+    getHighResScanCanvas: (pageIdx, targetMaxDim) => {
+      const scanItem = scannedDocs[(pageIdx || 1) - 1];
+      if(!scanItem || !scanItem.origImg) return null;
+      const img = scanItem.origImg;
+      const rot = ((scanItem.rotation % 360) + 360) % 360;
+      const iw = img.naturalWidth || img.width;
+      const ih = img.naturalHeight || img.height;
+      const rotW = (rot === 90 || rot === 270) ? ih : iw;
+      const rotH = (rot === 90 || rot === 270) ? iw : ih;
+
+      const rotCanvas = document.createElement('canvas');
+      rotCanvas.width = rotW;
+      rotCanvas.height = rotH;
+      const rCtx = rotCanvas.getContext('2d');
+      rCtx.save();
+      rCtx.translate(rotW / 2, rotH / 2);
+      rCtx.rotate((rot * Math.PI) / 180);
+      rCtx.drawImage(img, -iw / 2, -ih / 2);
+      rCtx.restore();
+
+      const c = scanItem.crop || { x: 0, y: 0, w: 1, h: 1 };
+      const sx = Math.round(c.x * rotW);
+      const sy = Math.round(c.y * rotH);
+      const sw = Math.max(16, Math.round(c.w * rotW));
+      const sh = Math.max(16, Math.round(c.h * rotH));
+
+      const desiredMax = targetMaxDim || 2400;
+      const curMax = Math.max(sw, sh);
+      // Upscale low-res photos (like WhatsApp images) up to 2.5x so small Gujarati/Hindi characters & matras are >= 24px tall
+      const scale = curMax < desiredMax ? Math.min(2.6, desiredMax / Math.max(1, curMax)) : (desiredMax / curMax);
+      const outW = Math.max(32, Math.round(sw * scale));
+      const outH = Math.max(32, Math.round(sh * scale));
+
+      const outCanvas = document.createElement('canvas');
+      outCanvas.width = outW;
+      outCanvas.height = outH;
+      const oCtx = outCanvas.getContext('2d');
+      oCtx.imageSmoothingEnabled = true;
+      oCtx.imageSmoothingQuality = 'high';
+      oCtx.drawImage(rotCanvas, sx, sy, sw, sh, 0, 0, outW, outH);
+      return outCanvas;
+    },
     refreshPreview: () => {
       updateActivePreviewAndThumb();
     },
