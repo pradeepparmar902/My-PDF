@@ -4385,7 +4385,7 @@ function openAdminEmailLoginModal(){
   backdrop.className = 'modal-backdrop';
 
   const hasConfiguredAdmin = !!(adminConfig.adminEmail && adminConfig.adminEmail.trim());
-  const initialEmail = adminConfig.adminEmail || ((fbAuth && fbAuth.currentUser) ? fbAuth.currentUser.email : '') || '';
+  const initialEmail = ((fbAuth && fbAuth.currentUser) ? fbAuth.currentUser.email : '') || '';
 
   backdrop.innerHTML = `
     <div class="modal-card" style="max-width:420px;">
@@ -4495,7 +4495,7 @@ function openAdminEmailLoginModal(){
         const extras = (adminConfig.adminEmails || []).map(e => e.trim().toLowerCase());
         const signed = (fbUser.email || '').trim().toLowerCase();
         if(primary && signed !== primary && !extras.includes(signed)){
-          showErr('Signed in as ' + signed + ', but this account is not registered as an Admin. Authorized admin is: ' + primary);
+          showErr('You do not have admin access. Please connect to admin.');
           submitBtn.disabled = false;
           submitBtn.textContent = '🔐 Sign In & Unlock Settings';
           return;
@@ -4522,6 +4522,15 @@ function openAdminEmailLoginModal(){
     const pw = passInp.value;
     if(!em || pw.length < 6){ showErr('Please enter a valid email and a password of at least 6 characters.'); return; }
     if(!fbAuth){ showErr('Firebase Auth SDK is not available.'); return; }
+
+    if(adminConfig.adminEmail && adminConfig.adminEmail.trim()){
+      const primary = adminConfig.adminEmail.trim().toLowerCase();
+      const extras = (adminConfig.adminEmails || []).map(e => e.trim().toLowerCase());
+      if(em !== primary && !extras.includes(em)){
+        showErr('You do not have admin access. Please connect to admin.');
+        return;
+      }
+    }
 
     regBtn.disabled = true;
     regBtn.textContent = 'Creating Admin Account…';
